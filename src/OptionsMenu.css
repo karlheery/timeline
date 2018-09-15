@@ -1,0 +1,95 @@
+/* Position and sizing of burger button */
+
+
+.App-right {
+    position: absolute;
+    right: 0px;
+    width: 300px;
+	float: right;
+    border: 3px solid #73AD21;
+    padding: 10px;
+}
+
+.bm-burger-button {
+  position: fixed;
+  width: 36px;
+  height: 30px;
+  right: 20px;
+  top: 20px;
+}
+
+/* Color/shape of burger icon bars */
+.bm-burger-bars {
+  background: #222222;
+}
+
+/* Position and sizing of clickable cross button */
+.bm-cross-button {
+  height: 24px;
+  width: 24px;      
+}
+
+/* Color/shape of close button cross */
+.bm-cross {
+  background: #bdc3c7;	
+  right: 10px;
+}
+
+/* General sidebar styles */
+.bm-menu {
+  background: #555555;
+  padding: 2.5em 1.5em 0;
+  font-size: 1.15em;
+}
+
+/* Morph shape necessary with bubble or elastic */
+.bm-morph-shape {
+  fill: #373a47;
+}
+
+/* Wrapper for item list */
+.bm-item-list {
+  color: #b8b7ad;
+  padding: 0.8em;
+}
+
+/* Individual item */
+.bm-item {
+  display: inline-block;
+}
+
+/* Styling of overlay */
+.bm-overlay {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+
+.list-item {
+  font-size: 10px;
+}
+
+.options-btn {
+  background-color: #f4511e;
+  border: none;
+  color: white;
+  padding: 10px 32px;
+  text-align: center;
+  font-size: 16px;
+  margin: 4px 2px;
+  opacity: 0.6;
+  transition: 0.3s;
+  display: inline-block;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.options-btn:hover {opacity: 1}
+
+.menu-input {
+    width: 100%;
+    padding: 8px 10px;
+    margin: 8px 0;
+    box-sizing: border-box;
+	display: block;
+	margin-bottom: 10px;
+}
