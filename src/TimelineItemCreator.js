@@ -51,7 +51,7 @@ class TimelineItemCreator extends Component {
 		console.log('Saving event for date: ' + this.state.dateDisplay);
 		event.preventDefault();		// @todo what does this do?
 	  
-		this.setState({ saveStatus: true });
+		this.setState({ saveStatus: 1 });
 				
 		// create the timeline item to save & merge
 		var timelineItem = this.getTimelineEventData();
@@ -63,11 +63,11 @@ class TimelineItemCreator extends Component {
 			//setTimeout( this.status.saveStatus = -1, 5000);
 		}			
 				
-		axios.post('XXXX', {
-			objectName: timelineItem,
+		axios.post('https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items', {
+			item: timelineItem,
 			contentType: 'application/json'
 		})
-		.then(function (result) {
+		.then((result) => {
 			
 			// merge this event with timeline ...as opposed to re-getting the whole thing
 			this.addEventToTimeline( result );
@@ -80,11 +80,12 @@ class TimelineItemCreator extends Component {
 			// @TODO - nice if we could take user to this timeline item on main page
 			//			
 			this.setState({
-				uploadMessage: "Successfully saved " + savedEvent				
+				uploadMessage: "Successfully saved " + savedEvent,				
+				saveStatus: 0
 			});
 			
 		})
-		.catch(function (err) {
+		.catch((err) => {
 			console.log(err);
 		});
 	
@@ -97,11 +98,14 @@ class TimelineItemCreator extends Component {
   getTimelineEventData() {	  
 		// create the timeline item to save & merge
 		return  {
-			"title": this.state.title,
-			"category": this.state.category,
-			"date": this.state.dateDisplay,		/// pass through the stringified date which allows for "unsure"
-			"media": this.state.files,
-			"comment": this.state.comment
+				"title_on_date": this.state.title + "-" + this.state.dateDisplay,
+				"time_sortable": this.state.dateAsNumber,
+				"timeline_name": "Caroline. Our Glue.",
+				"title": this.state.title,
+				"category": this.state.category,
+				"date": this.state.dateDisplay,		/// pass through the stringified date which allows for "unsure"
+				"media": this.state.files,
+				"comment": this.state.comment
 		};
   }
   
@@ -111,6 +115,7 @@ class TimelineItemCreator extends Component {
    */
   addEventToTimeline( timelineItem ) {
 	  
+	  // @TODO
   }
   
   /**
@@ -122,49 +127,54 @@ class TimelineItemCreator extends Component {
 	  var value = '';
 	  
 	  if ( object instanceof moment ) {
+		  
+		  // @TODO logic if box ticked first...
+		  
 		  name = 'date';
 		  value = object ;//.format("YYYY-MM-DD");   // @TODO display as object.format("dddd, Do MMM YYYY");  		  
 		  this.setState({
 			  [name]: value,
-			  dateDisplay: object.format("dddd, Do MMM YYYY")  		  
+			  dateDisplay: object.format("dddd, Do MMM YYYY"), 		  
+			  dateAsNumber: object.valueOf()
 		  })
 	  }
-	  else if ( object.id == "unsure-date" ) {
+	  else if ( object.target.name == "unsure-date" ) {
 		  
-		  // strip out the day/date from the displayed date
-		  // note this will (deliberately) inrease likelihood of merge
-		  // @TODO also need to reset to 1st of for edits?
-		  this.setState({
-			  dateDisplay: this.state.date.format("MMM YYYY")  		  
-		  })		  	  
+		  if( object.target.checked ) {
+			  			  
+			  // if date is set already, change it to 1st of month
+			  if( this.state.date ) {
+				  var newDate = this.state.date.startOf('month')
+				  this.setState({ 
+					date: newDate,
+					dateAsNumber: newDate.valueOf()
+				  })
+				  
+				// strip out the day/date from the displayed date
+				// note this will (deliberately) inrease likelihood of merge
+				//
+				this.setState({
+					dateDisplay: this.state.date.format("MMM YYYY")  		  
+				})		  	  
+			  }
+			  
+		  }
+		  else {
+			  // if date is set already, change it to 1st of month
+			  if( this.state.date ) {
+				  dateDisplay: this.state.date.format("dddd, Do MMM YYYY") 
+			  }			  			  
+		  }
+		  
 	  }	  
 	  else {
 		  
-		  /*
-		  // radio button selects - convert to strings for mapping to icons later
-		  if( object.id == "category" ) {
-			
-			var iconName = "Success"; // set a default for now
-			if( object.target instanceof FaceIcon ) {
-				iconName = "Friends";
-			} else if( object.target instanceof LoveIcon ) {
-				iconName = "Love";
-			} 
-			
-			this.setState({
-				 category: iconName
-			})
-		  }
-		  else {
-			  */
-			 
 			 // for everything else we store the raw value
-			name = object.target;
-			value = object.target.value;
+			var name = object.target.name;
+			var value = object.target.value;
 			this.setState({
-				[object.target.id]: object.target.value			  
+				[name]: value
 			})
-		  //}
 	  }
 	  	 
   }
@@ -172,7 +182,7 @@ class TimelineItemCreator extends Component {
   
   render() {
 	  
-	const { saveStatus } = this.state;
+	var saveStatus = this.state.saveStatus;
 	
 	const s3Url = 'http://khpublicbucket.s3-website-eu-west-1.amazonaws.com'	
 	
@@ -211,7 +221,7 @@ class TimelineItemCreator extends Component {
 			<tr>
 			<td>
 				<label htmlFor="title">Event</label>        
-				<input type="text" id='title' value={this.state.title} size="30" className="menu-input" placeholder='Title or tagline (optional)'
+				<input type="text" name='title' id='title' value={this.state.title} size="30" className="menu-input" placeholder='Title or tagline (optional)'
 					onChange={this.handleChange.bind(this)}/>		
 
 				<form onChange={this.handleChange.bind(this)}>
@@ -225,13 +235,13 @@ class TimelineItemCreator extends Component {
 				</form>
 				
 				<br/>
-				<label htmlFor="date">When</label> (ish: <input type="checkbox" id='unsure-date' selected={this.state.unsure} onChange={this.handleChange.bind(this)}/>?)
+				<label htmlFor="date">When</label> (ish: <input type="checkbox" name='unsure-date' id='unsure-date' selected={this.state.unsure} onChange={this.handleChange.bind(this)}/>?)
 
 				<DatePicker id="date" dateFormat="YYYY-MM-DD" selected={this.state.date} className="menu-input" size="12" 
 					onChange={this.handleChange.bind(this)} /> 
 				
 				<label htmlFor="comment">Comment</label>        
-				<textarea rows='4' columns='40' id='comment' value={this.state.comment} className="menu-input" placeholder="Comment (include your initials)..."
+				<textarea rows='4' columns='40' name='comment' id='comment' value={this.state.comment} className="menu-input" placeholder="Comment (include your initials)..."
 					onChange={this.handleChange.bind(this)}/>	
 				
 				<Button id='save-comment-button' bsStyle='primary' bsClass='options-btn' 
@@ -239,7 +249,7 @@ class TimelineItemCreator extends Component {
 					onClick={saveStatus == 0 ? this.handleSubmit.bind(this) : null}
 				>
 				
-					{(saveStatus == 1 ? 'Saved Event' : (saveStatus == 0 ? 'Click to Save' : 'Enter Title & Date (min.)' ))}
+					{(saveStatus == 1 ? 'Saving Event' : (saveStatus == 0 ? 'Click to Save' : 'Enter Title & Date (min.)' ))}
 				</Button>				
 				<br/>
 				<br/>
@@ -283,10 +293,7 @@ class TimelineItemCreator extends Component {
   onDrop(files) {
 
 	var uploaded = [];
-	
-	this.setState({
-      files: uploaded
-	});
+			
 	
 	// iterate through files uploading them to S3
 	for(var f=0; f < files.length; f++) {			
@@ -310,7 +317,7 @@ class TimelineItemCreator extends Component {
 		  console.log( "now putting the file " + file + " with URL " + signedUrl );	  
 		  return axios.put(signedUrl, file, options);
 		})
-		.then(function (result) {
+		.then((result) => {
 		  console.log(result);
 
 			// add files as we go
