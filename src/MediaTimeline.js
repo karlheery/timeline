@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { VerticalTimeline, VerticalTimelineElement }  from 'react-vertical-timeline-component';
 import 'react-vertical-timeline-component/style.min.css';
 
+import axios from 'axios';
+
 import caro from './Banner_Image.jpg';
 
 import WorkIcon from '@material-ui/icons/Work';
@@ -13,9 +15,9 @@ import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
 
 class MediaTimeline extends Component {
 	
-  constructor() {
+  constructor(props) {
 	  
-	super();
+	super(props);
 	
 	/** These are defaults for testing. Real list is queried from Dynamo DB through API Gateway & Lambda */
 	this.exampleTimeline = {
@@ -41,39 +43,43 @@ class MediaTimeline extends Component {
 			],
             content: [ 
 				{					
-					title: "Friends stick together!",
+					title: "Test Timeline Title!",
 					category: "Friends",
 					date: "2012-04-20",
 					media: "https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/IMG_5816.JPG",
-					comment: "Ah look!"
+					comment: "This is a test comment!"
 				},
 				{					
-					title: "Budding romance",
+					title: "Test Timeline Title 2",
 					category: "Love",
 					date: "2015-04-20",			
 					media: "https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/IMG_5815.JPG",					
-					comment: "Budding romance"					
+					comment: "This is another test comment!"					
 				},
 				{					
-					title: "Christmas to remember",
+					title: "Test Timeline Title 3!",
 					category: "Friends",
 					date: "2016-12",					
 					media: "https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/IMG_5787.PNG",
-					comment: "One of many. Thank you for the great times Caro!"					
+					comment: "This is yet another test comment!"					
 				},				
 			]
     };
+	
+	// set initial state
+	this.state = {
+		menu: this.props.menu		
+	};
+		
+	
   }
 	
 		
   // called by ReactJS after `render()`
   componentDidMount() {   
-    // pass referemce to this timeline on to menu
-	// @TODO on click of item, change the clicked entru
-	//this.menu.setTimeline(this);
-	this.setState({menu: this.props.menu });
-	
+	this.getTimeline();					
   }
+  
 	
   /**
    * Open the menu to allow editing of the clicked item
@@ -86,28 +92,113 @@ class MediaTimeline extends Component {
   
   
   /**
-   * @TODO Should call API
+   * Call API to retrieve timeline from AWS, or default to example timeline as a last resort
    */
   getTimeline() {
-	  return this.exampleTimeline;
+	  				
+		var queryParams = {
+				timeline_name: "Caroline. Our Glue."
+		};
+		
+		console.log( "querying timeline with params " + queryParams );
+				
+	  	axios.get('https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items', {
+			 params: queryParams
+		})
+		.then((result) => {			// these arrows are used so we can call other methods and setState (indirectly) from within
+			
+			console.log( "successfully retrieved timeline data " + JSON.stringify(result.data) );	  
+			
+			/**
+				{
+				  "chapters": [
+					{
+					  "name": "The Wonder Years",
+					  "from_date": "1979-02-07",
+					  "to_date": "1991-06-30",
+					  "background": "https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/Backgrounds/WonderYears.jpg"
+					},
+					{
+					  "name": "Young Fun",
+					  "from_date": "1991-07-01",
+					  "to_date": "1997-06-30",
+					  "background": "https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/Backgrounds/TakeThat.jpg"
+					},
+					{
+					  "name": "Girl About Town",
+					  "from_date": "1997-07-01",
+					  "to_date": "2018-09-01",
+					  "background": "https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/Backgrounds/Malahide_Background_v1.jpg"
+					}
+				  ],
+				  "description": "The beautiful life of Caroline McConkey",
+				  "name": "Caroline. Our Glue.",
+				  "content": [
+					{
+					  "category": "Love",
+					  "comment": "This is just a test",
+					  "timeline_name": "Caroline. Our Glue.",
+					  "date": "Jan-2015",
+					  "media": [
+						"https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/IMG_5815.JPG",
+						"https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/IMG_5815.JPG"
+					  ],
+					  "title": "Test Item"
+					}
+				  ]
+				}
+			*/
+			
+			this.setTimeline( result.data );			
+
+		})
+		.catch((err) => {
+			console.error( err );
+			alert("Cant show timeline right now - sorry! Check back later", err);
+			this.setTimeline( this.exampleTimeline );
+		});
+		
+		
+
   }
   
+  
+  /**
+   * Save some newly source timeline data, eg from API call
+   */
+  setTimeline( tData ) {	  
+	  this.setState({				
+			timelineData: tData
+	  });
+	  console.log( "timeline data saved: " + this.state.timelineData );
+  }
+  
+  
+  shouldComponentUpdate() {
+	  return true;
+  }
   
   
   /**
    * Build and display the timeline
    */
   render() {
-	  
-	var timelineContent = this.getTimeline();
+	  	
+	var timelineContent = this.state.timelineData;
+	console.log( "rendering timeline " + timelineContent );
 	
+	if( !timelineContent ) {
+		timelineContent = {};
+		timelineContent.content = [];
+	}
+		 		 
 	
 	for( var i=0; i<timelineContent.content.length; i++ ) {
 		
-		if( timelineContent.content[i].category == "Friends" ) {
+		if( timelineContent.content[i].category === "Friends" ) {
           timelineContent.content[i].category = <FaceIcon/>;
 		}
-		else if ( timelineContent.content[i].category == "Love" ) {        
+		else if ( timelineContent.content[i].category === "Love" ) {        
 		  timelineContent.content[i].category = <LoveIcon/>;
 		}
       
