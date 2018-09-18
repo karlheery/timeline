@@ -46,21 +46,21 @@ class MediaTimeline extends Component {
 					title: "Test Timeline Title!",
 					category: "Friends",
 					date: "2012-04-20",
-					media: "https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/IMG_5816.JPG",
+					media: ["https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/IMG_5816.JPG"],
 					comment: "This is a test comment!"
 				},
 				{					
 					title: "Test Timeline Title 2",
 					category: "Love",
 					date: "2015-04-20",			
-					media: "https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/IMG_5815.JPG",					
+					media: ["https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/IMG_5815.JPG", "https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/IMG_5817.JPG"],					
 					comment: "This is another test comment!"					
 				},
 				{					
 					title: "Test Timeline Title 3!",
 					category: "Friends",
 					date: "2016-12",					
-					media: "https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/IMG_5787.PNG",
+					media: [],
 					comment: "This is yet another test comment!"					
 				},				
 			]
@@ -201,6 +201,20 @@ class MediaTimeline extends Component {
 		else if ( timelineContent.content[i].category === "Love" ) {        
 		  timelineContent.content[i].category = <LoveIcon/>;
 		}
+		else if ( timelineContent.content[i].category === "Work" ) {        
+		  timelineContent.content[i].category = <WorkIcon/>;
+		}
+		else if ( timelineContent.content[i].category === "School" ) {        
+		  timelineContent.content[i].category = <SchoolIcon/>;
+		}
+		else if ( timelineContent.content[i].category === "Family" ) {        
+		  timelineContent.content[i].category = <SupervisorAccountIcon/>
+		}
+		else if ( timelineContent.content[i].category === "Success" ) {        
+		  timelineContent.content[i].category = <StarIcon/>;
+		}
+
+
       
 	}
 	
@@ -284,10 +298,14 @@ class MediaTimeline extends Component {
 									iconStyle={{ background: 'rgb(33, 150, 243)', color: '#fff' }}
 									iconOnClick={() => this.editItem()}			// @TODO need to do something funky here as this is not the object - context is within map
 									icon={<StarIcon />} 
-									>									
-										<img src='https://s3.eu-west-1.amazonaws.com/khpublicbucket/Caroline/IMG_5787.PNG' className='App-itemimage' align='left' />	
-										<h3 className='vertical-timeline-element-title'>{contentItem.category}</h3>										
-										<p><i>"{contentItem.comment}"</i> - {contentItem.author}</p>
+									>	
+										{(contentItem.media && contentItem.media.length >= 1 ? 										
+											( contentItem.media.length >=2 ?
+												<div><img src={contentItem.media[0]} className='App-itemimage' align='top' /><img src={contentItem.media[1]} className='App-itemimage' align='top' /></div> : 
+												<img src={contentItem.media[0]} className='App-itemimage' align='left' /> ) : "" )}
+											
+										<h3 className='vertical-timeline-element-title'></h3>										
+										<p>{contentItem.category} <i>"{contentItem.comment}"</i></p>
 									</VerticalTimelineElement>
 						})}
 					</VerticalTimeline>

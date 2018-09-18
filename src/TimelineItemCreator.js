@@ -32,7 +32,7 @@ class TimelineItemCreator extends Component {
 	
     this.state = { 
 		disabled: true, 
-		files: [],
+		fileList: [],
 		saveStatus: false
 	}
   }
@@ -104,7 +104,7 @@ class TimelineItemCreator extends Component {
 				"title": this.state.title,
 				"category": this.state.category,
 				"date": this.state.dateDisplay,		/// pass through the stringified date which allows for "unsure"
-				"media": this.state.files,
+				"media": this.state.media,
 				"comment": this.state.comment
 		};
   }
@@ -271,7 +271,7 @@ class TimelineItemCreator extends Component {
 				  <p>{this.state.uploadMessage}</p>
 				  <ul>
 					{
-					  this.state.files.map(f => <li key='{f.name}' className='list-item'>{f.name} - {f.size} bytes</li>)
+					  this.state.fileList.map(f => <li key='{f.name}' className='list-item'>{f.name} - {f.size} bytes</li>)
 					}
 				  </ul>
 				</aside>
@@ -293,6 +293,7 @@ class TimelineItemCreator extends Component {
   onDrop(files) {
 
 	var uploaded = [];
+	var mediaFiles = []
 			
 	
 	// iterate through files uploading them to S3
@@ -311,7 +312,10 @@ class TimelineItemCreator extends Component {
 			headers: {
 			  'Content-Type': file.type
 			},
-			crossDomain: true
+			params: {
+			  
+			},
+			crossDomain: true			
 		  };
 
 		  console.log( "now putting the file " + file + " with URL " + signedUrl );	  
@@ -322,11 +326,13 @@ class TimelineItemCreator extends Component {
 
 			// add files as we go
 		  uploaded.push( file );
+		  mediaFiles.push( 'https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/' + file.name );
 		  
 		  // now update state so we rerender
 		  this.setState({
-			files: uploaded,
-			uploadMessage: files.length + " files just uploaded"
+			fileList: uploaded,
+			media: mediaFiles,
+			uploadMessage: uploaded.length + " files just uploaded"
 		  });
 
 
