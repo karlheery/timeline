@@ -30,13 +30,86 @@ class TimelineItemCreator extends Component {
   constructor() {
     super()
 	
+	console.log( "creating creator" );
+	
     this.state = { 
 		disabled: true, 
 		fileList: [],
 		saveStatus: false
 	}
+	
+	
+	window.itemComponent = this;
+
   }
 
+  
+  /** 
+   * Pull timeline event data from state
+   */   
+  getTimelineEventData() {	  
+		// create the timeline item to save & merge
+		return  {
+				"title_on_date": this.state.title + "|" + this.state.dateDisplay,
+				"time_sortable": this.state.dateAsNumber,
+				"timeline_name": "Caroline. Our Glue.",
+				"title": this.state.title,
+				"category": this.state.category,
+				"date": this.state.dateDisplay,		/// pass through the stringified date which allows for "unsure"
+				"media": this.state.media,
+				"comment": this.state.comment
+		};
+  }
+  
+  /**
+   * set the staet of menu items so that menu renders in edit mode rather than new
+   */   
+  setMenuState( item ) {
+	// change menu state and clear down the state first so we arent editing a previous item	
+	
+	var tokens = item.title_on_date.split("|");
+	var unsure_of_date = false;
+	if( tokens.length > 1 && tokens[1].length < 10 ) {	// full dates are stored as YYYY-MM-DD (10 characters)
+		unsure_of_date = true
+	}
+	
+	var cal_date = moment(item.date, "dddd, Do MMM YYYY");
+	if( !cal_date ) {
+		cal_date = moment(item.date, "MMM YYYY");
+	}
+	
+    this.setState({
+		title: item.title,
+		old_title: item.title,		// for deletion of old
+		dateAsNumber: item.time_sortable,	// this doesnt cnie
+		category: item.category,
+		dateDisplay: cal_date,
+		unsure: unsure_of_date,
+		media: item.media,
+		comment: item.comment,
+		isEdit: ( item.title ? true : false )
+	})
+  }
+
+  
+  /**
+   * If we close an edit screen we want it to open fresh
+   */
+  clearMenuState() {
+	  
+	  this.setState({
+		  title: undefined,
+		  dateAsNumber: undefined,
+		  category: undefined,
+		  dateDisplay: undefined,
+		  media: undefined,
+		  comment: undefined,
+		  isEdit: false
+	  })
+	  
+  }
+  
+  
   
   handleFinishedUpload = info => {
     console.log('File uploaded with filename', info.filename)
@@ -92,22 +165,7 @@ class TimelineItemCreator extends Component {
   }
   
   
-  /** 
-   * Pull timeline event data from state
-   */   
-  getTimelineEventData() {	  
-		// create the timeline item to save & merge
-		return  {
-				"title_on_date": this.state.title + "-" + this.state.dateDisplay,
-				"time_sortable": this.state.dateAsNumber,
-				"timeline_name": "Caroline. Our Glue.",
-				"title": this.state.title,
-				"category": this.state.category,
-				"date": this.state.dateDisplay,		/// pass through the stringified date which allows for "unsure"
-				"media": this.state.media,
-				"comment": this.state.comment
-		};
-  }
+  
   
   
   /**
@@ -117,6 +175,7 @@ class TimelineItemCreator extends Component {
 	  
 	  // @TODO
   }
+  
   
   /**
    * Handle changes to form by updating state
@@ -134,7 +193,7 @@ class TimelineItemCreator extends Component {
 		  value = object ;//.format("YYYY-MM-DD");   // @TODO display as object.format("dddd, Do MMM YYYY");  		  
 		  this.setState({
 			  [name]: value,
-			  dateDisplay: object.format("dddd, Do MMM YYYY"), 		  
+			  dateDisplay: object.format("dddd, Do MMM YYYY"), 
 			  dateAsNumber: object.valueOf()
 		  })
 	  }
@@ -289,7 +348,11 @@ class TimelineItemCreator extends Component {
   }
 
   
-  			  
+  
+  /**
+   * As the files are dropped, we automatically upload them to S3 using axios
+   * and change the state of the fileList as we go
+   */  			 
   onDrop(files) {
 
 	var uploaded = [];
@@ -311,10 +374,7 @@ class TimelineItemCreator extends Component {
 		  var options = {
 			headers: {
 			  'Content-Type': file.type
-			},
-			params: {
-			  
-			},
+			},			
 			crossDomain: true			
 		  };
 

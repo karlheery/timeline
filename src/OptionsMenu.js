@@ -16,6 +16,14 @@ class OptionsMenu extends React.Component {
     this.state = {
       menuOpen: false
     }
+	
+	console.log( "creating options menu" );
+		
+	window.menuComponent = this;
+	
+	// creata refernce for calling methods on timeline creator
+	this.child = React.createRef();
+	
   }
   
   
@@ -23,17 +31,36 @@ class OptionsMenu extends React.Component {
   // via the default means, e.g. clicking the X, pressing the ESC key etc.
   handleStateChange (state) {
     this.setState({menuOpen: state.isOpen})  
+	
+	if( !this.state.menuOpen ) {
+		this.child.current.clearMenuState();
+	}
+  }
+  
+  
+  /**
+   * This can be used to open the menu, e.g. when a user clicks a timeline item
+   */
+  openMenu () {	
+	// change menu state and clear down the state first so we arent editing a previous item	
+    this.setState({menuOpen: true})
+	
   }
   
   
   // This can be used to open the menu, e.g. when a user clicks a timeline item
-  openMenu () {
-    this.setState({menuOpen: true})
+  openMenuToEdit ( item ) {  
+	
+	this.child.current.setMenuState(item);
+	
+	this.setState({menuOpen: true})
   }
-  
+
+
   // This can be used to close the menu, e.g. when a user clicks a menu item
   closeMenu () {
     this.setState({menuOpen: false})
+	this.child.current.clearMenuState();
   }
 
   // This can be used to toggle the menu, e.g. when using a custom icon
@@ -41,14 +68,20 @@ class OptionsMenu extends React.Component {
   // See https://github.com/negomi/react-burger-menu#custom-icons
   toggleMenu () {
     this.setState({menuOpen: !this.state.menuOpen})
+	
+	if( !this.state.menuOpen ) {
+		this.child.current.clearMenuState();
+	}
   }
   
   
   showSettings (event) {
     event.preventDefault();    
   }
+  
 
   render () {
+	  	
     return (
 	
 	  <Menu 
@@ -57,7 +90,7 @@ class OptionsMenu extends React.Component {
           onStateChange={(state) => this.handleStateChange(state)}
         >
 
-		<TimelineItemCreator/>		  
+		<TimelineItemCreator ref={this.child}/>		  
         
       </Menu>
 		      

@@ -7,11 +7,18 @@ import OptionsMenu from './OptionsMenu';
 
 class App extends Component {
 	
-		
+  	
+  constructor(props) {
+	  
+	super(props);
+	
+  }
+  	
   render() {
+	  		
     return (
 		<div>
-			<div align="right" id="menu">
+			<div align="right" id="menu" name="menu">
 				<OptionsMenu/>
 			</div>
 		
@@ -21,7 +28,7 @@ class App extends Component {
 					<h1 className="App-title">Caroline. Our Glue.</h1>		  
 				</header>					
 				<div>
-					<MediaTimeline background={this.props.data} handleItemSelect={this.props.children}/>											
+					<MediaTimeline/>											
 				</div>
 			</div>
 	    </div>

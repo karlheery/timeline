@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { PropTypes } from 'react'
+
 import { VerticalTimeline, VerticalTimelineElement }  from 'react-vertical-timeline-component';
 import 'react-vertical-timeline-component/style.min.css';
 
@@ -43,6 +45,8 @@ class MediaTimeline extends Component {
 			],
             content: [ 
 				{					
+					title_on_date: "Test Timeline Title!|2012-04-20",
+					time_sortable: 1000,
 					title: "Test Timeline Title!",
 					category: "Friends",
 					date: "2012-04-20",
@@ -50,6 +54,8 @@ class MediaTimeline extends Component {
 					comment: "This is a test comment!"
 				},
 				{					
+					title_on_date: "Test Timeline Title 2|2015-04-20",
+					time_sortable: 1001,				
 					title: "Test Timeline Title 2",
 					category: "Love",
 					date: "2015-04-20",			
@@ -57,6 +63,8 @@ class MediaTimeline extends Component {
 					comment: "This is another test comment!"					
 				},
 				{					
+					title_on_date: "Test Timeline Title 3!|2016-12",
+					time_sortable: 1002,				
 					title: "Test Timeline Title 3!",
 					category: "Friends",
 					date: "2016-12",					
@@ -68,25 +76,34 @@ class MediaTimeline extends Component {
 	
 	// set initial state
 	this.state = {
-		menu: this.props.menu		
+		menuController: this.props.app		
 	};
-		
+	
+	this.editItem = this.editItem.bind(this);
 	
   }
 	
 		
   // called by ReactJS after `render()`
   componentDidMount() {   
-	this.getTimeline();					
+	this.getTimeline();	
+
+	//this.timerID = setInterval(() => this.doSOmething(), 1000 );
   }
   
 	
   /**
    * Open the menu to allow editing of the clicked item
    */
-  editItem (event) {
-	console.log( "editing item " + event );
-    this.state.menu.openMenu();    
+  editItem (item) {
+	console.log( "editing item " + item );	
+		
+	if( !item || !item.title ) {
+		console.error( "couldnt find item to edit: " + item );
+	}
+	
+	// now open the menu with this item as its state
+	window.menuComponent.openMenuToEdit( item );	
   }
   
   
@@ -196,22 +213,22 @@ class MediaTimeline extends Component {
 	for( var i=0; i<timelineContent.content.length; i++ ) {
 		
 		if( timelineContent.content[i].category === "Friends" ) {
-          timelineContent.content[i].category = <FaceIcon/>;
+          timelineContent.content[i].category_icon = <FaceIcon/>;
 		}
 		else if ( timelineContent.content[i].category === "Love" ) {        
-		  timelineContent.content[i].category = <LoveIcon/>;
+		  timelineContent.content[i].category_icon = <LoveIcon/>;
 		}
 		else if ( timelineContent.content[i].category === "Work" ) {        
-		  timelineContent.content[i].category = <WorkIcon/>;
+		  timelineContent.content[i].category_icon = <WorkIcon/>;
 		}
 		else if ( timelineContent.content[i].category === "School" ) {        
-		  timelineContent.content[i].category = <SchoolIcon/>;
+		  timelineContent.content[i].category_icon = <SchoolIcon/>;
 		}
 		else if ( timelineContent.content[i].category === "Family" ) {        
-		  timelineContent.content[i].category = <SupervisorAccountIcon/>
+		  timelineContent.content[i].category_icon = <SupervisorAccountIcon/>
 		}
 		else if ( timelineContent.content[i].category === "Success" ) {        
-		  timelineContent.content[i].category = <StarIcon/>;
+		  timelineContent.content[i].category_icon = <StarIcon/>;
 		}
 
 
@@ -220,84 +237,16 @@ class MediaTimeline extends Component {
 	
 		
 		
-	/*
-	      <div className="Timeline">
-		<VerticalTimeline>
-		  <VerticalTimelineElement
-			className="vertical-timeline-element--work"
-			date="2011 - present"
-			iconOnClick={ this.editItem }
-			iconStyle={{ background: 'rgb(33, 150, 243)', color: '#fff' }}
-			icon={<FaceIcon	 />}
-		  >
-			<h3 className="vertical-timeline-element-title">Creative Director</h3>
-			<h4 className="vertical-timeline-element-subtitle">Miami, FL</h4>
-			<p>
-				<img src={caro} className="App-itemimage" align="left" />				
-			   Creative Direction, User Experience, Visual Design, Project Management, Team Leading
-			</p>
-		  </VerticalTimelineElement>
-		  <VerticalTimelineElement
-			className="vertical-timeline-element--work"
-			date="2010 - 2011"
-			iconStyle={{ background: 'rgb(33, 150, 243)', color: '#fff' }}
-			icon={<SchoolIcon />}
-		  >
-			<h3 className="vertical-timeline-element-title">Art Director</h3>
-			<h4 className="vertical-timeline-element-subtitle">San Francisco, CA</h4>
-			<p>
-			  Creative Direction, User Experience, Visual Design, SEO, Online Marketing
-			</p>
-		  </VerticalTimelineElement>
-		  <VerticalTimelineElement
-			className="vertical-timeline-element--work"
-			date="2008 - 2010"
-			iconStyle={{ background: 'rgb(33, 150, 243)', color: '#fff' }}
-			icon={<StarIcon />}
-		  >
-			<h3 className="vertical-timeline-element-title">Web Designer</h3>
-			<h4 className="vertical-timeline-element-subtitle">Los Angeles, CA</h4>
-			<p>
-			  User Experience, Visual Design
-			</p>
-		  </VerticalTimelineElement>
-		  <VerticalTimelineElement
-			className="vertical-timeline-element--work"
-			date="2006 - 2008"
-			iconStyle={{ background: 'rgb(33, 150, 243)', color: '#fff' }}
-			icon={<WorkIcon />}
-		  >
-			<h3 className="vertical-timeline-element-title">Web Designer</h3>
-			<h4 className="vertical-timeline-element-subtitle">San Francisco, CA</h4>
-			<p>
-			  User Experience, Visual Design
-			</p>
-		  </VerticalTimelineElement>
-		  <VerticalTimelineElement
-			className="vertical-timeline-element--work"
-			date="2006 - 2008"
-			iconStyle={{ background: 'rgb(33, 150, 243)', color: '#fff' }}
-			icon={<LoveIcon />}
-		  >
-			<h3 className="vertical-timeline-element-title">Web Designer</h3>
-			<h4 className="vertical-timeline-element-subtitle">San Francisco, CA</h4>
-			<p>
-			  User Experience, Visual Design
-			</p>
-		  </VerticalTimelineElement>
-		</VerticalTimeline>
-      </div>
-	*/
-	
     return (
 				<div id='timeline'>
 					<VerticalTimeline>
-						{timelineContent.content.map(function(contentItem){
-							return <VerticalTimelineElement key={contentItem.date} className='vertical-timeline-element--work'
+						{timelineContent.content.map((contentItem) => {
+							return <VerticalTimelineElement key={contentItem.title_on_date} id={contentItem.title_on_date} 
+									className='vertical-timeline-element--work'
 									date={contentItem.date}
 									iconStyle={{ background: 'rgb(33, 150, 243)', color: '#fff' }}
-									iconOnClick={() => this.editItem()}			// @TODO need to do something funky here as this is not the object - context is within map
-									icon={<StarIcon />} 
+									iconOnClick={() => this.editItem(contentItem)}			// @TODO need to do something funky here as this is not the object - context is within map
+									icon={<StarIcon/>} 
 									>	
 										{(contentItem.media && contentItem.media.length >= 1 ? 										
 											( contentItem.media.length >=2 ?
@@ -305,7 +254,7 @@ class MediaTimeline extends Component {
 												<img src={contentItem.media[0]} className='App-itemimage' align='left' /> ) : "" )}
 											
 										<h3 className='vertical-timeline-element-title'></h3>										
-										<p>{contentItem.category} <i>"{contentItem.comment}"</i></p>
+										<p>{contentItem.category_icon} <i>"{contentItem.comment}"</i></p>
 									</VerticalTimelineElement>
 						})}
 					</VerticalTimeline>
