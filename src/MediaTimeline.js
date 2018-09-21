@@ -45,7 +45,7 @@ class MediaTimeline extends Component {
 			],
             content: [ 
 				{					
-					title_on_date: "Test Timeline Title!|2012-04-20",
+					title_on_date: "Test Timeline Title!|1000",
 					time_sortable: 1000,
 					title: "Test Timeline Title!",
 					category: "Friends",
@@ -54,7 +54,7 @@ class MediaTimeline extends Component {
 					comment: "This is a test comment!"
 				},
 				{					
-					title_on_date: "Test Timeline Title 2|2015-04-20",
+					title_on_date: "Test Timeline Title 2|1001",
 					time_sortable: 1001,				
 					title: "Test Timeline Title 2",
 					category: "Love",
@@ -63,7 +63,7 @@ class MediaTimeline extends Component {
 					comment: "This is another test comment!"					
 				},
 				{					
-					title_on_date: "Test Timeline Title 3!|2016-12",
+					title_on_date: "Test Timeline Title 3!|1002",
 					time_sortable: 1002,				
 					title: "Test Timeline Title 3!",
 					category: "Friends",
@@ -80,6 +80,8 @@ class MediaTimeline extends Component {
 	};
 	
 	this.editItem = this.editItem.bind(this);
+	
+	window.timelineComponent = this;
 	
   }
 	
@@ -105,6 +107,37 @@ class MediaTimeline extends Component {
 	// now open the menu with this item as its state
 	window.menuComponent.openMenuToEdit( item );	
   }
+  
+  
+  /**
+   * Update an item following a save
+   */
+   updateItem( item ) {
+	   
+	   var timelineContent = this.state.timelineData;
+	   
+	   for( var i=0; i<timelineContent.content.length; i++ ) {
+		   
+		   // replace the item
+			if( timelineContent.content[i].title_on_date === item.title_on_date ) {
+				timelineContent.content[i] = item;
+			}
+	   }
+	   
+  	   // reset state
+	   this.setTimeline( timelineContent );
+
+	   try {
+			// now try scroll it into view
+			var elmnt = document.getElementById( item.title_on_date );
+			elmnt.scrollIntoView();
+	   }
+	   catch(err) {
+		   // swallow it
+	   }
+	   	   
+   }
+   
   
   
   
@@ -253,8 +286,8 @@ class MediaTimeline extends Component {
 												<div><img src={contentItem.media[0]} className='App-itemimage' align='top' /><img src={contentItem.media[1]} className='App-itemimage' align='top' /></div> : 
 												<img src={contentItem.media[0]} className='App-itemimage' align='left' /> ) : "" )}
 											
-										<h3 className='vertical-timeline-element-title'></h3>										
-										<p>{contentItem.category_icon} <i>"{contentItem.comment}"</i></p>
+										<h3 className='vertical-timeline-element-title'>{contentItem.category_icon} {contentItem.title}</h3>										
+										<p><i>"{contentItem.comment}"</i></p>
 									</VerticalTimelineElement>
 						})}
 					</VerticalTimeline>

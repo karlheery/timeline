@@ -48,15 +48,42 @@ class TimelineItemCreator extends Component {
    * Pull timeline event data from state
    */   
   getTimelineEventData() {	  
+  
+		var newMediaList = [];	
+		
+		// @TODO  we're only derefencing files here rather than actually deleting them
+		if( this.state.filesToDelete && this.state.filesToDelete.length > 0 && this.state.media.length > 0 ) {					
+			
+			for( var f=0; f<this.state.filesToDelete.length; f++ ) {
+				//newMediaList => newMediaList.filter(e => !e.endsWidth(this.state.filesToDelete[f]));
+
+				for( var m=0; m<this.state.media.length; m++ ) {
+					if( !this.state.media[m].endsWith(this.state.filesToDelete[f]) ) {
+						newMediaList.push(this.state.media[m]);
+						console.log( "item " + this.state.title + " will have " + this.state.media[m] );
+					}
+					else {
+						console.log( "item " + this.state.title + " dereferencing media " + this.state.media[m] );
+					}
+				}
+			}
+			
+			this.setState({
+				media: newMediaList
+			});
+		}
+			
+		
 		// create the timeline item to save & merge
 		return  {
-				"title_on_date": this.state.title + "|" + this.state.dateDisplay,
+				"title_on_date": this.state.title + "|" + this.state.dateAsNumber,
+				"old_title": this.state.old_title,
 				"time_sortable": this.state.dateAsNumber,
 				"timeline_name": "Caroline. Our Glue.",
 				"title": this.state.title,
 				"category": this.state.category,
 				"date": this.state.dateDisplay,		/// pass through the stringified date which allows for "unsure"
-				"media": this.state.media,
+				"media": newMediaList,
 				"comment": this.state.comment
 		};
   }
@@ -67,9 +94,26 @@ class TimelineItemCreator extends Component {
   setMenuState( item ) {
 	// change menu state and clear down the state first so we arent editing a previous item	
 	
-	var tokens = item.title_on_date.split("|");
+	
+	// parse the list of files so we can see them nicer on the screen for deletion
+	//
+	var fileNames = [];
+	for( var f=0; item.media && f<item.media.length; f++ ) {		
+		var tokens = item.media[f].split("/");
+		
+		if( tokens && tokens.length > 1 ) {
+			fileNames.push(tokens[tokens.length-1]);
+		}
+		else if ( tokens ) {
+			fileNames.push(tokens[0]);
+		}
+		else {
+			fileNames.push(item.media[f]);
+		}
+	}
+	
 	var unsure_of_date = false;
-	if( tokens.length > 1 && tokens[1].length < 10 ) {	// full dates are stored as YYYY-MM-DD (10 characters)
+	if( item.date && item.date.length < 9 ) {	// full dates are stored as dddd, Do MMM YYYY (18 characters)
 		unsure_of_date = true
 	}
 	
@@ -80,12 +124,14 @@ class TimelineItemCreator extends Component {
 	
     this.setState({
 		title: item.title,
-		old_title: item.title,		// for deletion of old
+		old_title: item.title_on_date,		// for deletion of old
 		dateAsNumber: item.time_sortable,	// this doesnt cnie
 		category: item.category,
-		dateDisplay: cal_date,
+		//date: cal_date,
+		dateDisplay: item.date,
 		unsure: unsure_of_date,
-		media: item.media,
+		media: item.media,		
+		fileList: fileNames,
 		comment: item.comment,
 		isEdit: ( item.title ? true : false )
 	})
@@ -97,15 +143,18 @@ class TimelineItemCreator extends Component {
    */
   clearMenuState() {
 	  
-	  this.setState({
+	  /*this.setState({
 		  title: undefined,
+		  old_title: undefined,
 		  dateAsNumber: undefined,
 		  category: undefined,
 		  dateDisplay: undefined,
-		  media: undefined,
+		  //media: [],
+		  //fileList: [],
 		  comment: undefined,
-		  isEdit: false
-	  })
+		  //isEdit: false,
+		  uploadMessage: ""
+	  })*/
 	  
   }
   
@@ -157,10 +206,17 @@ class TimelineItemCreator extends Component {
 				saveStatus: 0
 			});
 			
+			window.timelineComponent.updateItem( timelineItem );
 		})
 		.catch((err) => {
 			console.log(err);
-		});
+			
+			this.setState({
+				uploadMessage: "Doh. Failed to save.",				
+				saveStatus: 0
+			});
+			
+		});						
 	
   }
   
@@ -225,6 +281,30 @@ class TimelineItemCreator extends Component {
 			  }			  			  
 		  }
 		  
+	  }	  	  
+	  else if ( object.target.name === "delete-file" ) {
+		  
+		  var fileName = object.target.id;
+		  var deleteFiles = this.state.filesToDelete;
+			  
+		  // maintain a list of files to delete on save
+		  if( object.target.checked ) {			  			  
+			  
+			  if( !deleteFiles ) {
+				  deleteFiles = []
+			  }
+			  deleteFiles.push( fileName );
+			  			  
+			  this.setState({
+				  filesToDelete: deleteFiles
+			  });			  			  
+			  
+			  
+		  } else {
+			  // remove item not longer to be deleted
+			  deleteFiles = deleteFiles.filter(e => e !== fileName);
+		  }
+		  
 	  }	  
 	  else {
 		  
@@ -271,7 +351,7 @@ class TimelineItemCreator extends Component {
 					
 		*/
 
-		  
+		  //<input type="checkbox" name='del-{f.name}' id='del-{f.name}' selected=false onChange={this.handleChange.bind(this)}/>
     return (
 			
 		<div>
@@ -329,8 +409,10 @@ class TimelineItemCreator extends Component {
 				<aside>
 				  <p>{this.state.uploadMessage}</p>
 				  <ul>
-					{
-					  this.state.fileList.map(f => <li key='{f.name}' className='list-item'>{f.name} - {f.size} bytes</li>)
+					{					
+							this.state.fileList.map(f => 
+								( this.state.isEdit ? <li key={f} className='list-item'>Delete {f}? <input type="checkbox" name='delete-file' id={f} onChange={this.handleChange.bind(this)}/></li>
+								: this.state.fileList.map(f => <li key={f} className='list-item'>{f}</li>) ) )
 					}
 				  </ul>
 				</aside>
@@ -356,16 +438,27 @@ class TimelineItemCreator extends Component {
   onDrop(files) {
 
 	var uploaded = [];
-	var mediaFiles = []
+	var mediaFiles = this.state.media;		// start with the existing uploads
+	
+	if( !mediaFiles ) {
+		mediaFiles = [];
+	}
 			
 	
 	// iterate through files uploading them to S3
 	for(var f=0; f < files.length; f++) {			
 				
 		var file = files[f];
+		
+		var tokens = file.name.split(".");	// look for file extension		
+		var suffix = tokens.splice(tokens.length-1,1);	// take off suffix
+		var uniqueFileName  = tokens.join('');	// join the rest
+		uniqueFileName = uniqueFileName + moment().valueOf();		// add current time
+		uniqueFileName = uniqueFileName + "." + suffix;		// add the suffix again
+		
 	
 		axios.post('https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy', {
-		  objectName: 'Caroline/' + file.name,
+		  objectName: 'Caroline/' + uniqueFileName,
 		  contentType: file.type
 		})
 		.then(function (result) {
@@ -385,8 +478,8 @@ class TimelineItemCreator extends Component {
 		  console.log(result);
 
 			// add files as we go
-		  uploaded.push( file );
-		  mediaFiles.push( 'https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/' + file.name );
+		  uploaded.push( uniqueFileName );
+		  mediaFiles.push( 'https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/' + uniqueFileName );
 		  
 		  // now update state so we rerender
 		  this.setState({

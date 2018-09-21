@@ -32,7 +32,7 @@ class OptionsMenu extends React.Component {
   handleStateChange (state) {
     this.setState({menuOpen: state.isOpen})  
 	
-	if( !this.state.menuOpen ) {
+	if( !state.menuOpen ) {
 		this.child.current.clearMenuState();
 	}
   }
