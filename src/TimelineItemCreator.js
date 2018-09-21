@@ -83,7 +83,7 @@ class TimelineItemCreator extends Component {
 				"title": this.state.title,
 				"category": this.state.category,
 				"date": this.state.dateDisplay,		/// pass through the stringified date which allows for "unsure"
-				"media": newMediaList,
+				"media": this.state.media,
 				"comment": this.state.comment
 		};
   }
