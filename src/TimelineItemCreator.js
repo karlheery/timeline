@@ -117,17 +117,18 @@ class TimelineItemCreator extends Component {
 		unsure_of_date = true
 	}
 	
-	var cal_date = moment(item.date, "dddd, Do MMM YYYY");
+	var cal_date = moment(item.time_sortable);
+	/*moment(item.date, "dddd, Do MMM YYYY");
 	if( !cal_date ) {
 		cal_date = moment(item.date, "MMM YYYY");
-	}
+	}*/
 	
     this.setState({
 		title: item.title,
 		old_title: item.title_on_date,		// for deletion of old
 		dateAsNumber: item.time_sortable,	// this doesnt cnie
 		category: item.category,
-		//date: cal_date,
+		date: cal_date,
 		dateDisplay: item.date,
 		unsure: unsure_of_date,
 		media: item.media,		
