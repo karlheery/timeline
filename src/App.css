@@ -40,10 +40,14 @@ html {
 }
 
 .App-itemimage {  
-  height: 250px;
+  height: 200px;
   padding: 10px;
 }
 
+.App-itemimage-thumbnail {  
+  height: 20px;
+  padding: 5px;
+}
 
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }

@@ -4,6 +4,8 @@ import { PropTypes } from 'react'
 import { VerticalTimeline, VerticalTimelineElement }  from 'react-vertical-timeline-component';
 import 'react-vertical-timeline-component/style.min.css';
 
+import MediaItem  from './MediaItem';
+
 import axios from 'axios';
 
 import caro from './Banner_Image.jpg';
@@ -14,6 +16,8 @@ import SchoolIcon from '@material-ui/icons/School';
 import FaceIcon from '@material-ui/icons/FaceSharp';
 import LoveIcon from '@material-ui/icons/FavoriteSharp';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
+
+
 
 class MediaTimeline extends Component {
 	
@@ -59,7 +63,7 @@ class MediaTimeline extends Component {
 					title: "Test Timeline Title 2",
 					category: "Love",
 					date: "2015-04-20",			
-					media: ["https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/IMG_5815.JPG", "https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/IMG_5817.JPG"],					
+					media: ["https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/95E9EFBD-4FC3-4524-A06C-5F4A3035E345_0_1538256967385.jpeg", "https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/IMG_5817.JPG"],					
 					comment: "This is another test comment!"					
 				},
 				{					
@@ -229,21 +233,29 @@ class MediaTimeline extends Component {
   }
   
   
+  
+  openModal(file) {
+	console.log("open image here" );	// @TODO	
+  }
+  
+  
   /**
    * Build and display the timeline
    */
   render() {
 	  	
 	var timelineContent = this.state.timelineData;
-	console.log( "rendering timeline " + timelineContent );
 	
 	if( !timelineContent ) {
 		timelineContent = {};
 		timelineContent.content = [];
 	}
-		 		 
+	
+	console.log( "rendering timeline with " + timelineContent.content.length + " items" );	
 	
 	for( var i=0; i<timelineContent.content.length; i++ ) {
+		
+		console.log( " item: " + timelineContent.content[i].title_on_date );
 		
 		if( timelineContent.content[i].category === "Friends" ) {
           timelineContent.content[i].category_icon = <FaceIcon/>;
@@ -264,14 +276,35 @@ class MediaTimeline extends Component {
 		  timelineContent.content[i].category_icon = <StarIcon/>;
 		}
 
-
       
 	}
 	
 		
-		
+	/* FOR TESTING
+	var mockItem = { 	
+					title_on_date: "Test Timeline Title 2|1001",
+					time_sortable: 1001,				
+					title: "Test Timeline Title 2",
+					category: "Love",
+					date: "2015-04-20",			
+					media: ["https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/95E9EFBD-4FC3-4524-A06C-5F4A3035E345_0_1538256967385.jpeg", "https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/95E9EFBD-4FC3-4524-A06C-5F4A3035E345_0_1538256967385.jpeg"],					
+					comment: "This is another test comment!"					
+				};
+
+	
+	    return (
+				<div id='timeline'>
+				
+					<MediaItem contentItem={mockItem}/>
+				
+				</div>
+	);
+	*/
+
+				
     return (
 				<div id='timeline'>
+								
 					<VerticalTimeline>
 						{timelineContent.content.map((contentItem) => {
 							return <VerticalTimelineElement key={contentItem.title_on_date} id={contentItem.title_on_date} 
@@ -279,15 +312,9 @@ class MediaTimeline extends Component {
 									date={contentItem.date}
 									iconStyle={{ background: 'rgb(33, 150, 243)', color: '#fff' }}
 									iconOnClick={() => this.editItem(contentItem)}			// @TODO need to do something funky here as this is not the object - context is within map
-									icon={<StarIcon/>} 
+									icon={contentItem.category_icon} 
 									>	
-										{(contentItem.media && contentItem.media.length >= 1 ? 										
-											( contentItem.media.length >=2 ?
-												<div><img src={contentItem.media[0]} className='App-itemimage' align='top' /><img src={contentItem.media[1]} className='App-itemimage' align='top' /></div> : 
-												<img src={contentItem.media[0]} className='App-itemimage' align='left' /> ) : "" )}
-											
-										<h3 className='vertical-timeline-element-title'>{contentItem.category_icon} {contentItem.title}</h3>										
-										<p><i>"{contentItem.comment}"</i></p>
+										<MediaItem contentItem={contentItem}/>										
 									</VerticalTimelineElement>
 						})}
 					</VerticalTimeline>

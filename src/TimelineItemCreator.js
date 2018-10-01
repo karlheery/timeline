@@ -48,32 +48,56 @@ class TimelineItemCreator extends Component {
    * Pull timeline event data from state
    */   
   getTimelineEventData() {	  
-  
-		var newMediaList = [];	
+  				
+		// remove any weird dupes
+		var uniqueMedia = this.state.media.filter(function(item, pos, self) {
+			return self.indexOf(item) == pos;
+		})
+		
+		this.setState({
+			media: uniqueMedia
+		});
+		
 		
 		// @TODO  we're only derefencing files here rather than actually deleting them
 		if( this.state.filesToDelete && this.state.filesToDelete.length > 0 && this.state.media.length > 0 ) {					
+		
+			console.log( "deleting " + this.state.filesToDelete.length + " files from " + uniqueMedia.length + ": "+ uniqueMedia );
 			
 			for( var f=0; f<this.state.filesToDelete.length; f++ ) {
 				//newMediaList => newMediaList.filter(e => !e.endsWidth(this.state.filesToDelete[f]));
 
-				for( var m=0; m<this.state.media.length; m++ ) {
-					if( !this.state.media[m].endsWith(this.state.filesToDelete[f]) ) {
-						newMediaList.push(this.state.media[m]);
-						console.log( "item " + this.state.title + " will have " + this.state.media[m] );
+				var newMediaList = [];	
+						
+				var foundOnce = false;
+				for( var m=0; m<uniqueMedia.length; m++ ) {					
+				
+					// if media file name ends with this file name, its a dupe, or if I am deleting rows and found one already, add rest so we only delete 1
+					// and finally avoid adding dupes if its in media alread. This is defensive coding to allow fix up data on past bugs
+					//
+					if( (!uniqueMedia[m].endsWith(this.state.filesToDelete[f]) || foundOnce) &&
+						newMediaList.indexOf(uniqueMedia[m]) < 0 ) {						
+						
+						newMediaList.push(uniqueMedia[m]);
+						console.log( "item " + this.state.title + " will have " + uniqueMedia[m] );
 					}
 					else {
-						console.log( "item " + this.state.title + " dereferencing media " + this.state.media[m] );
+						console.log( "item " + this.state.title + " dereferencing media " + m + ": " + uniqueMedia[m] );
+						foundOnce = true;
 					}
 				}
+				
+				console.log( "new media list is :" + newMediaList );
+				uniqueMedia = newMediaList;
 			}
-			
-			this.setState({
-				media: newMediaList
-			});
+						
 		}
 			
 		
+		this.setState({
+			media: uniqueMedia
+		});
+
 		// create the timeline item to save & merge
 		return  {
 				"title_on_date": this.state.title + "|" + this.state.dateAsNumber,
@@ -83,7 +107,7 @@ class TimelineItemCreator extends Component {
 				"title": this.state.title,
 				"category": this.state.category,
 				"date": this.state.dateDisplay,		/// pass through the stringified date which allows for "unsure"
-				"media": this.state.media,
+				"media": uniqueMedia,			// since state is asynch and I was messing with it, return local data
 				"comment": this.state.comment
 		};
   }
@@ -94,21 +118,26 @@ class TimelineItemCreator extends Component {
   setMenuState( item ) {
 	// change menu state and clear down the state first so we arent editing a previous item	
 	
+	// trouble parsing https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/Monaco 7:10:161537710565215.jpg
 	
 	// parse the list of files so we can see them nicer on the screen for deletion
 	//
 	var fileNames = [];
 	for( var f=0; item.media && f<item.media.length; f++ ) {		
 		var tokens = item.media[f].split("/");
+		console.log( "parsed " + item.media[f] + " into " + tokens );
 		
-		if( tokens && tokens.length > 1 ) {
+		if( tokens && tokens.length > 1  ) {
 			fileNames.push(tokens[tokens.length-1]);
+			console.log( "saving " + tokens[tokens.length-1] );
 		}
-		else if ( tokens ) {
+		else if ( tokens && tokens.length == 1 ) {
 			fileNames.push(tokens[0]);
+			console.log( "saving 2 " + tokens[0] );
 		}
-		else {
+		else if( fileNames.indexOf(item.media[f]) < 0 ) {
 			fileNames.push(item.media[f]);
+			console.log( "saving 3 " + item.media[f] );
 		}
 	}
 	
@@ -338,8 +367,6 @@ class TimelineItemCreator extends Component {
 		autoUpload: true		// @TODO change once we have a form/button!		
     };
 	    
-	console.log( "will upload files to " + s3Url );
-	
 		
 		/*
 		<div>
@@ -360,6 +387,13 @@ class TimelineItemCreator extends Component {
 			<tbody>
 			<tr>
 			<td>
+				
+				<div className="dropzone">			
+				  <Dropzone size={50} onDrop={ this.onDrop.bind(this) }>
+						<p>Click to upload pic.</p>
+				  </Dropzone>				  
+				</div>
+				
 				<label htmlFor="title">Event</label>        
 				<input type="text" name='title' id='title' value={this.state.title} size="30" className="menu-input" placeholder='Title or tagline (optional)'
 					onChange={this.handleChange.bind(this)}/>		
@@ -390,22 +424,7 @@ class TimelineItemCreator extends Component {
 				>
 				
 					{(saveStatus == 1 ? 'Saving Event' : (saveStatus == 0 ? 'Click to Save' : 'Enter Title & Date (min.)' ))}
-				</Button>				
-				<br/>
-				<br/>
-		 		 
-				<section>
-				<div className="dropzone">
-				
-				  <Dropzone 
-					size = { 150 }
-					onDrop={ this.onDrop.bind(this) } 						
-				  >
-					<p>Click to upload pic.</p>
-				  </Dropzone>
-				  
-				
-				</div>
+				</Button>
 				
 				<aside>
 				  <p>{this.state.uploadMessage}</p>
@@ -413,12 +432,10 @@ class TimelineItemCreator extends Component {
 					{					
 							this.state.fileList.map(f => 
 								( this.state.isEdit ? <li key={f} className='list-item'>Delete {f}? <input type="checkbox" name='delete-file' id={f} onChange={this.handleChange.bind(this)}/></li>
-								: this.state.fileList.map(f => <li key={f} className='list-item'>{f}</li>) ) )
+								: <li key={f} className='list-item'>{f}</li> ) )
 					}
 				  </ul>
 				</aside>
-				</section>
-	  
   
 			  </td>
 			  </tr>
@@ -439,30 +456,52 @@ class TimelineItemCreator extends Component {
   onDrop(files) {
 
 	var uploaded = [];
+	
 	var mediaFiles = this.state.media;		// start with the existing uploads
 	
 	if( !mediaFiles ) {
 		mediaFiles = [];
 	}
-			
 	
-	// iterate through files uploading them to S3
-	for(var f=0; f < files.length; f++) {			
-				
+	// make sure there's a placeholder for these entries.
+	this.setState({
+		fileList: uploaded,
+		media: mediaFiles,
+	});
+	
+			
+	// now start a recursive call chain (to avoid bug where the file names being stolen during for loop)
+	var f = 0;
+	
+	this.uploadFile(files, f);
+			
+  }
+  
+  
+  
+  
+  uploadFile(files, f) {
+			
+		if( f >= files.length ) {
+			return;
+		}
+		
 		var file = files[f];
 		
+		var uploaded = this.state.fileList;
+		var mediaFiles = this.state.media;
+				
 		var tokens = file.name.split(".");	// look for file extension		
 		var suffix = tokens.splice(tokens.length-1,1);	// take off suffix
 		var uniqueFileName  = tokens.join('');	// join the rest
-		uniqueFileName = uniqueFileName + moment().valueOf();		// add current time
-		uniqueFileName = uniqueFileName + "." + suffix;		// add the suffix again
-		
+		uniqueFileName = uniqueFileName + "_" + f + "_" + moment().valueOf();		// add current time
+		uniqueFileName = uniqueFileName + "." + suffix;		// add the suffix again		
 	
 		axios.post('https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy', {
 		  objectName: 'Caroline/' + uniqueFileName,
 		  contentType: file.type
 		})
-		.then(function (result) {
+		.then((result) => {
 		  var signedUrl = result.data.signed_url;
 		  
 		  var options = {
@@ -473,22 +512,32 @@ class TimelineItemCreator extends Component {
 		  };
 
 		  console.log( "now putting the file " + file + " with URL " + signedUrl );	  
-		  return axios.put(signedUrl, file, options);
-		})
-		.then((result) => {
-		  console.log(result);
-
-			// add files as we go
-		  uploaded.push( uniqueFileName );
-		  mediaFiles.push( 'https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/' + uniqueFileName );
 		  
-		  // now update state so we rerender
-		  this.setState({
-			fileList: uploaded,
-			media: mediaFiles,
-			uploadMessage: uploaded.length + " files just uploaded"
-		  });
+		  return axios.put(signedUrl, file, options)		
+		  .then((result) => {
+			  console.log(result);
+			  
+				// add files as we go
+			  if( uploaded.indexOf( uniqueFileName < 0 ) ) {
+				uploaded.push( uniqueFileName );
+			  }
 
+			  var s3File = 'https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/' + uniqueFileName;
+			  if( mediaFiles.indexOf( s3File < 0 ) ) {
+				mediaFiles.push( s3File );
+			  }
+			  
+			  // now update state so we rerender
+			  this.setState({
+				fileList: uploaded,
+				media: mediaFiles,
+				uploadMessage: uploaded.length + " files just uploaded"
+			  });
+			  
+		
+			  // keep calling recursively until all files are up
+			  this.uploadFile(files, f+1)			  
+		  })
 
 		})
 		.catch(function (err) {
@@ -496,9 +545,8 @@ class TimelineItemCreator extends Component {
 		});
 	}
 	
-
-	
-  }
+  
+  
 
   /*
   
