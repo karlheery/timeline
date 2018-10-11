@@ -1,5 +1,5 @@
 html { 
-  background: url(./Malahide_Background.jpg) no-repeat center center fixed; 
+  background: url(./Fashion.jpg) no-repeat center center fixed; 
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
@@ -24,15 +24,27 @@ html {
   background-color: #555;
   height: 80px;
   padding: 2px;
-  color: white;
+  color: white;  
 }
 
 .App-title {
+  float: left;
+  display: block;
+  padding: 2px;
   font-size: 1.5em;
 }
 
 .App-subtitle {
+  padding: 0px;
   font-size: 1.0em;  
+  float: right
+}
+
+.App-button {
+  border: none;
+  padding: 20px;
+  background-color: #555;
+  font-size: 1.0em
 }
 
 .App-intro {
@@ -47,6 +59,13 @@ html {
 .App-itemimage-thumbnail {  
   height: 20px;
   padding: 5px;
+}
+
+.App-right-menu {
+  overflow: hidden;
+  float:right;
+  position: absolute;
+  right: 100px
 }
 
 @keyframes App-logo-spin {

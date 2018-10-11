@@ -34,8 +34,9 @@ class TimelineItemCreator extends Component {
 	
     this.state = { 
 		disabled: true, 
+		isEdit: false,
 		fileList: [],
-		saveStatus: false
+		saveStatus: 0
 	}
 	
 	
@@ -163,7 +164,7 @@ class TimelineItemCreator extends Component {
 		media: item.media,		
 		fileList: fileNames,
 		comment: item.comment,
-		isEdit: ( item.title ? true : false )
+		isEdit: true
 	})
   }
 
@@ -173,18 +174,18 @@ class TimelineItemCreator extends Component {
    */
   clearMenuState() {
 	  
-	  /*this.setState({
-		  title: undefined,
-		  old_title: undefined,
-		  dateAsNumber: undefined,
-		  category: undefined,
-		  dateDisplay: undefined,
+	  this.setState({
+		//  title: undefined,
+		 // old_title: undefined,
+		  //dateAsNumber: undefined,
+		  //category: undefined,
+		  //dateDisplay: undefined,
 		  //media: [],
 		  //fileList: [],
 		  comment: undefined,
 		  //isEdit: false,
 		  uploadMessage: ""
-	  })*/
+	  })
 	  
   }
   
@@ -214,40 +215,82 @@ class TimelineItemCreator extends Component {
 			
 			//setTimeout( this.status.saveStatus = -1, 5000);
 		}			
+			
+			
+		// DELETE RECORD
+		if( this.state.deleteItem ) {
+			
+			axios.delete('https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items', {
+				item: timelineItem.old_title,
+				contentType: 'application/json'
+			})
+			.then((result) => {
+			
+				// merge this event with timeline ...as opposed to re-getting the whole thing
+				this.removeEventFromTimeline( timelineItem.old_title );
 				
-		axios.post('https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items', {
-			item: timelineItem,
-			contentType: 'application/json'
-		})
-		.then((result) => {
+				// get identifier
+				var savedEvent = timelineItem.old_title;
+		  
+				console.log( "successfully deleted item " + savedEvent );	  
+				
+				// @TODO - nice if we could take user to this timeline item on main page
+				//			
+				this.setState({
+					uploadMessage: "Successfully deleted " + timelineItem.old_title,				
+					saveStatus: 0
+				});
+				
+				window.timelineComponent.deleteItem( timelineItem.old_title );
+			})
+			.catch((err) => {
+				console.log(err);
+				
+				this.setState({
+					uploadMessage: "Doh. Failed to save.",				
+					saveStatus: 0
+				});
+				
+			});			
 			
-			// merge this event with timeline ...as opposed to re-getting the whole thing
-			this.addEventToTimeline( result );
+		}
+		else {
 			
-			// get identifier
-			var savedEvent = result.data.title;
-      
-			console.log( "successfully saved event " + savedEvent );	  
-			
-			// @TODO - nice if we could take user to this timeline item on main page
-			//			
-			this.setState({
-				uploadMessage: "Successfully saved " + savedEvent,				
-				saveStatus: 0
-			});
-			
-			window.timelineComponent.updateItem( timelineItem );
-		})
-		.catch((err) => {
-			console.log(err);
-			
-			this.setState({
-				uploadMessage: "Doh. Failed to save.",				
-				saveStatus: 0
-			});
-			
-		});						
-	
+			// NEW/EDIT RECORD
+			axios.post('https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items', {
+				item: timelineItem,
+				contentType: 'application/json'
+			})
+			.then((result) => {
+				
+				// merge this event with timeline ...as opposed to re-getting the whole thing
+				this.addEventToTimeline( result );
+				
+				// get identifier
+				var savedEvent = result.data.title;
+		  
+				console.log( "successfully saved event " + savedEvent );	  
+				
+				// @TODO - nice if we could take user to this timeline item on main page
+				//			
+				this.setState({
+					uploadMessage: "Successfully saved " + savedEvent,				
+					saveStatus: 0
+				});
+				
+				window.timelineComponent.updateItem( timelineItem );
+			})
+			.catch((err) => {
+				console.log(err);
+				
+				this.setState({
+					uploadMessage: "Doh. Failed to save.",				
+					saveStatus: 0
+				});
+				
+			});						
+		}
+		
   }
   
   
@@ -262,6 +305,9 @@ class TimelineItemCreator extends Component {
 	  // @TODO
   }
   
+  removeEventFromTimeline( itemName ) {
+	  
+  }
   
   /**
    * Handle changes to form by updating state
@@ -335,7 +381,14 @@ class TimelineItemCreator extends Component {
 			  deleteFiles = deleteFiles.filter(e => e !== fileName);
 		  }
 		  
-	  }	  
+	  }	
+	  else if ( object.target.name === "delete-item" ) {
+		  		    
+			this.setState({
+				deleteItem: object.target.checked
+			});			  			  
+			  			  		  
+	  }	  	  
 	  else {
 		  
 			 // for everything else we store the raw value
@@ -349,6 +402,10 @@ class TimelineItemCreator extends Component {
   }
 
   
+  
+  /**
+   * Handle the rendering of the form
+   */
   render() {
 	  
 	var saveStatus = this.state.saveStatus;
@@ -380,22 +437,23 @@ class TimelineItemCreator extends Component {
 		*/
 
 		  //<input type="checkbox" name='del-{f.name}' id='del-{f.name}' selected=false onChange={this.handleChange.bind(this)}/>
+		  
+		  // USABLE!!!!
+		  // {(this.state.isEdit ? <p>Delete: <input type="checkbox" name='delete-item' onChange={this.handleChange.bind(this)}/></p> : <p/> )}
+				
+				
     return (
 			
-		<div>
-			<table border="0" cellPadding="1">
-			<tbody>
-			<tr>
-			<td>
+		<div align="left">
 				
 				<div className="dropzone">			
 				  <Dropzone size={50} onDrop={ this.onDrop.bind(this) }>
-						<p>Click to upload pic.</p>
+						<p>Click to upload or drag pics.</p>
 				  </Dropzone>				  
 				</div>
 				
 				<label htmlFor="title">Event</label>        
-				<input type="text" name='title' id='title' value={this.state.title} size="30" className="menu-input" placeholder='Title or tagline (optional)'
+				<input type="text" name='title' id='title' value={this.state.title} size="30" className="menu-input" placeholder='Title or tagline'
 					onChange={this.handleChange.bind(this)}/>		
 
 				<form onChange={this.handleChange.bind(this)}>
@@ -411,11 +469,11 @@ class TimelineItemCreator extends Component {
 				<br/>
 				<label htmlFor="date">When</label> (ish: <input type="checkbox" name='unsure-date' id='unsure-date' selected={this.state.unsure} onChange={this.handleChange.bind(this)}/>?)
 
-				<DatePicker id="date" dateFormat="YYYY-MM-DD" selected={this.state.date} className="menu-input" size="12" 
+				<DatePicker id="date" dateFormat="YYYY-MM-DD" selected={this.state.date} className="menu-input" size="12" placeholder='YYYY-MM-DD'
 					onChange={this.handleChange.bind(this)} /> 
 				
 				<label htmlFor="comment">Comment</label>        
-				<textarea rows='4' columns='40' name='comment' id='comment' value={this.state.comment} className="menu-input" placeholder="Comment (include your initials)..."
+				<textarea rows='4' columns='40' name='comment' id='comment' value={this.state.comment} className="menu-input" placeholder="Comment (remember you are editing everyones, so include your initials)..."
 					onChange={this.handleChange.bind(this)}/>	
 				
 				<Button id='save-comment-button' bsStyle='primary' bsClass='options-btn' 
@@ -423,8 +481,9 @@ class TimelineItemCreator extends Component {
 					onClick={saveStatus == 0 ? this.handleSubmit.bind(this) : null}
 				>
 				
-					{(saveStatus == 1 ? 'Saving Event' : (saveStatus == 0 ? 'Click to Save' : 'Enter Title & Date (min.)' ))}
+					{(saveStatus == 1 ? 'Saving Event' : (saveStatus == 0 ? 'Click to Save' : (saveStatus == 2 ? 'CLICK TO SAVE*' : 'Enter Title & Date (min.)' )))}
 				</Button>
+				
 				
 				<aside>
 				  <p>{this.state.uploadMessage}</p>
@@ -437,11 +496,7 @@ class TimelineItemCreator extends Component {
 				  </ul>
 				</aside>
   
-			  </td>
-			  </tr>
-			  </tbody>
-			  </table>
-			  </div>
+			</div>
 	  	  
 	
     )
@@ -474,6 +529,8 @@ class TimelineItemCreator extends Component {
 	var f = 0;
 	
 	this.uploadFile(files, f);
+	
+	this.setState({ saveStatus: 2 });
 			
   }
   
@@ -481,7 +538,7 @@ class TimelineItemCreator extends Component {
   
   
   uploadFile(files, f) {
-			
+					
 		if( f >= files.length ) {
 			return;
 		}

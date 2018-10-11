@@ -57,53 +57,21 @@ class MediaItem extends Component {
 	  			
 	var contentItem = this.state.item;
 		
-	console.log( "rendering item with " + contentItem.media.length + " media") ;
-		
+	//console.log( "rendering item with " + contentItem.media.length + " media") ;
+
     const settings = {
 		className: "slider variable-width",
 		variableWidth: true,
 		adaptiveHeight: true,
-		customPaging: function(i) {
-			return (
-			  <a>
-				<img src={contentItem.media[i]} className='App-itemimage-thumbnail'/>
-			  </a>
-			);
-		  },
-		dots: true,
-		dotsClass: "slick-dots slick-thumb",
+		dots: true,		
 		infinite: true,
-		speed: 5000,
+		speed: 8000,
 		autoplay: true,
 		autoplaySpeed: 200,
 		slidesToShow: 1,
 		slidesToScroll: 1
 	};
 	
-	
-	for( var i=0; i<contentItem.media.length; i++ ) {
-		console.log( contentItem.media[i] );
-	}
-	
-	/*
-	{
-					contentItem.media.map(f => 
-						(contentItem.media && contentItem.media.length >= 1 ? 										
-							( contentItem.media.length >=2 ?
-								<img src={f} onClick={()=>this.openModal(f)} className='App-itemimage' align='top'/>											
-								:
-								<img src={contentItem.media[0]} key={contentItem.media[0]} className='App-itemimage' align='left' /> 
-							) 
-							: 
-							"" 
-						)
-					)
-				}
-				*/
-				
-						//<img src={contentItem.media[0]} className='App-itemimage' align='top' /><img src={contentItem.media[1]} className='App-itemimage' align='top' /></div> 
-		//style={{width: 50%; height: 50%}}
-
 		
 				
     return (

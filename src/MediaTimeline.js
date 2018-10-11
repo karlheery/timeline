@@ -18,7 +18,6 @@ import LoveIcon from '@material-ui/icons/FavoriteSharp';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
 
 
-
 class MediaTimeline extends Component {
 	
   constructor(props) {
@@ -80,7 +79,8 @@ class MediaTimeline extends Component {
 	
 	// set initial state
 	this.state = {
-		menuController: this.props.app		
+		menuController: this.props.app,
+		chapterIndex: 0
 	};
 	
 	this.editItem = this.editItem.bind(this);
@@ -94,7 +94,7 @@ class MediaTimeline extends Component {
   componentDidMount() {   
 	this.getTimeline();	
 
-	//this.timerID = setInterval(() => this.doSOmething(), 1000 );
+	this.timerID = setInterval(() => this.changeBackground(), 5000 );
   }
   
 	
@@ -141,6 +141,39 @@ class MediaTimeline extends Component {
 	   }
 	   	   
    }
+   
+   
+   deleteItem( itemName ) {
+	   
+	   var timelineContent = this.state.timelineData;
+
+	   var prev_title = "";
+	   
+	   for( var i=0; i<timelineContent.content.length; i++ ) {
+
+			// replace the item
+			if( timelineContent.content[i].title_on_date === itemName ) {
+				timelineContent.splice(i,1);
+			}
+			
+			prev_title = timelineContent.content[i].title_on_date;
+	   }
+	   
+  	   // reset state
+	   this.setTimeline( timelineContent );
+
+	   try {
+			// now try scroll previous one  into view
+			var elmnt = document.getElementById( prev_title );
+			elmnt.scrollIntoView();
+	   }
+	   catch(err) {
+		   // swallow it
+	   }
+
+	   
+   }
+   
    
   
   
@@ -239,6 +272,41 @@ class MediaTimeline extends Component {
   }
   
   
+  /** 
+   * Rotate to next background image. @TODO - change it based on period in timeline
+   */
+  changeBackground() {
+	  
+	  var i = 0
+	  console.log( "chapterIndex " + this.state.chapterIndex );
+	  
+	  if( this.state.chapterIndex ) {
+		  i = this.state.chapterIndex;
+	  }
+	  
+	  i = i+1;
+	  
+	  if( this.state.timelineData.chapters && i >= this.state.timelineData.chapters.length ) {
+		  i = 0;
+	  }
+	  
+	  console.log( "changing to backgound " + i )
+	  	  
+	  
+	  var imgName = this.state.timelineData.chapters[i].background;
+	  console.log( "new background image is " + imgName )
+	  	  	  
+	  document.body.style.backgroundImage = "url('" + imgName + "')";
+	  
+	  this.setState( {
+		  chapterIndex: i
+	  });
+	  
+  }
+  
+  
+  
+  
   /**
    * Build and display the timeline
    */
@@ -251,11 +319,11 @@ class MediaTimeline extends Component {
 		timelineContent.content = [];
 	}
 	
-	console.log( "rendering timeline with " + timelineContent.content.length + " items" );	
+	//console.log( "rendering timeline with " + timelineContent.content.length + " items" );	
 	
 	for( var i=0; i<timelineContent.content.length; i++ ) {
 		
-		console.log( " item: " + timelineContent.content[i].title_on_date );
+		//console.log( " item: " + timelineContent.content[i].title_on_date );
 		
 		if( timelineContent.content[i].category === "Friends" ) {
           timelineContent.content[i].category_icon = <FaceIcon/>;
@@ -284,7 +352,7 @@ class MediaTimeline extends Component {
 	var mockItem = { 	
 					title_on_date: "Test Timeline Title 2|1001",
 					time_sortable: 1001,				
-					title: "Test Timeline Title 2",
+						title: "Test Timeline Title 2",
 					category: "Love",
 					date: "2015-04-20",			
 					media: ["https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/95E9EFBD-4FC3-4524-A06C-5F4A3035E345_0_1538256967385.jpeg", "https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/95E9EFBD-4FC3-4524-A06C-5F4A3035E345_0_1538256967385.jpeg"],					
