@@ -8,6 +8,8 @@ import MediaItem  from './MediaItem';
 
 import axios from 'axios';
 
+import * as Scroll from 'react-scroll';
+
 import caro from './Banner_Image.jpg';
 
 import WorkIcon from '@material-ui/icons/Work';
@@ -95,6 +97,11 @@ class MediaTimeline extends Component {
 	this.getTimeline();	
 
 	this.timerID = setInterval(() => this.changeBackground(), 5000 );
+	
+	//var scroll = Scroll.animateScroll; 
+	//scroll.scrollToBottom( { 
+	//	isDynamic:true, 
+	//});
   }
   
 	
@@ -153,7 +160,7 @@ class MediaTimeline extends Component {
 
 			// replace the item
 			if( timelineContent.content[i].title_on_date === itemName ) {
-				timelineContent.splice(i,1);
+				timelineContent.content.splice(i,1);
 			}
 			
 			prev_title = timelineContent.content[i].title_on_date;
@@ -286,7 +293,7 @@ class MediaTimeline extends Component {
 	  
 	  i = i+1;
 	  
-	  if( this.state.timelineData.chapters && i >= this.state.timelineData.chapters.length ) {
+	  if( this.state.timelineData && this.state.timelineData.chapters && i >= this.state.timelineData.chapters.length ) {
 		  i = 0;
 	  }
 	  
@@ -377,11 +384,11 @@ class MediaTimeline extends Component {
 						{timelineContent.content.map((contentItem) => {
 							return <VerticalTimelineElement key={contentItem.title_on_date} id={contentItem.title_on_date} 
 									className='vertical-timeline-element--work'
-									date={contentItem.date}
-									iconStyle={{ background: 'rgb(33, 150, 243)', color: '#fff' }}
+									//date={contentItem.date}
+									iconStyle={{ background: 'rgb(131, 112, 140)', color: '#dad4dd' }}
 									iconOnClick={() => this.editItem(contentItem)}			// @TODO need to do something funky here as this is not the object - context is within map
 									icon={contentItem.category_icon} 
-									>	
+									>											
 										<MediaItem contentItem={contentItem}/>										
 									</VerticalTimelineElement>
 						})}

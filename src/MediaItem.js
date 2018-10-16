@@ -72,21 +72,28 @@ class MediaItem extends Component {
 		slidesToScroll: 1
 	};
 	
+	
+	if( !contentItem.media || !Array.isArray(contentItem.media) ) {
+		contentItem.media = [];
+	}
+		
 		
 				
     return (
 			<div name="media">
+				<p className='handwriting'><i>{contentItem.date}</i></p>
+				
 				<Slider {...settings}>
 				
-				{
-					contentItem.media.map(f => (<div key={f}><img src={f} className='App-itemimage' onClick={()=>this.openModal(f)}/></div>) )
+				{					
+						contentItem.media.map(f => ( <div key={f}><img src={f} className='App-itemimage' onClick={()=>this.openModal(f)}/></div> ))						
 				}
 				
 				</Slider>
 				
 											
-				<h3 className='vertical-timeline-element-title'>{contentItem.title}</h3>										
-				<p><i>{contentItem.comment}</i></p>
+				<h3 className='handwriting'>{contentItem.title}</h3>										
+				<p className='handwriting'>{contentItem.comment}</p>
 				
 			</div>						
 	);

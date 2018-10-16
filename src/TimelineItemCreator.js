@@ -15,6 +15,9 @@ import './OptionsMenu.css'
 
 import 'react-datepicker/dist/react-datepicker.css';
 
+//ES6
+import ToggleButton from 'react-toggle-button'
+
 import WorkIcon from '@material-ui/icons/Work';
 import StarIcon from '@material-ui/icons/Star';
 import SchoolIcon from '@material-ui/icons/School';
@@ -51,9 +54,13 @@ class TimelineItemCreator extends Component {
   getTimelineEventData() {	  
   				
 		// remove any weird dupes
-		var uniqueMedia = this.state.media.filter(function(item, pos, self) {
-			return self.indexOf(item) == pos;
-		})
+		var uniqueMedia = []
+		
+		if( this.state.media && Array.isArray(this.state.media) ) {
+			uniqueMedia = this.state.media.filter(function(item, pos, self) {
+					return self.indexOf(item) == pos;
+			})
+		}
 		
 		this.setState({
 			media: uniqueMedia
@@ -101,6 +108,7 @@ class TimelineItemCreator extends Component {
 
 		// create the timeline item to save & merge
 		return  {
+				"command" : ( this.state.deleteItem ? "DELETE" : "UPSERT" ),
 				"title_on_date": this.state.title + "|" + this.state.dateAsNumber,
 				"old_title": this.state.old_title,
 				"time_sortable": this.state.dateAsNumber,
@@ -182,7 +190,7 @@ class TimelineItemCreator extends Component {
 		  //dateDisplay: undefined,
 		  //media: [],
 		  //fileList: [],
-		  comment: undefined,
+		  //comment: undefined,
 		  //isEdit: false,
 		  uploadMessage: ""
 	  })
@@ -220,8 +228,8 @@ class TimelineItemCreator extends Component {
 		// DELETE RECORD
 		if( this.state.deleteItem ) {
 			
-			axios.delete('https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items', {
-				item: timelineItem.old_title,
+			axios.post('https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items', {
+				item: timelineItem,
 				contentType: 'application/json'
 			})
 			.then((result) => {
@@ -238,7 +246,8 @@ class TimelineItemCreator extends Component {
 				//			
 				this.setState({
 					uploadMessage: "Successfully deleted " + timelineItem.old_title,				
-					saveStatus: 0
+					saveStatus: 0,
+					deleteItem: false
 				});
 				
 				window.timelineComponent.deleteItem( timelineItem.old_title );
@@ -247,7 +256,7 @@ class TimelineItemCreator extends Component {
 				console.log(err);
 				
 				this.setState({
-					uploadMessage: "Doh. Failed to save.",				
+					uploadMessage: "Doh. Failed to delete.",				
 					saveStatus: 0
 				});
 				
@@ -317,6 +326,8 @@ class TimelineItemCreator extends Component {
 	  var name = '';
 	  var value = '';
 	  
+	  console.log( "object changed is " + object );
+	  
 	  if ( object instanceof moment ) {
 		  
 		  // @TODO logic if box ticked first...
@@ -382,10 +393,10 @@ class TimelineItemCreator extends Component {
 		  }
 		  
 	  }	
-	  else if ( object.target.name === "delete-item" ) {
+	  else if ( object.target.name === "delete-toggle" ) {
 		  		    
 			this.setState({
-				deleteItem: object.target.checked
+				deleteItem: object.target.value
 			});			  			  
 			  			  		  
 	  }	  	  
@@ -440,19 +451,40 @@ class TimelineItemCreator extends Component {
 		  
 		  // USABLE!!!!
 		  // {(this.state.isEdit ? <p>Delete: <input type="checkbox" name='delete-item' onChange={this.handleChange.bind(this)}/></p> : <p/> )}
-				
+						
 				
     return (
 			
 		<div align="left">
 				
 				<div className="dropzone">			
-				  <Dropzone size={50} onDrop={ this.onDrop.bind(this) }>
-						<p>Click to upload or drag pics.</p>
+				  <Dropzone size={40} onDrop={ this.onDrop.bind(this) }>
+						<p className='handwriting'>Drag or click to upload pics.</p>
 				  </Dropzone>				  
 				</div>
 				
-				<label htmlFor="title">Event</label>        
+				{ 
+						(this.state.isEdit? 
+						<ToggleButton
+							inactiveLabel={"SAVE"}
+							activeLabel={"DEL"}
+							colors={{
+								active: {
+								  base: 'rgb(255,0,0)'
+								}
+							}}
+							value={this.state.deleteItem}
+							onToggle={(value) => {
+								this.setState({
+									deleteItem: !value,
+									saveStatus: 2
+							}) }}
+						/>
+						: <br/>
+						)
+				}
+					
+				<label htmlFor="title">Event*</label>        
 				<input type="text" name='title' id='title' value={this.state.title} size="30" className="menu-input" placeholder='Title or tagline'
 					onChange={this.handleChange.bind(this)}/>		
 
@@ -467,18 +499,19 @@ class TimelineItemCreator extends Component {
 				</form>
 				
 				<br/>
-				<label htmlFor="date">When</label> (ish: <input type="checkbox" name='unsure-date' id='unsure-date' selected={this.state.unsure} onChange={this.handleChange.bind(this)}/>?)
-
+				<label htmlFor="date">When* </label> (ish: <input type="checkbox" name='unsure-date' id='unsure-date' selected={this.state.unsure} onChange={this.handleChange.bind(this)}/>?)
+				<div className='subscript'>(YYYY-MM-DD)</div>
 				<DatePicker id="date" dateFormat="YYYY-MM-DD" selected={this.state.date} className="menu-input" size="12" placeholder='YYYY-MM-DD'
 					onChange={this.handleChange.bind(this)} /> 
 				
-				<label htmlFor="comment">Comment</label>        
+				
+				<label htmlFor="comment">Comment*</label>        
 				<textarea rows='4' columns='40' name='comment' id='comment' value={this.state.comment} className="menu-input" placeholder="Comment (remember you are editing everyones, so include your initials)..."
 					onChange={this.handleChange.bind(this)}/>	
-				
-				<Button id='save-comment-button' bsStyle='primary' bsClass='options-btn' 
-					disabled={saveStatus != 0}
-					onClick={saveStatus == 0 ? this.handleSubmit.bind(this) : null}
+					
+				<Button id='save-item-button' bsStyle='primary' bsClass='options-btn' 
+					disabled={ saveStatus != 0 && saveStatus != 2}
+					onClick={ (saveStatus == 0 || saveStatus == 2) ? this.handleSubmit.bind(this) : null}
 				>
 				
 					{(saveStatus == 1 ? 'Saving Event' : (saveStatus == 0 ? 'Click to Save' : (saveStatus == 2 ? 'CLICK TO SAVE*' : 'Enter Title & Date (min.)' )))}

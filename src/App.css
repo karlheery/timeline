@@ -42,8 +42,11 @@ html {
 
 .App-button {
   border: none;
+  position:fixed;
+  right: 40px;
   padding: 20px;
-  background-color: #555;
+  background-color: Transparent;
+  outline: none;
   font-size: 1.0em
 }
 
