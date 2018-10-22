@@ -48,18 +48,13 @@ class App extends Component {
   /**
    * Render the top banner and the main timeline page
    */	 
-  render() {
-	  		  
- 	  		
-	var divStyle = {
-            backgroundImage: 'url(./TakeThat.jpg)',
-			height: '100%',
-			width: '100%'
-    }
+  render() {	  		   	  			
 	
-    return (
-		<div>
 		
+    return (
+		<div className="main-area">
+			<div id="main-bg" className="main-bg"></div>
+						
 			<Sound
 			  url="./music/Tom Baxter - Better.mp3"
 			  playStatus={ (this.state.sound ? Sound.status.PAUSED : Sound.status.PLAYING) }
@@ -78,9 +73,9 @@ class App extends Component {
 							onClick={this.togglePlay.bind(this)}
 						>								
 							{ (this.state.sound ? 
-								<div> <PlayerIcon.Play width={32} height={32} style={{ marginRight: 32 }}/>  </div>
+								<div> <PlayerIcon.Play width={32} height={32} style={{ marginRight: 25 }}/>  </div>
 								: 
-								<div> <PlayerIcon.Pause width={32} height={32} style={{ marginRight: 32 }}/> </div>)							
+								<div> <PlayerIcon.Pause width={32} height={32} style={{ marginRight: 25 }}/> </div>)							
 							}
 						</Button>
 			</div>
@@ -93,7 +88,7 @@ class App extends Component {
 							
 							
 				</header>					
-				<div style={divStyle}>
+				<div>
     				<MediaTimeline/>											
 				</div>
 			</div>

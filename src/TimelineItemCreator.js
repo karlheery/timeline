@@ -409,7 +409,10 @@ class TimelineItemCreator extends Component {
 				[name]: value
 			})
 	  }
-	  	 
+		  
+	  this.setState({		
+		saveStatus: 2
+	  });
   }
 
   

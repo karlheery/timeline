@@ -76,8 +76,7 @@ class MediaItem extends Component {
 	if( !contentItem.media || !Array.isArray(contentItem.media) ) {
 		contentItem.media = [];
 	}
-		
-		
+				
 				
     return (
 			<div name="media">

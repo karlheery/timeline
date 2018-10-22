@@ -96,7 +96,7 @@ class MediaTimeline extends Component {
   componentDidMount() {   
 	this.getTimeline();	
 
-	this.timerID = setInterval(() => this.changeBackground(), 5000 );
+	this.timerID = setInterval(() => this.changeBackground(), 8000 );
 	
 	//var scroll = Scroll.animateScroll; 
 	//scroll.scrollToBottom( { 
@@ -301,9 +301,19 @@ class MediaTimeline extends Component {
 	  	  
 	  
 	  var imgName = this.state.timelineData.chapters[i].background;
+	  var mainPage = document.getElementById("main-bg");
+
 	  console.log( "new background image is " + imgName )
-	  	  	  
-	  document.body.style.backgroundImage = "url('" + imgName + "')";
+	  //mainPage.style.backgroundImage = "url('" + imgName + "')";	  	  
+	  
+	  window.addEventListener("load", function() {
+		mainPage.classList.add("hidden");
+	  });
+
+	  window.addEventListener("transitionend", this.changeBackgroundTo( imgName ) );
+	  //window.addEventListener("webkitTransitionEnd", this.changeBackgroundTo( imgName ) );
+	  //window.addEventListener("mozTransitionEnd", this.changeBackgroundTo( imgName ) );
+	  //window.addEventListener("oTransitionEnd", this.changeBackgroundTo( imgName ) );	  
 	  
 	  this.setState( {
 		  chapterIndex: i
@@ -311,6 +321,21 @@ class MediaTimeline extends Component {
 	  
   }
   
+
+  /**
+   * CHange background image to given URL
+   * @param {} imgName 
+   */
+  changeBackgroundTo( imgName ) {
+	
+	var mainPage = document.getElementById("main-bg");
+
+	if (mainPage.classList.contains("hidden")) {		  
+		mainPage.style.backgroundImage = "url('" + imgName + "')";	
+	}
+	mainPage.classList.toggle("hidden");
+	
+  }
   
   
   
@@ -376,14 +401,13 @@ class MediaTimeline extends Component {
 	);
 	*/
 
-				
     return (
 				<div id='timeline'>
 								
 					<VerticalTimeline>
 						{timelineContent.content.map((contentItem) => {
 							return <VerticalTimelineElement key={contentItem.title_on_date} id={contentItem.title_on_date} 
-									className='vertical-timeline-element--work'
+									className='my-timeline-element'
 									//date={contentItem.date}
 									iconStyle={{ background: 'rgb(131, 112, 140)', color: '#dad4dd' }}
 									iconOnClick={() => this.editItem(contentItem)}			// @TODO need to do something funky here as this is not the object - context is within map

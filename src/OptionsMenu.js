@@ -32,9 +32,9 @@ class OptionsMenu extends React.Component {
   handleStateChange (state) {
     this.setState({menuOpen: state.isOpen})  
 	
-	if( !state.menuOpen ) {
-		this.child.current.clearMenuState();
-	}
+	  if( !state.menuOpen ) {
+  		this.child.current.clearMenuState();
+  	}
   }
   
   
@@ -49,18 +49,16 @@ class OptionsMenu extends React.Component {
   
   
   // This can be used to open the menu, e.g. when a user clicks a timeline item
-  openMenuToEdit ( item ) {  
-	
-	this.child.current.setMenuState(item);
-	
-	this.setState({menuOpen: true})
+  openMenuToEdit ( item ) {  	
+    this.child.current.setMenuState(item);    
+    this.setState({menuOpen: true})
   }
 
 
   // This can be used to close the menu, e.g. when a user clicks a menu item
   closeMenu () {
     this.setState({menuOpen: false})
-	this.child.current.clearMenuState();
+	  this.child.current.clearMenuState();
   }
 
   // This can be used to toggle the menu, e.g. when using a custom icon
@@ -69,9 +67,9 @@ class OptionsMenu extends React.Component {
   toggleMenu () {
     this.setState({menuOpen: !this.state.menuOpen})
 	
-	if( !this.state.menuOpen ) {
-		this.child.current.clearMenuState();
-	}
+	  if( !this.state.menuOpen ) {
+  		this.child.current.clearMenuState();
+  	}
   }
   
   
@@ -85,7 +83,7 @@ class OptionsMenu extends React.Component {
     return (
 	
 	  <Menu 
-		  right
+      right          
           isOpen={this.state.menuOpen}
           onStateChange={(state) => this.handleStateChange(state)}
         >
