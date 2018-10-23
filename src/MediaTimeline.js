@@ -8,8 +8,6 @@ import MediaItem  from './MediaItem';
 
 import axios from 'axios';
 
-import * as Scroll from 'react-scroll';
-
 import caro from './Banner_Image.jpg';
 
 import WorkIcon from '@material-ui/icons/Work';
@@ -98,12 +96,9 @@ class MediaTimeline extends Component {
 
 	this.timerID = setInterval(() => this.changeBackground(), 8000 );
 	
-	//var scroll = Scroll.animateScroll; 
-	//scroll.scrollToBottom( { 
-	//	isDynamic:true, 
-	//});
   }
-  
+
+
 	
   /**
    * Open the menu to allow editing of the clicked item
@@ -285,7 +280,6 @@ class MediaTimeline extends Component {
   changeBackground() {
 	  
 	  var i = 0
-	  console.log( "chapterIndex " + this.state.chapterIndex );
 	  
 	  if( this.state.chapterIndex ) {
 		  i = this.state.chapterIndex;
@@ -297,13 +291,13 @@ class MediaTimeline extends Component {
 		  i = 0;
 	  }
 	  
-	  console.log( "changing to backgound " + i )
+	  //console.log( "changing to backgound " + i )
 	  	  
 	  
 	  var imgName = this.state.timelineData.chapters[i].background;
 	  var mainPage = document.getElementById("main-bg");
 
-	  console.log( "new background image is " + imgName )
+	  //console.log( "new background image is " + imgName )
 	  //mainPage.style.backgroundImage = "url('" + imgName + "')";	  	  
 	  
 	  window.addEventListener("load", function() {
@@ -403,7 +397,6 @@ class MediaTimeline extends Component {
 
     return (
 				<div id='timeline'>
-								
 					<VerticalTimeline>
 						{timelineContent.content.map((contentItem) => {
 							return <VerticalTimelineElement key={contentItem.title_on_date} id={contentItem.title_on_date} 
@@ -417,6 +410,7 @@ class MediaTimeline extends Component {
 									</VerticalTimelineElement>
 						})}
 					</VerticalTimeline>
+					
 				</div>
 	);
   }

@@ -4,6 +4,8 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
 
+import EditIcon from '@material-ui/icons/Edit';
+
 
 class MediaItem extends Component {
 	
@@ -79,9 +81,8 @@ class MediaItem extends Component {
 				
 				
     return (
-			<div name="media">
-				<p className='handwriting'><i>{contentItem.date}</i></p>
-				
+			<div name="media">				
+				<p className='handwriting'><i>{contentItem.date}</i></p>				
 				<Slider {...settings}>
 				
 				{					
@@ -93,6 +94,11 @@ class MediaItem extends Component {
 											
 				<h3 className='handwriting'>{contentItem.title}</h3>										
 				<p className='handwriting'>{contentItem.comment}</p>
+
+				<div align="right">
+					<EditIcon className="hoverable-img" align="right" onClick={() => window.timelineComponent.editItem(this.state.item)}/>
+				</div>
+				
 				
 			</div>						
 	);

@@ -5,6 +5,9 @@ import './OptionsMenu.css';
 import MediaTimeline from './MediaTimeline';
 import OptionsMenu from './OptionsMenu';
 
+import scrollToComponent from 'react-scroll-to-component';
+
+
 import Sound from 'react-sound';
 
 import { Button, PlayerIcon } from 'react-player-controls'
@@ -31,18 +34,31 @@ class App extends Component {
    * switch on and off music
    */
   togglePlay() {
-	console.log( "toggling sound to " + !this.state.sound );
-	
-	this.setState({
-		sound: !this.state.sound
-	});
-	
-	if( this.state.sound ) {
-		console.log( "start auto-scroll");
-	}
+		console.log( "toggling sound to " + !this.state.sound );
+		
+		this.setState({
+			sound: !this.state.sound
+		});
+		
+		if( this.state.sound ) {
+			this.startScrolling();
+		}
 	
   }
-  
+	
+	
+	
+  /**
+   * Start scrolling to end of timeline
+   * 
+   * @TODO pause and wait for end of carousel
+   */
+  startScrolling() {
+		scrollToComponent(this.EndOfTimeline, { offset: 0, align: 'top', duration: 10000000})
+	}
+	
+		
+
   
   
   /**
@@ -91,6 +107,9 @@ class App extends Component {
 				<div>
     				<MediaTimeline/>											
 				</div>
+
+				<section className="end" ref={(section) => { this.EndOfTimeline = section; }}></section>	
+       
 			</div>
 	    </div>
     );
