@@ -39,6 +39,7 @@ class TimelineItemCreator extends Component {
 		disabled: true, 
 		isEdit: false,
 		fileList: [],
+		mediaList: [],
 		saveStatus: 0
 	}
 	
@@ -125,28 +126,27 @@ class TimelineItemCreator extends Component {
    * set the staet of menu items so that menu renders in edit mode rather than new
    */   
   setMenuState( item ) {
-	// change menu state and clear down the state first so we arent editing a previous item	
 	
-	// trouble parsing https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/Monaco 7:10:161537710565215.jpg
+	console.log( "editing item " + item.title );
+	
+	// @TODO trouble parsing https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/Monaco 7:10:161537710565215.jpg
 	
 	// parse the list of files so we can see them nicer on the screen for deletion
 	//
 	var fileNames = [];
 	for( var f=0; item.media && f<item.media.length; f++ ) {		
-		var tokens = item.media[f].split("/");
-		console.log( "parsed " + item.media[f] + " into " + tokens );
 		
+		// @TODO deliberately disabled the file name parsing as I switch to thumbnails not file names for delete
+		//var tokens = item.media[f].split("/");
+		var tokens;
 		if( tokens && tokens.length > 1  ) {
-			fileNames.push(tokens[tokens.length-1]);
-			console.log( "saving " + tokens[tokens.length-1] );
+			fileNames.push(tokens[tokens.length-1]);			
 		}
 		else if ( tokens && tokens.length == 1 ) {
 			fileNames.push(tokens[0]);
-			console.log( "saving 2 " + tokens[0] );
 		}
 		else if( fileNames.indexOf(item.media[f]) < 0 ) {
 			fileNames.push(item.media[f]);
-			console.log( "saving 3 " + item.media[f] );
 		}
 	}
 	
@@ -172,6 +172,7 @@ class TimelineItemCreator extends Component {
 		media: item.media,		
 		fileList: fileNames,
 		comment: item.comment,
+		uploadMessage: "Delete?:",
 		isEdit: true
 	})
   }
@@ -181,19 +182,27 @@ class TimelineItemCreator extends Component {
    * If we close an edit screen we want it to open fresh
    */
   clearMenuState() {
-	  
-	  this.setState({
-		//  title: undefined,
-		 // old_title: undefined,
-		  //dateAsNumber: undefined,
-		  //category: undefined,
-		  //dateDisplay: undefined,
-		  //media: [],
-		  //fileList: [],
-		  //comment: undefined,
-		  //isEdit: false,
-		  uploadMessage: ""
-	  })
+	 
+	console.log( "clearing down timeline item");
+
+	this.setState({
+		title: undefined,		
+		old_title: undefined,
+		dateAsNumber: undefined,
+		category: undefined,
+		date: undefined,
+		dateDisplay: undefined,
+		unsure: undefined,
+		media: undefined,		
+		fileList: undefined,
+		comment: undefined,
+		uploadMessage: undefined,
+		isEdit: false,
+		disabled: true, 
+		fileList: [],
+		mediaList: [],
+		saveStatus: 0
+	})
 	  
   }
   
@@ -451,21 +460,29 @@ class TimelineItemCreator extends Component {
 		*/
 
 		  //<input type="checkbox" name='del-{f.name}' id='del-{f.name}' selected=false onChange={this.handleChange.bind(this)}/>
+				
 		  
-		  // USABLE!!!!
-		  // {(this.state.isEdit ? <p>Delete: <input type="checkbox" name='delete-item' onChange={this.handleChange.bind(this)}/></p> : <p/> )}
-						
+	var titleText = this.state.title;
+	var commentText = this.state.comment;
+	// @TODO hack - because something is editing my component outside of React (see warning message)
+	// the text box isnt changing to blank on NEW item after an EDIT
+	// React state looks fine and only happens on text fields so i'll just blank them here
+	//
+	if( !this.state.isEdit && (!saveStatus || saveStatus == 0) ) {
+		titleText = undefined;
+		commentText = undefined;
+	}
 				
     return (
 			
-		<div align="left">
-				
+		<div align="left">			
 				<div className="dropzone">			
 				  <Dropzone size={40} onDrop={ this.onDrop.bind(this) }>
 						<p className='handwriting'>Drag or click to upload pics.</p>
 				  </Dropzone>				  
 				</div>
 				
+				<div className="subscript">Note: we are all editors of this one item...</div>
 				{ 
 						(this.state.isEdit? 
 						<ToggleButton
@@ -486,9 +503,9 @@ class TimelineItemCreator extends Component {
 						: <br/>
 						)
 				}
-					
+				
 				<label htmlFor="title">Event*</label>        
-				<input type="text" name='title' id='title' value={this.state.title} size="30" className="menu-input" placeholder='Title or tagline'
+				<input type="text" name='title' id='title' value={titleText} size="30" className="menu-input" placeholder='Title or tagline'
 					onChange={this.handleChange.bind(this)}/>		
 
 				<form onChange={this.handleChange.bind(this)}>
@@ -509,7 +526,7 @@ class TimelineItemCreator extends Component {
 				
 				
 				<label htmlFor="comment">Comment*</label>        
-				<textarea rows='4' columns='40' name='comment' id='comment' value={this.state.comment} className="menu-input" placeholder="Comment (remember you are editing everyones, so include your initials)..."
+				<textarea rows='4' columns='40' name='comment' id='comment' value={commentText} className="menu-input" placeholder="Comment (remember you are editing everyones, so include your initials)..."
 					onChange={this.handleChange.bind(this)}/>	
 					
 				<Button id='save-item-button' bsStyle='primary' bsClass='options-btn' 
@@ -526,7 +543,7 @@ class TimelineItemCreator extends Component {
 				  <ul>
 					{					
 							this.state.fileList.map(f => 
-								( this.state.isEdit ? <li key={f} className='list-item'>Delete {f}? <input type="checkbox" name='delete-file' id={f} onChange={this.handleChange.bind(this)}/></li>
+								( this.state.isEdit ? <li key={f} className='list-item'><img src={f} width="30"/>? <input type="checkbox" name='delete-file' id={f} onChange={this.handleChange.bind(this)}/></li>
 								: <li key={f} className='list-item'>{f}</li> ) )
 					}
 				  </ul>

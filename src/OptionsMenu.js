@@ -30,9 +30,13 @@ class OptionsMenu extends React.Component {
   // This keeps your state in sync with the opening/closing of the menu
   // via the default means, e.g. clicking the X, pressing the ESC key etc.
   handleStateChange (state) {
-    this.setState({menuOpen: state.isOpen})  
+
+    console.log( "menu state changing with " + state.isOpen );
+
+    var newMenuOpenState = state.isOpen;
+    this.setState({menuOpen: newMenuOpenState})  
 	
-	  if( !state.menuOpen ) {
+	  if( !newMenuOpenState ) {
   		this.child.current.clearMenuState();
   	}
   }
@@ -42,7 +46,8 @@ class OptionsMenu extends React.Component {
    * This can be used to open the menu, e.g. when a user clicks a timeline item
    */
   openMenu () {	
-	// change menu state and clear down the state first so we arent editing a previous item	
+  // change menu state and clear down the state first so we arent editing a previous item	
+    this.child.current.clearMenuState();    
     this.setState({menuOpen: true})
 	
   }
@@ -65,9 +70,11 @@ class OptionsMenu extends React.Component {
   // Tip: You probably want to hide either/both default icons if using a custom icon
   // See https://github.com/negomi/react-burger-menu#custom-icons
   toggleMenu () {
-    this.setState({menuOpen: !this.state.menuOpen})
+
+    var newMenuOpenState = !this.state.menuOpen;
+    this.setState({menuOpen: newMenuOpenState})
 	
-	  if( !this.state.menuOpen ) {
+	  if( !newMenuOpenState ) {
   		this.child.current.clearMenuState();
   	}
   }

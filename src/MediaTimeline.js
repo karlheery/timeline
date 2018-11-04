@@ -16,6 +16,7 @@ import SchoolIcon from '@material-ui/icons/School';
 import FaceIcon from '@material-ui/icons/FaceSharp';
 import LoveIcon from '@material-ui/icons/FavoriteSharp';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
+import { relativeTimeRounding } from '../../../AppData/Local/Microsoft/TypeScript/3.1/node_modules/moment/moment';
 
 
 class MediaTimeline extends Component {
@@ -27,9 +28,9 @@ class MediaTimeline extends Component {
 	/** These are defaults for testing. Real list is queried from Dynamo DB through API Gateway & Lambda */
 	this.exampleTimeline = {
         name: "Caroline's Timeline",
-            background: "http://localhost:8080/TimelineShow/test_images/test_background.jpg",
+            background: "",
             description: "A beautiful life...",
-            bucket_url: "http://localhost:8080/TimelineShow/test_images/media/",
+            bucket_url: "",
             basedir: "",
             name_contains: "",
 			chapters: [
@@ -37,13 +38,13 @@ class MediaTimeline extends Component {
 					from_date: "1979-02-07",
 					to_date: "1997-06-30",
 					name: "The Wonder Years",
-					background: "http://localhost:8080/TimelineShow/test_images/test_background.jpg"					
+					background: "test_media/Fashion.jpg"					
 				},
 				{
 					from_date: "1997-07-31",
 					to_date: "2018-08-07",
 					name: "The Good Years",
-					background: "http://localhost:8080/TimelineShow/test_images/Malahide_Background_v1.jpg"					
+					background: "test_media/Malahide_Background.jpg"					
 				}				
 			],
             content: [ 
@@ -53,7 +54,7 @@ class MediaTimeline extends Component {
 					title: "Test Timeline Title!",
 					category: "Friends",
 					date: "2012-04-20",
-					media: ["https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/IMG_5816.JPG"],
+					media: ["test_media/IMG_5787.PNG"],
 					comment: "This is a test comment!"
 				},
 				{					
@@ -62,7 +63,7 @@ class MediaTimeline extends Component {
 					title: "Test Timeline Title 2",
 					category: "Love",
 					date: "2015-04-20",			
-					media: ["https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/95E9EFBD-4FC3-4524-A06C-5F4A3035E345_0_1538256967385.jpeg", "https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/IMG_5817.JPG"],					
+					media: ["test_media/IMG_5787.PNG", "test_media/IMG_5788.PNG", "test_media/IMG_5789.PNG"],					
 					comment: "This is another test comment!"					
 				},
 				{					
@@ -72,6 +73,15 @@ class MediaTimeline extends Component {
 					category: "Friends",
 					date: "2016-12",					
 					media: [],
+					comment: "This is yet another test comment!"					
+				},				
+				{					
+					title_on_date: "Test Timeline Title 4!|1002",
+					time_sortable: 1002,				
+					title: "Test Timeline Title 4!",
+					category: "Friends",
+					date: "2016-12",					
+					media: ["test_media/IMG_5790.PNG"],
 					comment: "This is yet another test comment!"					
 				},				
 			]
@@ -243,7 +253,7 @@ class MediaTimeline extends Component {
 		})
 		.catch((err) => {
 			console.error( err );
-			alert("Cant show timeline right now - sorry! Check back later", err);
+			alert("Cant show timeline right now - sorry! Check your internet connetion? The following is just a sampler", err);
 			this.setTimeline( this.exampleTimeline );
 		});
 		
@@ -293,6 +303,10 @@ class MediaTimeline extends Component {
 	  
 	  //console.log( "changing to backgound " + i )
 	  	  
+	  
+	  if( !this.state.timelineData || !this.state.timelineData.chapters ) {
+		  return;
+	  }
 	  
 	  var imgName = this.state.timelineData.chapters[i].background;
 	  var mainPage = document.getElementById("main-bg");
@@ -400,7 +414,7 @@ class MediaTimeline extends Component {
 					<VerticalTimeline>
 						{timelineContent.content.map((contentItem) => {
 							return <VerticalTimelineElement key={contentItem.title_on_date} id={contentItem.title_on_date} 
-									className='my-timeline-element'
+									className='vertical-timeline-element'
 									//date={contentItem.date}
 									iconStyle={{ background: 'rgb(131, 112, 140)', color: '#dad4dd' }}
 									iconOnClick={() => this.editItem(contentItem)}			// @TODO need to do something funky here as this is not the object - context is within map
