@@ -85,7 +85,10 @@ class MediaTimeline extends Component {
 					comment: "This is yet another test comment!"					
 				},				
 			]
-    };
+	};
+	
+
+	this.mediaItems = {};
 	
 	// set initial state
 	this.state = {
@@ -125,6 +128,16 @@ class MediaTimeline extends Component {
   }
   
   
+
+  /**
+   * Save reference from child so we can update item state
+   * Is this a right use of refs?
+   */
+  saveRef( title_on_date, ref ) {
+	this.mediaItems[ title_on_date ] = ref;
+  }
+  
+
   /**
    * Update an item following a save
    */
@@ -142,6 +155,19 @@ class MediaTimeline extends Component {
 	   
   	   // reset state
 	   this.setTimeline( timelineContent );
+
+	   for (var key in this.mediaItems) {
+		console.log("key " + key + " has value " + this.mediaItems[key]);
+	  }
+	  console.log( "looking for " + item.title_on_date  );
+
+	   // changing state like above doesnt trigger a re-render
+	   // so lets go one lever deeper -  lookup the actual react node so we can change the internal state
+	   var itemComponent = this.mediaItems[ item.title_on_date ];
+	   if( itemComponent ) { 
+		   console.log( "updating item state for " + item.title_on_date );
+		   itemComponent.updateItem( item );
+	   }
 
 	   try {
 			// now try scroll it into view
@@ -407,7 +433,7 @@ class MediaTimeline extends Component {
 				
 				</div>
 	);
-	*/
+	*/	
 
     return (
 				<div id='timeline'>
@@ -417,15 +443,14 @@ class MediaTimeline extends Component {
 									className='vertical-timeline-element'
 									//date={contentItem.date}
 									iconStyle={{ background: 'rgb(131, 112, 140)', color: '#dad4dd' }}
-									iconOnClick={() => this.editItem(contentItem)}			// @TODO need to do something funky here as this is not the object - context is within map
+									iconOnClick={() => this.editItem(contentItem)}
 									icon={contentItem.category_icon} 
 									>											
 										<MediaItem contentItem={contentItem}/>										
 									</VerticalTimelineElement>
 						})}
-					</VerticalTimeline>
-					
-				</div>
+					</VerticalTimeline>					
+				</div>				
 	);
   }
   

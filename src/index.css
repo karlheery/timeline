@@ -5,7 +5,8 @@ body {
 }
 
 .handwriting {
-  font-family: 'Kalam', sans-serif
+  font-family: 'Kalam', sans-serif;
+  white-space: pre-wrap;
 }
 
 .subscript { 

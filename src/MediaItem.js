@@ -11,51 +11,61 @@ class MediaItem extends Component {
 	
   constructor(props) {
 	  
-	super(props);
+		super(props);
+			
+		// set initial state
+		this.state = {
+			item: this.props.contentItem
+		};
 		
-	// set initial state
-	this.state = {
-		item: this.props.contentItem
-	};
-	
-	this.expandItem = this.expandItem.bind(this);
-	
+		this.expandItem = this.expandItem.bind(this);
+
+		// save reference in parent
+		window.timelineComponent.saveRef( this.props.contentItem.title_on_date, this );
+		
   }
 	
 		
   // called by ReactJS after `render()`
   componentDidMount() {   
-	
-	//this.timerID = setInterval(() => this.doSOmething(), 1000 );
+			//this.timerID = setInterval(() => this.doSOmething(), 1000 );
   }
-  
+	
+	
+	/**
+	 * update the item, perhaps as a result of an edit, so we can show changes in real-time	 
+	 */
+	updateItem ( changedItem ) {
+			this.setState({
+				item: changedItem
+			})
+	}
+
 	
   /**
    * Open the menu to allow editing of the clicked item
    */
   expandItem (item) {
-	console.log( "expanding item " + item );	
-		
-	if( !item || !item.title ) {
-		console.error( "couldnt find item to edit: " + item );
-	}
-	
-	// now open the menu with this item as its state
-	//window.menuComponent.openMenuToEdit( item );	
+			console.log( "expanding item " + item );	
+				
+			if( !item || !item.title ) {
+				console.error( "couldnt find item to edit: " + item );
+			}
+			
+			// now open the menu with this item as its state
+			//window.menuComponent.openMenuToEdit( item );	
   }
     
   
   openModal(file) {
-	console.log("open image here" );	// @TODO	
+			console.log("open image here" );	// @TODO	
   }
   
   
   /**
    * Build and display the timeline
    */
-  render() {
-	  
-	  
+  render() {	  
 	  			
 	var contentItem = this.state.item;
 		
@@ -78,8 +88,7 @@ class MediaItem extends Component {
 	if( !contentItem.media || !Array.isArray(contentItem.media) ) {
 		contentItem.media = [];
 	}
-				
-				
+					
     return (
 			<div name="media">				
 				<p className='handwriting'><i>{contentItem.date}</i></p>				

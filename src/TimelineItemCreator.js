@@ -38,6 +38,7 @@ class TimelineItemCreator extends Component {
     this.state = { 
 		disabled: true, 
 		isEdit: false,
+		category: "Friends",
 		fileList: [],
 		mediaList: [],
 		saveStatus: 0
@@ -189,7 +190,7 @@ class TimelineItemCreator extends Component {
 		title: undefined,		
 		old_title: undefined,
 		dateAsNumber: undefined,
-		category: undefined,
+		category: "Friends",
 		date: undefined,
 		dateDisplay: undefined,
 		unsure: undefined,
@@ -464,13 +465,14 @@ class TimelineItemCreator extends Component {
 		  
 	var titleText = this.state.title;
 	var commentText = this.state.comment;
+
 	// @TODO hack - because something is editing my component outside of React (see warning message)
 	// the text box isnt changing to blank on NEW item after an EDIT
 	// React state looks fine and only happens on text fields so i'll just blank them here
 	//
 	if( !this.state.isEdit && (!saveStatus || saveStatus == 0) ) {
-		titleText = undefined;
-		commentText = undefined;
+		titleText = "";
+		commentText = "";
 	}
 				
     return (
@@ -509,13 +511,13 @@ class TimelineItemCreator extends Component {
 					onChange={this.handleChange.bind(this)}/>		
 
 				<form onChange={this.handleChange.bind(this)}>
-					<label htmlFor="Friends"><FaceIcon/></label><input type="radio" id="Friends" name="category" value="Friends"/>
-					<label htmlFor="Family">&nbsp;&nbsp;<SupervisorAccountIcon/></label><input type="radio" id="Family" name="category" value="Family"/>
-					<label htmlFor="Love">&nbsp;&nbsp;<LoveIcon/></label><input type="radio" id="Love" name="category" value="Love"/>
+					<label htmlFor="Friends"><FaceIcon/></label><input type="radio" id="Friends" name="category" value="Friends" checked={this.state.category === "Friends"} />
+					<label htmlFor="Family">&nbsp;&nbsp;<SupervisorAccountIcon/></label><input type="radio" id="Family" name="category" value="Family" checked={this.state.category === "Family"} />
+					<label htmlFor="Love">&nbsp;&nbsp;<LoveIcon/></label><input type="radio" id="Love" name="category" value="Love" checked={this.state.category === "Love"} />
 					<br/>
-					<label htmlFor="Work"><WorkIcon/></label><input type="radio" id="Work" name="category" value="Work"/>
-					<label htmlFor="School">&nbsp;&nbsp;<SchoolIcon/></label><input type="radio" id="School" name="category" value="School"/>
-					<label htmlFor="Success">&nbsp;&nbsp;<StarIcon/></label><input type="radio" id="Success" name="category" value="Success"/>
+					<label htmlFor="Work"><WorkIcon/></label><input type="radio" id="Work" name="category" value="Work" checked={this.state.category === "Work"}/>
+					<label htmlFor="School">&nbsp;&nbsp;<SchoolIcon/></label><input type="radio" id="School" name="category" value="School" checked={this.state.category === "School"}/>
+					<label htmlFor="Success">&nbsp;&nbsp;<StarIcon/></label><input type="radio" id="Success" name="category" value="Success" checked={this.state.category === "Success"}/>
 				</form>
 				
 				<br/>
