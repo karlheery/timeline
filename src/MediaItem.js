@@ -19,12 +19,13 @@ class MediaItem extends Component {
 		};
 		
 		this.expandItem = this.expandItem.bind(this);
-
-		// save reference in parent
-		window.timelineComponent.saveRef( this.props.contentItem.title_on_date, this );
 		
   }
 	
+
+  getId() {
+	  return this.state.item.title_on_date;
+  }
 		
   // called by ReactJS after `render()`
   componentDidMount() {   

@@ -10,6 +10,8 @@ import axios from 'axios';
 
 import caro from './Banner_Image.jpg';
 
+import scrollToComponent from 'react-scroll-to-component';
+
 import WorkIcon from '@material-ui/icons/Work';
 import StarIcon from '@material-ui/icons/Star';
 import SchoolIcon from '@material-ui/icons/School';
@@ -89,6 +91,8 @@ class MediaTimeline extends Component {
 	
 
 	this.mediaItems = {};
+	this.scrolling = 0;
+	this.scrollTarget = 0;
 	
 	// set initial state
 	this.state = {
@@ -156,11 +160,6 @@ class MediaTimeline extends Component {
   	   // reset state
 	   this.setTimeline( timelineContent );
 
-	   for (var key in this.mediaItems) {
-		console.log("key " + key + " has value " + this.mediaItems[key]);
-	  }
-	  console.log( "looking for " + item.title_on_date  );
-
 	   // changing state like above doesnt trigger a re-render
 	   // so lets go one lever deeper -  lookup the actual react node so we can change the internal state
 	   var itemComponent = this.mediaItems[ item.title_on_date ];
@@ -189,12 +188,15 @@ class MediaTimeline extends Component {
 	   
 	   for( var i=0; i<timelineContent.content.length; i++ ) {
 
+			if( i > 0 ) {
+				prev_title = timelineContent.content[i].title_on_date;
+			}
+
 			// replace the item
 			if( timelineContent.content[i].title_on_date === itemName ) {
 				timelineContent.content.splice(i,1);
 			}
 			
-			prev_title = timelineContent.content[i].title_on_date;
 	   }
 	   
   	   // reset state
@@ -213,6 +215,77 @@ class MediaTimeline extends Component {
    }
    
    
+
+  /**
+   * Start scrolling to end of timeline
+   * 
+   */
+  startScrolling() {
+	
+	// scroll direction forward
+	this.scrolling = +1;
+	this.nextScroll();
+  }
+
+
+  /**
+   * Stop scrolling 
+   *    
+   */
+  stopScrolling() {	
+	// scroll direction forward
+	this.scrolling = 0;	
+  }
+
+
+  /**
+   * Called recursively at event when item scrolls into view
+   *   * @TODO pause and wait for end of carousel
+   */
+  nextScroll() {
+
+	// check the flag - user might have stopped scrolling
+	if( this.scrolling === 0 ) {
+		console.log( "stopping scrolling at " + this.scrollTarget );
+		return;
+	}
+
+
+	var timelineContent = this.state.timelineData;
+	
+	this.scrollTarget += this.scrolling;
+
+	// and once we hit bottom we'll go in reverse
+	if( this.scrollTarget < 0 || this.scrollTarget >= timelineContent.length-1 ) {
+		this.scrolling = -1 * this.scrolling;
+		this.scrollTarget += this.scrolling; 
+	}
+		
+	// now find the media item
+	var mediaItem = this.mediaItems[timelineContent.content[this.scrollTarget].title_on_date]
+	
+	// then set a delay timer and scroll to it
+	setTimeout( function () {
+
+		   try {
+				console.log( "scrolling to item " + this.scrollTarget + " of " + timelineContent.content.length + ": item = " + mediaItem.getId() );
+				let scroller = scrollToComponent(mediaItem, { offset: 0, align: 'centre', duration: 10000});
+				scroller.on('end', () => window.timelineComponent.nextScroll() );
+
+				// now try scroll it into view
+				//var elmnt = document.getElementById( mediaItem.getId() );
+				//elmnt.scrollIntoView({ behavior: "smooth", block: "start" });
+			}
+			catch(err) {
+				// swallow it
+				console.log.err( "can't scroll", err );
+		   }			
+	}, 12000);
+	
+		
+  }
+
+
   
   
   
@@ -446,10 +519,15 @@ class MediaTimeline extends Component {
 									iconOnClick={() => this.editItem(contentItem)}
 									icon={contentItem.category_icon} 
 									>											
-										<MediaItem contentItem={contentItem}/>										
+										<MediaItem contentItem={contentItem} 
+											ref={(item) => { this.saveRef( contentItem.title_on_date, item ); }}
+										/>										
 									</VerticalTimelineElement>
 						})}
 					</VerticalTimeline>					
+
+					<section className="end" ref={(section) => { this.EndOfTimeline = section; }}></section>	       
+
 				</div>				
 	);
   }

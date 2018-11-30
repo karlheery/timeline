@@ -5,9 +5,6 @@ import './OptionsMenu.css';
 import MediaTimeline from './MediaTimeline';
 import OptionsMenu from './OptionsMenu';
 
-import scrollToComponent from 'react-scroll-to-component';
-
-
 import Sound from 'react-sound';
 
 import { Button, PlayerIcon } from 'react-player-controls'
@@ -22,7 +19,7 @@ class App extends Component {
 	super(props);
 	
 	this.state = {
-		sound: true
+		play: true
 	}
 	
 	//this.togglePlay = this.togglePlay.bind(this);
@@ -34,32 +31,22 @@ class App extends Component {
    * switch on and off music
    */
   togglePlay() {
-		console.log( "toggling sound to " + !this.state.sound );
+		console.log( "toggling play to " + !this.state.play );
 		
 		this.setState({
-			sound: !this.state.sound
+			play: !this.state.play
 		});
 		
-		if( this.state.sound ) {
-			this.startScrolling();
+		if( this.state.play ) {
+			this.timeline.startScrolling();
+		}
+		else{
+			this.timeline.stopScrolling();
 		}
 	
   }
 	
 	
-	
-  /**
-   * Start scrolling to end of timeline
-   * 
-   * @TODO pause and wait for end of carousel
-   */
-  startScrolling() {
-		scrollToComponent(this.EndOfTimeline, { offset: 0, align: 'top', duration: 10000000})
-	}
-	
-		
-
-  
   
   /**
    * Render the top banner and the main timeline page
@@ -73,7 +60,7 @@ class App extends Component {
 						
 			<Sound
 			  url="./music/Tom Baxter - Better.mp3"
-			  playStatus={ (this.state.sound ? Sound.status.PAUSED : Sound.status.PLAYING) }
+			  playStatus={ (this.state.play ? Sound.status.PAUSED : Sound.status.PLAYING) }
 			  playFromPosition={300 /* in milliseconds */}
 			  //onLoading={this.handleSongLoading}
 			  //onPlaying={this.handleSongPlaying}
@@ -88,7 +75,7 @@ class App extends Component {
 						<Button className="App-button"
 							onClick={this.togglePlay.bind(this)}
 						>								
-							{ (this.state.sound ? 
+							{ (this.state.play ? 
 								<div> <PlayerIcon.Play width={32} height={32} style={{ marginRight: 25 }}/>  </div>
 								: 
 								<div> <PlayerIcon.Pause width={32} height={32} style={{ marginRight: 25 }}/> </div>)							
@@ -105,11 +92,9 @@ class App extends Component {
 							
 				</header>					
 				<div>
-    				<MediaTimeline/>											
+    				<MediaTimeline ref={(tl) => { this.timeline = tl; }}/>											
 				</div>
 
-				<section className="end" ref={(section) => { this.EndOfTimeline = section; }}></section>	
-       
 			</div>
 	    </div>
     );
