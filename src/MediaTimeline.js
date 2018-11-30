@@ -93,6 +93,7 @@ class MediaTimeline extends Component {
 	this.mediaItems = {};
 	this.scrolling = 0;
 	this.scrollTarget = 0;
+	this.sleepTime = 3000;
 	
 	// set initial state
 	this.state = {
@@ -251,12 +252,11 @@ class MediaTimeline extends Component {
 	}
 
 
-	var timelineContent = this.state.timelineData;
-	
+	var timelineContent = this.state.timelineData;	
 	this.scrollTarget += this.scrolling;
-
+	
 	// and once we hit bottom we'll go in reverse
-	if( this.scrollTarget < 0 || this.scrollTarget >= timelineContent.length-1 ) {
+	if( this.scrollTarget < 0 || this.scrollTarget >= timelineContent.content.length ) {
 		this.scrolling = -1 * this.scrolling;
 		this.scrollTarget += this.scrolling; 
 	}
@@ -280,7 +280,7 @@ class MediaTimeline extends Component {
 				// swallow it
 				console.log.err( "can't scroll", err );
 		   }			
-	}, 12000);
+	}, this.sleepTime );
 	
 		
   }
