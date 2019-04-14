@@ -95,6 +95,7 @@ html {
 
 .App-button {
   border: none;
+  z-index: 1;
   position:fixed;
   right: 40px;
   padding: 20px;
@@ -108,8 +109,8 @@ html {
 }
 
 .App-itemimage {  
-  height: 300px;
-  padding: 10px;
+  height: 250px;
+  padding: 1px;
 }
 
 .App-itemimage-thumbnail {  
@@ -126,10 +127,10 @@ html {
 
 .vertical-timeline-element {
   background-color: "#dad4dd";
-  padding-top: 10px;
-  padding-right: 10px;
-  padding-bottom: 10px;
-  padding-left: 10px;  
+  padding-top: 1px;
+  padding-right: 1px;
+  padding-bottom: 1px;
+  padding-left: 1px;  
 }
 
 

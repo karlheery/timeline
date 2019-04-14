@@ -62,7 +62,23 @@ class MediaItem extends Component {
 			console.log("open image here" );	// @TODO	
   }
   
-  
+
+	/*
+	 * Return number of content items within this MediaItem, perhaps to helps set delay on scroll
+	 */
+	getNumberContentItems() {
+	
+		var contentItem = this.state.item;
+
+		if( !contentItem.media || !Array.isArray(contentItem.media) ) {
+			return 1;
+		}
+
+		return contentItem.media.length;
+	
+	}
+
+
   /**
    * Build and display the timeline
    */

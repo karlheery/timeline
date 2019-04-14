@@ -19,7 +19,7 @@ class App extends Component {
 	super(props);
 	
 	this.state = {
-		play: true
+		play: false
 	}
 	
 	//this.togglePlay = this.togglePlay.bind(this);
@@ -31,13 +31,17 @@ class App extends Component {
    * switch on and off music
    */
   togglePlay() {
-		console.log( "toggling play to " + !this.state.play );
+		
+		// cache it as changing it is asynch and want to stop/start scrolling
+		var newPlayState = !this.state.play
+
+		console.log( "toggling play to " + newPlayState );
 		
 		this.setState({
-			play: !this.state.play
+			play: newPlayState
 		});
 		
-		if( this.state.play ) {
+		if( newPlayState ) {
 			this.timeline.startScrolling();
 		}
 		else{
@@ -75,7 +79,7 @@ class App extends Component {
 						<Button className="App-button"
 							onClick={this.togglePlay.bind(this)}
 						>								
-							{ (this.state.play ? 
+							{ (!this.state.play ? 
 								<div> <PlayerIcon.Play width={32} height={32} style={{ marginRight: 25 }}/>  </div>
 								: 
 								<div> <PlayerIcon.Pause width={32} height={32} style={{ marginRight: 25 }}/> </div>)							

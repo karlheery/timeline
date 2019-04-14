@@ -18,7 +18,7 @@ import SchoolIcon from '@material-ui/icons/School';
 import FaceIcon from '@material-ui/icons/FaceSharp';
 import LoveIcon from '@material-ui/icons/FavoriteSharp';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
-import { relativeTimeRounding } from '../../../AppData/Local/Microsoft/TypeScript/3.1/node_modules/moment/moment';
+import { relativeTimeRounding } from 'moment';
 
 
 class MediaTimeline extends Component {
@@ -93,7 +93,8 @@ class MediaTimeline extends Component {
 	this.mediaItems = {};
 	this.scrolling = 0;
 	this.scrollTarget = 0;
-	this.sleepTime = 3000;
+	this.sleepTimePerItem = 3000;
+	this.previousItemSleepTime = this.sleepTimePerItem;
 	
 	// set initial state
 	this.state = {
@@ -264,13 +265,24 @@ class MediaTimeline extends Component {
 	// now find the media item
 	var mediaItem = this.mediaItems[timelineContent.content[this.scrollTarget].title_on_date]
 	
+ 	
 	// then set a delay timer and scroll to it
 	setTimeout( function () {
 
 		   try {
-				console.log( "scrolling to item " + this.scrollTarget + " of " + timelineContent.content.length + ": item = " + mediaItem.getId() );
+
+				// now sleep is over, check one more time if we're still scrolling
+				if( this.scrolling === 0 ) {
+					return;
+				}
+			
+				console.log( "scrolling to item " + this.scrollTarget + " of " + timelineContent.content.length + ": item = " + mediaItem.getId()  );
 				let scroller = scrollToComponent(mediaItem, { offset: 0, align: 'centre', duration: 10000});
 				scroller.on('end', () => window.timelineComponent.nextScroll() );
+
+				this.previousItemSleepTime = ( mediaItem.getNumberContentItems() == 0 ? 
+										this.sleepTimePerItem : 
+										this.sleepTimePerItem * mediaItem.getNumberContentItems() );				
 
 				// now try scroll it into view
 				//var elmnt = document.getElementById( mediaItem.getId() );
@@ -280,7 +292,7 @@ class MediaTimeline extends Component {
 				// swallow it
 				console.log.err( "can't scroll", err );
 		   }			
-	}, this.sleepTime );
+	}, this.previousItemSleepTime );
 	
 		
   }
