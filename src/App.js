@@ -64,7 +64,7 @@ class App extends Component {
 						
 			<Sound
 			  url="./music/Tom Baxter - Better.mp3"
-			  playStatus={ (this.state.play ? Sound.status.PAUSED : Sound.status.PLAYING) }
+			  playStatus={ (this.state.play ? Sound.status.PLAYING : Sound.status.PAUSED) }
 			  playFromPosition={300 /* in milliseconds */}
 			  //onLoading={this.handleSongLoading}
 			  //onPlaying={this.handleSongPlaying}
