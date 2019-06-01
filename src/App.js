@@ -18,7 +18,18 @@ class App extends Component {
 	  
 	super(props);
 	
+
+	// @TODO hardcoding for now - some replace based on choice of timeline
+	var cloud_config = {				
+		s3_bucket: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket',
+		s3_folder: 'Caroline',		// based on choice
+		upload_url: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
+		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items'
+	}
+
 	this.state = {
+		timeline_name: "Caroline. Our Glue.",		//@TODO hardcoded for now, should be based on choice
+		config: cloud_config,
 		play: false
 	}
 	
@@ -72,7 +83,7 @@ class App extends Component {
 			/>
 			
 			<div className="App-right-menu" id="menu" name="menu">
-				<OptionsMenu/>
+				<OptionsMenu timeline_name={this.state.timeline_name} config={this.state.config}/>
 			</div>										
 		
 			<div className="App-right-menu">
@@ -91,12 +102,12 @@ class App extends Component {
 		    <div className="App">
 				<header className="App-header">
 					<img src={banner} className="App-banner" alt="banner" align="left" />
-					<h1 className="App-title">Caroline. Our Glue.</h1>		  
+					<h1 className="App-title">{this.state.timeline_name}</h1>		  
 							
 							
 				</header>					
 				<div>
-    				<MediaTimeline ref={(tl) => { this.timeline = tl; }}/>											
+    				<MediaTimeline timeline_name={this.state.timeline_name} config={this.state.config} ref={(tl) => { this.timeline = tl; }}/>											
 				</div>
 
 			</div>

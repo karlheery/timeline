@@ -30,12 +30,12 @@ import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
 class TimelineItemCreator extends Component {
     
   
-  constructor() {
-    super()
-	
-	console.log( "creating creator" );
-	
+  constructor(props) {
+    super(props)
+			
     this.state = { 
+		timeline_name: this.props.timeline_name,
+		config: this.props.config,
 		disabled: true, 
 		isEdit: false,
 		category: "Friends",
@@ -114,7 +114,7 @@ class TimelineItemCreator extends Component {
 				"title_on_date": this.state.title + "|" + this.state.dateAsNumber,
 				"old_title": this.state.old_title,
 				"time_sortable": this.state.dateAsNumber,
-				"timeline_name": "Caroline. Our Glue.",
+				"timeline_name": this.state.timeline_name,
 				"title": this.state.title,
 				"category": this.state.category,
 				"date": this.state.dateDisplay,		/// pass through the stringified date which allows for "unsure"
@@ -238,7 +238,7 @@ class TimelineItemCreator extends Component {
 		// DELETE RECORD
 		if( this.state.deleteItem ) {
 			
-			axios.post('https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items', {
+			axios.post( this.state.config.content_api, {
 				item: timelineItem,
 				contentType: 'application/json'
 			})
@@ -276,7 +276,7 @@ class TimelineItemCreator extends Component {
 		else {
 			
 			// NEW/EDIT RECORD
-			axios.post('https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items', {
+			axios.post( this.state.config.content_api, {
 				item: timelineItem,
 				contentType: 'application/json'
 			})
@@ -433,23 +433,26 @@ class TimelineItemCreator extends Component {
   render() {
 	  
 	var saveStatus = this.state.saveStatus;
+		
 	
-	const s3Url = 'http://khpublicbucket.s3-website-eu-west-1.amazonaws.com'	
-	
-    const uploadOptions = {
-		s3Path: '/Caroline/',		
-		signingUrl: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
-		signingUrlMethod: 'POST',
-		//server: '',		// the absence of this is defaulting it to localhost:3000/undefined during PUT which is causing 404. Adding it uses right file name but...
-		accept: 'image/*',
-		//signingUrlHeaders={{ additional: headers }}
-		//signingUrlQueryParams={{ additional: query-params }}
-		signingUrlWithCredentials: false,      // in case when need to pass authentication credentials via CORS
-		autoUpload: true		// @TODO change once we have a form/button!		
-    };
-	    
 		
 		/*
+
+		const s3Url = 'http://khpublicbucket.s3-website-eu-west-1.amazonaws.com'	
+
+		  const uploadOptions = {
+			s3Path: '/Caroline/',		
+			signingUrl: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
+			signingUrlMethod: 'POST',
+			//server: '',		// the absence of this is defaulting it to localhost:3000/undefined during PUT which is causing 404. Adding it uses right file name but...
+			accept: 'image/*',
+			//signingUrlHeaders={{ additional: headers }}
+			//signingUrlQueryParams={{ additional: query-params }}
+			signingUrlWithCredentials: false,      // in case when need to pass authentication credentials via CORS
+			autoUpload: true		// @TODO change once we have a form/button!		
+    };
+	    
+
 		<div>
 		  <DropzoneS3Uploader
 			onFinish={this.handleFinishedUpload}
@@ -609,8 +612,8 @@ class TimelineItemCreator extends Component {
 		uniqueFileName = uniqueFileName + "_" + f + "_" + moment().valueOf();		// add current time
 		uniqueFileName = uniqueFileName + "." + suffix;		// add the suffix again		
 	
-		axios.post('https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy', {
-		  objectName: 'Caroline/' + uniqueFileName,
+		axios.post( this.state.config.upload_uri, {
+		  objectName: this.state.config.s3_folder +  '/' + uniqueFileName,
 		  contentType: file.type
 		})
 		.then((result) => {
@@ -634,7 +637,7 @@ class TimelineItemCreator extends Component {
 				uploaded.push( uniqueFileName );
 			  }
 
-			  var s3File = 'https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/' + uniqueFileName;
+			  var s3File = this.state.config.s3_bucket + '/' + this.state.config.s3_folder + '/' + uniqueFileName;
 			  if( mediaFiles.indexOf( s3File < 0 ) ) {
 				mediaFiles.push( s3File );
 			  }

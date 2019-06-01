@@ -98,6 +98,8 @@ class MediaTimeline extends Component {
 	
 	// set initial state
 	this.state = {
+		timeline_name: this.props.timeline_name,
+		config: this.props.config,
 		menuController: this.props.app,
 		chapterIndex: 0
 	};
@@ -111,7 +113,7 @@ class MediaTimeline extends Component {
 		
   // called by ReactJS after `render()`
   componentDidMount() {   
-	this.getTimeline();	
+	this.getTimeline(this.state.timeline_name);	
 
 	this.timerID = setInterval(() => this.changeBackground(), 8000 );
 	
@@ -304,15 +306,15 @@ class MediaTimeline extends Component {
   /**
    * Call API to retrieve timeline from AWS, or default to example timeline as a last resort
    */
-  getTimeline() {
+  getTimeline( param_timeline_name ) {
 	  				
 		var queryParams = {
-				timeline_name: "Caroline. Our Glue."
+				timeline_name: param_timeline_name
 		};
 		
 		console.log( "querying timeline with params " + queryParams );
 				
-	  	axios.get('https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items', {
+	  	axios.get( this.state.config.content_api, {
 			 params: queryParams
 		})
 		.then((result) => {			// these arrows are used so we can call other methods and setState (indirectly) from within

@@ -14,6 +14,8 @@ class OptionsMenu extends React.Component {
   constructor (props) {
     super(props)
     this.state = {
+      timeline_name: props.timeline_name,
+      config: props.config,
       menuOpen: false
     }
 	
@@ -94,8 +96,8 @@ class OptionsMenu extends React.Component {
           isOpen={this.state.menuOpen}
           onStateChange={(state) => this.handleStateChange(state)}
         >
-		<TimelineItemCreator ref={this.child}/>		          
-      </Menu>
+		  <TimelineItemCreator timeline_name={this.state.timeline_name} config={this.state.config} ref={this.child}/>		          
+    </Menu>
 		      
     );
   }
