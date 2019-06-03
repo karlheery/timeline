@@ -24,7 +24,8 @@ class App extends Component {
 		s3_bucket: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket',
 		s3_folder: 'Caroline',		// based on choice
 		upload_url: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
-		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items'
+		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items',
+		music_url: './music/Tom Baxter - Better.mp3'
 	}
 
 	this.state = {
@@ -74,7 +75,7 @@ class App extends Component {
 			<div id="main-bg" className="main-bg"></div>
 						
 			<Sound
-			  url="./music/Tom Baxter - Better.mp3"
+			  url={this.state.config.music_url}
 			  playStatus={ (this.state.play ? Sound.status.PLAYING : Sound.status.PAUSED) }
 			  playFromPosition={300 /* in milliseconds */}
 			  //onLoading={this.handleSongLoading}
