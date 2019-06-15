@@ -91,6 +91,7 @@ class MediaTimeline extends Component {
 	
 
 	this.mediaItems = {};
+	this.numberScrollers = 0;
 	this.scrolling = 0;
 	this.scrollTarget = 0;
 	this.sleepTimePerItem = 3000;
@@ -224,11 +225,14 @@ class MediaTimeline extends Component {
    * Start scrolling to end of timeline
    * 
    */
-  startScrolling() {
-	
+  startScrolling() {	
 	// scroll direction forward
-	this.scrolling = +1;
-	this.nextScroll();
+	
+	if( this.scrolling === 0 && this.numberScrollers === 0 ) {
+		this.scrolling = +1;
+		this.numberScrollers += 1;
+		this.nextScroll();
+	}
   }
 
 
@@ -239,7 +243,25 @@ class MediaTimeline extends Component {
   stopScrolling() {	
 	// scroll direction forward
 	this.scrolling = 0;	
+	this.scrollingHadStopped = true;
   }
+
+
+  /**
+   * As we hit end of scrolling and set about firing off another one, check whether we've since hit stop
+   */
+  checkNextScroll() {
+	// check the flag - user might have stopped scrolling
+	// also checked if someone stopped & restarted scrolling why we were sleeping
+	// if so, escape recursive scrolling here, just once mind!
+	if( this.scrolling === 0 || this.numberScrollers > 1) {
+		this.numberScrollers -= 1;			
+		return;
+	}
+
+	window.timelineComponent.nextScroll();
+  }
+
 
 
   /**
@@ -247,13 +269,6 @@ class MediaTimeline extends Component {
    *   * @TODO pause and wait for end of carousel
    */
   nextScroll() {
-
-	// check the flag - user might have stopped scrolling
-	if( this.scrolling === 0 ) {
-		console.log( "stopping scrolling at " + this.scrollTarget );
-		return;
-	}
-
 
 	var timelineContent = this.state.timelineData;	
 	this.scrollTarget += this.scrolling;
@@ -274,21 +289,18 @@ class MediaTimeline extends Component {
 		   try {
 
 				// now sleep is over, check one more time if we're still scrolling
-				if( this.scrolling === 0 ) {
+				if( this.scrolling === 0 || this.numberScrollers > 1) {
+					this.numberScrollers -= 1;
 					return;
 				}
 			
 				console.log( "scrolling to item " + this.scrollTarget + " of " + timelineContent.content.length + ": item = " + mediaItem.getId()  );
 				let scroller = scrollToComponent(mediaItem, { offset: 0, align: 'centre', duration: 10000});
-				scroller.on('end', () => window.timelineComponent.nextScroll() );
+				scroller.on('end', () => window.timelineComponent.checkNextScroll() );
 
 				this.previousItemSleepTime = ( mediaItem.getNumberContentItems() == 0 ? 
 										this.sleepTimePerItem : 
 										this.sleepTimePerItem * mediaItem.getNumberContentItems() );				
-
-				// now try scroll it into view
-				//var elmnt = document.getElementById( mediaItem.getId() );
-				//elmnt.scrollIntoView({ behavior: "smooth", block: "start" });
 			}
 			catch(err) {
 				// swallow it
@@ -388,12 +400,6 @@ class MediaTimeline extends Component {
   
   shouldComponentUpdate() {
 	  return true;
-  }
-  
-  
-  
-  openModal(file) {
-	console.log("open image here" );	// @TODO	
   }
   
   

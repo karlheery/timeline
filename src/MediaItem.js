@@ -4,6 +4,9 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
 
+import Lightbox from 'react-image-lightbox';
+import 'react-image-lightbox/style.css'; // This only needs to be imported once in your app
+ 
 import EditIcon from '@material-ui/icons/Edit';
 
 
@@ -59,7 +62,18 @@ class MediaItem extends Component {
     
   
   openModal(file) {
-			console.log("open image here" );	// @TODO	
+		
+		console.log("open image here " + file );	// @TODO	
+
+		var contentItem = this.state.item;
+		var index = contentItem.media.findIndex(obj => obj==file);
+		console.log("at index " + index  );	
+
+		this.setState({
+			lightboxOpen: true,			
+			lightboxFileIndex: index
+		});	
+			
   }
   
 
@@ -104,7 +118,7 @@ class MediaItem extends Component {
 	
 	if( !contentItem.media || !Array.isArray(contentItem.media) ) {
 		contentItem.media = [];
-	}
+	}	
 					
     return (
 			<div name="media">				
@@ -117,6 +131,27 @@ class MediaItem extends Component {
 				
 				</Slider>
 				
+
+				{this.state.lightboxOpen && (
+				<Lightbox
+					mainSrc={contentItem.media[this.state.lightboxFileIndex]}
+					imageTitle={contentItem.title}
+					imageCaption={contentItem.comment}
+					nextSrc={contentItem.media[(this.state.lightboxFileIndex + 1) % contentItem.media.length]}
+					prevSrc={contentItem.media[(this.state.lightboxFileIndex + contentItem.media.length - 1) % contentItem.media.length]}
+					onCloseRequest={() => this.setState({ lightboxOpen: false })}
+					onMovePrevRequest={() =>
+					this.setState({
+						lightboxFileIndex: (this.state.lightboxFileIndex + contentItem.media.length - 1) % contentItem.media.length,
+					})
+					}
+					onMoveNextRequest={() =>
+					this.setState({
+						lightboxFileIndex: (this.state.lightboxFileIndex + 1) % contentItem.media.length,
+					})
+					}
+				/>		  
+				)}
 											
 				<h3 className='handwriting'>{contentItem.title}</h3>										
 				<p className='handwriting'>{contentItem.comment}</p>
