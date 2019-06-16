@@ -8,8 +8,6 @@ import MediaItem  from './MediaItem';
 
 import axios from 'axios';
 
-import caro from './Banner_Image.jpg';
-
 import scrollToComponent from 'react-scroll-to-component';
 
 import WorkIcon from '@material-ui/icons/Work';
@@ -255,7 +253,7 @@ class MediaTimeline extends Component {
 	// also checked if someone stopped & restarted scrolling why we were sleeping
 	// if so, escape recursive scrolling here, just once mind!
 	if( this.scrolling === 0 || this.numberScrollers > 1) {
-		this.numberScrollers -= 1;			
+		this.numberScrollers -= 1;				
 		return;
 	}
 
@@ -423,7 +421,7 @@ class MediaTimeline extends Component {
 	  //console.log( "changing to backgound " + i )
 	  	  
 	  
-	  if( !this.state.timelineData || !this.state.timelineData.chapters ) {
+	  if( !this.state.timelineData || !this.state.timelineData.chapters || this.state.timelineData.chapters.length < 2 ) {
 		  return;
 	  }
 	  

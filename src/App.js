@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import banner from './Banner_Image.jpg';
 import './App.css';
 import './OptionsMenu.css';
 import MediaTimeline from './MediaTimeline';
@@ -20,18 +19,32 @@ class App extends Component {
 	
 
 	// @TODO hardcoding for now - some replace based on choice of timeline
-	var cloud_config = {				
+	var cloud_config1 = {
 		s3_bucket: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket',
 		s3_folder: 'Caroline',		// based on choice
+		banner_image: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/backgrounds/BannerIcon.jpg',
 		upload_url: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
 		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items',
 		music_url: './music/Tom Baxter - Better.mp3'
 	}
 
+	var cloud_config2 = {
+		s3_bucket: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket',
+		s3_folder: 'Family',		// based on choice
+		banner_image: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket/Family/backgrounds/HeeryFamilyIcon.jpg',
+		upload_url: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
+		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items',
+		music_url: './music/Ed Sheeran - Photograph.mp3'
+	}
+	
+
 	this.state = {
-		timeline_name: "Caroline. Our Glue.",		//@TODO hardcoded for now, should be based on choice
-		config: cloud_config,
-		play: false
+		timelineChosen: false,
+		play: false,
+		timelines: {
+			"Caroline. Our Glue.": cloud_config1,
+			"Family = Life": cloud_config2,
+		}
 	}
 	
 	//this.togglePlay = this.togglePlay.bind(this);
@@ -61,6 +74,22 @@ class App extends Component {
 		}
 	
   }
+
+
+
+  /**
+   * Handle choice of timeline on main page by rendering MediaTimeilne it
+   */
+  handleChoice( name ) {
+
+	this.setState({
+		timelineChosen: true,
+		timeline_name: name,
+		config: this.state.timelines[name],
+		play: false
+	});
+	
+  }
 	
 	
   
@@ -68,12 +97,14 @@ class App extends Component {
    * Render the top banner and the main timeline page
    */	 
   render() {	  		   	  			
-	
+		
 		
     return (
 		<div className="main-area">
 			<div id="main-bg" className="main-bg"></div>
-						
+
+			{this.state.timelineChosen	&&
+			<div>
 			<Sound
 			  url={this.state.config.music_url}
 			  playStatus={ (this.state.play ? Sound.status.PLAYING : Sound.status.PAUSED) }
@@ -102,7 +133,7 @@ class App extends Component {
 			
 		    <div className="App">
 				<header className="App-header">
-					<img src={banner} className="App-banner" alt="banner" align="left" />
+					<img src={this.state.config.banner_image} className="App-banner" alt="banner" align="left" />
 					<h1 className="App-title">{this.state.timeline_name}</h1>		  
 							
 							
@@ -112,6 +143,30 @@ class App extends Component {
 				</div>
 
 			</div>
+			</div>
+			}
+
+			{!this.state.timelineChosen && 
+				<div className="App">
+
+				<div className="App-card">
+				<img src={this.state.timelines["Caroline. Our Glue."].banner_image} className="App-card-thumbnail"/>
+				<h1>Caroline. Our Glue.</h1>
+				<p><button className="App-card-button" onClick={() => this.handleChoice("Caroline. Our Glue.")}>View Timeline</button></p>
+				</div>
+
+				<br/>
+				<hr/>
+				<br/>
+
+				<div className="App-card">
+				<img src={this.state.timelines["Family = Life"].banner_image} className="App-card-thumbnail"/>
+				<h1>Family = Life</h1>
+				<p><button className="App-card-button" onClick={() => this.handleChoice("Family = Life")}>View Timeline</button></p>
+				</div>				
+				
+			</div>}
+
 	    </div>
     );
   }

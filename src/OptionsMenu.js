@@ -4,11 +4,6 @@ import './OptionsMenu.css';
 import TimelineItemCreator  from './TimelineItemCreator';
 
 
-//import banner from './Banner_Image.jpg';
-//	  <img src={banner} alt="banner" align="right" />
-
-
-
 class OptionsMenu extends React.Component {
 	
   constructor (props) {

@@ -612,7 +612,7 @@ class TimelineItemCreator extends Component {
 		uniqueFileName = uniqueFileName + "_" + f + "_" + moment().valueOf();		// add current time
 		uniqueFileName = uniqueFileName + "." + suffix;		// add the suffix again		
 	
-		axios.post( this.state.config.upload_uri, {
+		axios.post( this.state.config.upload_url, {
 		  objectName: this.state.config.s3_folder +  '/' + uniqueFileName,
 		  contentType: file.type
 		})
