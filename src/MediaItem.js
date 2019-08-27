@@ -8,6 +8,7 @@ import Lightbox from 'react-image-lightbox';
 import 'react-image-lightbox/style.css'; // This only needs to be imported once in your app
  
 import EditIcon from '@material-ui/icons/Edit';
+import ExifOrientationImg from 'react-exif-orientation-img'
 
 
 class MediaItem extends Component {
@@ -126,7 +127,7 @@ class MediaItem extends Component {
 				<Slider {...settings}>
 				
 				{					
-						contentItem.media.map(f => ( <div key={f}><img src={f} className='App-itemimage' onClick={()=>this.openModal(f)}/></div> ))						
+						contentItem.media.map(f => ( <div key={f}><ExifOrientationImg src={f} className='App-itemimage' onClick={()=>this.openModal(f)}/></div> ))						
 				}
 				
 				</Slider>

@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import { PropTypes } from 'react'
 
+// consider toggling with a tiled photo gallery
+// ...like: https://github.com/neptunian/react-photo-gallery
+//
 import { VerticalTimeline, VerticalTimelineElement }  from 'react-vertical-timeline-component';
 import 'react-vertical-timeline-component/style.min.css';
 

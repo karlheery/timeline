@@ -5,6 +5,8 @@ import Dropzone from 'react-dropzone'
 //import DropzoneS3Uploader from 'react-dropzone-s3-uploader'
 //import ReactS3Uploader from 'react-s3-uploader';
 
+import Resizer from 'react-image-file-resizer';
+
 import axios from 'axios';
 
 import DatePicker from 'react-datepicker';
@@ -478,6 +480,12 @@ class TimelineItemCreator extends Component {
 		commentText = "";
 	}
 				
+	// need to rotate and resize image
+	// could use this demo which includes dropzone reference:
+	// https://www.npmjs.com/package/react-avatar-editor
+	// but this more directly seems to solve it...
+	// https://www.npmjs.com/package/react-image-file-resizer
+	//
     return (
 			
 		<div align="left">			
@@ -602,7 +610,30 @@ class TimelineItemCreator extends Component {
 		}
 		
 		var file = files[f];
+				
+		var TARGET_SIZE = 1.5 // MB
+		var qualityRatio = file.size / (1024*1024);
+		if ( qualityRatio < TARGET_SIZE )
+			qualityRatio = 100
+		else
+			qualityRatio = Math.round( (TARGET_SIZE * 100) / qualityRatio );
+
+		console.log("about to resize file: " + file.name + " of size " + file.size + " to quality ratio " + qualityRatio);
+		Resizer.imageFileResizer(
+			file,
+			800,
+			800,
+			'PNG',
+			100,
+			0,
+			uri => {
+				console.log("resized file" + file + " to " + uri.name);
+			},
+			'base64'
+		);
 		
+		console.log("preparing to upload...");
+
 		var uploaded = this.state.fileList;
 		var mediaFiles = this.state.media;
 				

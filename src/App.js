@@ -7,6 +7,7 @@ import OptionsMenu from './OptionsMenu';
 import Sound from 'react-sound';
 
 import { Button, PlayerIcon } from 'react-player-controls'
+import ExifOrientationImg from 'react-exif-orientation-img'
 
 
 
@@ -133,7 +134,7 @@ class App extends Component {
 			
 		    <div className="App">
 				<header className="App-header">
-					<img src={this.state.config.banner_image} className="App-banner" alt="banner" align="left" />
+					<ExifOrientationImg src={this.state.config.banner_image} className="App-banner" alt="banner" align="left" />
 					<h1 className="App-title">{this.state.timeline_name}</h1>		  
 							
 							
@@ -150,7 +151,7 @@ class App extends Component {
 				<div className="App">
 
 				<div className="App-card">
-				<img src={this.state.timelines["Caroline. Our Glue."].banner_image} className="App-card-thumbnail"/>
+				<ExifOrientationImg src={this.state.timelines["Caroline. Our Glue."].banner_image} className="App-card-thumbnail"/>
 				<h1>Caroline. Our Glue.</h1>
 				<p><button className="App-card-button" onClick={() => this.handleChoice("Caroline. Our Glue.")}>View Timeline</button></p>
 				</div>
@@ -160,7 +161,7 @@ class App extends Component {
 				<br/>
 
 				<div className="App-card">
-				<img src={this.state.timelines["Family = Life"].banner_image} className="App-card-thumbnail"/>
+				<ExifOrientationImg src={this.state.timelines["Family = Life"].banner_image} className="App-card-thumbnail"/>
 				<h1>Family = Life</h1>
 				<p><button className="App-card-button" onClick={() => this.handleChoice("Family = Life")}>View Timeline</button></p>
 				</div>				
