@@ -624,10 +624,11 @@ class TimelineItemCreator extends Component {
 			800,
 			800,
 			'PNG',
-			100,
+			qualityRatio,
 			0,
 			uri => {
-				console.log("resized file" + file + " to " + uri.name);
+				file.data = uri;
+				console.log("resized file" + file + " to " + uri);
 			},
 			'base64'
 		);
