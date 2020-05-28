@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { PropTypes } from 'react'
 
+import './scrapbook-style.css';
+
 // consider toggling with a tiled photo gallery
 // ...like: https://github.com/neptunian/react-photo-gallery
 //
@@ -32,7 +34,8 @@ class MediaTimeline extends Component {
 	this.exampleTimeline = {
         name: "Caroline's Timeline",
             background: "",
-            description: "A beautiful life...",
+			description: "A beautiful life...",
+			vizStyle: "Scrapbook",
             bucket_url: "",
             basedir: "",
             name_contains: "",
@@ -103,7 +106,7 @@ class MediaTimeline extends Component {
 		timeline_name: this.props.timeline_name,
 		config: this.props.config,
 		menuController: this.props.app,
-		chapterIndex: 0
+		chapterIndex: 0		
 	};
 	
 	this.editItem = this.editItem.bind(this);
@@ -465,7 +468,62 @@ class MediaTimeline extends Component {
 	
   }
   
-  
+
+
+  /**
+   * Need function to generate random-ish positioning but increment grid-row
+   */   
+  getItemRowIndex( tc, item ) {
+
+	for( var i=0; i<tc.content.length; i++ ) {
+		   		
+		 if( tc.content[i].title_on_date === item.title_on_date ) {
+			 console.log( "item is at index " + (i+1) )
+			 return i+1;
+		 }
+	}
+
+	
+	return 100;
+	
+	/*
+
+	let figNum = "fig" + rowNum
+
+	var classNames = require('classnames');
+
+	//[`grid-row: ${figNum}`]: true
+	var imgPos = classNames({
+		'grid-column: span 5/-1': true,
+		'grid-row: fig10': true
+	});
+
+	/*
+	let imgPos = {
+		gridColumn: "span 5/-1",
+		gridRow: {figNum}
+	};
+
+		/*
+		randomize for some of these
+		  .fig--2 {
+			grid-column: 1/span 7;
+			grid-row: fig2;
+		  }
+		  .fig--3 {
+			grid-column: span 5/-2;
+			grid-row: fig3;
+		  }
+		  .fig--3 img {
+			object-position: left;
+		  }
+	
+	return imgPos;
+	*/
+  }
+
+
+
   
   /**
    * Build and display the timeline
@@ -527,9 +585,67 @@ class MediaTimeline extends Component {
 				
 				</div>
 	);
-	*/	
+	*/		
 
-    return (
+	
+	if( this.state.timelineData && this.state.timelineData.viz_style && this.state.timelineData.viz_style === "Scrapbook" ) {
+
+		//used to say style="--aspect-ratio: 4/3;"   ...or 4/3 for middle one
+		let imgStyle = {
+			aspect_ratio: 3/4
+		};
+		let vidStyle = {
+			aspect_ratio: 4/3
+		};
+				
+		/*
+								<figure className="scrap-fig scrap-fig--1" style={imgStyle}>
+							<img className="scrap-img" src='https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb&ixid=eyJhcHBfaWQiOjE0NTg5fQ' alt='Small child playing with toys'/>
+						</figure>
+						<p className="scrap-p">We played in Nana and Grandad’s garden. We picked apples and made apple crumble!</p>
+						<figure className="scrap-fig scrap-fig--2" style={vidStyle}>
+							<video controls autoPlay>
+								<source src="sample.mp4" type="video/mp4"/>
+								Your browser does not support the video tag.
+							</video>		  
+						</figure>
+						<p className="scrap-p">We had a game of football.</p>
+						<figure className="scrap-fig scrap-fig--3" style={imgStyle}>
+							<img className="scrap-img" src='https://images.unsplash.com/photo-1472162072942-cd5147eb3902?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb&ixid=eyJhcHBfaWQiOjE0NTg5fQ' alt='Child reading'/>
+						</figure>
+						<p className="scrap-p">We read a funny story together.</p>
+
+		*/
+		  
+		return (			
+					<div id='timeline' className='scrap-body scrap-grid'>
+						<header className='scrap-header'>
+							<h1 className='scrap-h1'>Heery Household Scrapbook</h1>
+							<h2>The Covid Times</h2>
+						</header>
+						{timelineContent.content.map((contentItem) => {
+							return <div>
+										<figure className="scrap-fig" key={contentItem.title_on_date} id={contentItem.title_on_date}  
+											style={{gridColumn: 'span 5/-1', gridRow: 'fig'+this.getItemRowIndex(timelineContent, contentItem)}}
+											onClick={() => this.editItem(contentItem)}>
+												<img className="scrap-img" src={contentItem.media[0]} alt='Media'/>
+										</figure>
+										<p className="scrap-p">{contentItem.title} - {contentItem.comment}</p>
+									</div>
+						})}
+
+						<section className="end" ref={(section) => { this.EndOfTimeline = section; }}></section>
+					</div>
+		);
+	}
+
+	//style={imgStyle}
+	//className={this.getImgPos(contentItem.title_on_date)}
+	// <MediaItem contentItem={contentItem} 
+	//ref={(item) => { this.saveRef( contentItem.title_on_date, item ); }}/>										
+   
+   
+	return (
 				<div id='timeline'>
 					<VerticalTimeline>
 						{timelineContent.content.map((contentItem) => {
@@ -547,10 +663,11 @@ class MediaTimeline extends Component {
 						})}
 					</VerticalTimeline>					
 
-					<section className="end" ref={(section) => { this.EndOfTimeline = section; }}></section>	       
+					<section className="end" ref={(section) => { this.EndOfTimeline = section; }}></section>
 
 				</div>				
 	);
+
   }
   
 }

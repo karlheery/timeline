@@ -1,5 +1,9 @@
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 
+Recompile SCCS using
+
+  sass ScrapbookStyle.scss scrapbook-style.css
+
 I build and ship it serverless using:
 
 	npm run build && aws s3 sync build/ s3://<bucket-name>
