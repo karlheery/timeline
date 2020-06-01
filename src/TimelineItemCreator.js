@@ -517,7 +517,7 @@ class TimelineItemCreator extends Component {
 						)
 				}
 				
-				<label htmlFor="title">Event*</label>        
+				<label htmlFor="title">Title*</label>        
 				<input type="text" name='title' id='title' value={titleText} size="30" className="menu-input" placeholder='Title or tagline'
 					onChange={this.handleChange.bind(this)}/>		
 

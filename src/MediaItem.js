@@ -19,7 +19,8 @@ class MediaItem extends Component {
 			
 		// set initial state
 		this.state = {
-			item: this.props.contentItem
+			item: this.props.contentItem,
+			show_details: this.props.show_details
 		};
 		
 		this.expandItem = this.expandItem.bind(this);
@@ -122,8 +123,12 @@ class MediaItem extends Component {
 	}	
 					
     return (
-			<div name="media">				
+			<div name="media">		
+				
+				{this.state.show_details && (		
 				<p className='handwriting'><i>{contentItem.date}</i></p>				
+				)}
+
 				<Slider {...settings}>
 				
 				{					
@@ -153,9 +158,13 @@ class MediaItem extends Component {
 					}
 				/>		  
 				)}
-											
-				<h3 className='handwriting'>{contentItem.title}</h3>										
-				<p className='handwriting'>{contentItem.comment}</p>
+
+				{this.state.show_details && (						
+					<React.Fragment>
+					<h3 className='handwriting'>{contentItem.title}</h3>										
+					<p className='handwriting'>{contentItem.comment}</p>
+					</React.Fragment>
+				)}
 
 				<div align="right">
 					<EditIcon className="hoverable-img" align="right" onClick={() => window.timelineComponent.editItem(this.state.item)}/>

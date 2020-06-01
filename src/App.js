@@ -159,31 +159,38 @@ class App extends Component {
 			}
 
 			{!this.state.timelineChosen && 
-				<div className="App">
+				<div>
 
-				<div className="App-card">
-				<ExifOrientationImg src={this.state.timelines["Heery's Scrapbook - Covid Times"].banner_image} className="App-card-thumbnail"/>
-				<h1>Heery's Scrapbook - Covid Times</h1>
-				<p><button className="App-card-button" onClick={() => this.handleChoice("Heery's Scrapbook - Covid Times")}>View Scrapbook</button></p>
+				<br/>
+				<br/>
+
+				<div className="row">
+  				<div className="column">
+    				<div className="App-card">
+						<ExifOrientationImg src={this.state.timelines["Heery's Scrapbook - Covid Times"].banner_image} className="App-card-thumbnail"/>
+						<p><button className="App-card-button" onClick={() => this.handleChoice("Heery's Scrapbook - Covid Times")}>Heery's Scrapbook - Covid Times</button></p>
+					</div>
 				</div>
 
 
-				<div className="App-card">
-				<ExifOrientationImg src={this.state.timelines["Caroline. Our Glue."].banner_image} className="App-card-thumbnail"/>
-				<h1>Caroline. Our Glue.</h1>
-				<p><button className="App-card-button" onClick={() => this.handleChoice("Caroline. Our Glue.")}>View Timeline</button></p>
+				<div className="column">
+    				<div className="App-card">						
+						<ExifOrientationImg src={this.state.timelines["Caroline. Our Glue."].banner_image} className="App-card-thumbnail"/>
+						<p><button className="App-card-button" onClick={() => this.handleChoice("Caroline. Our Glue.")}>Caroline. Our Glue.</button></p>
+					</div>
 				</div>
 
+				<div className="column">
+    				<div className="App-card">						
+						<ExifOrientationImg src={this.state.timelines["Family = Life"].banner_image} className="App-card-thumbnail"/>
+						<p><button className="App-card-button" onClick={() => this.handleChoice("Family = Life")}>Family = Life</button></p>
+					</div>	
+				</div>
+				</div>								
+
 				<br/>
-				<hr/>
 				<br/>
 
-				<div className="App-card">
-				<ExifOrientationImg src={this.state.timelines["Family = Life"].banner_image} className="App-card-thumbnail"/>
-				<h1>Family = Life</h1>
-				<p><button className="App-card-button" onClick={() => this.handleChoice("Family = Life")}>View Timeline</button></p>
-				</div>				
-				
 			</div>}
 
 	    </div>

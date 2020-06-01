@@ -1,5 +1,9 @@
+* {
+  box-sizing: border-box;
+}
+
 html {
-  background-color: black;
+  background-color: whitesmoke;
   position: absolute;
   z-index: -1;
   top: 0;
@@ -36,10 +40,10 @@ html {
   left: 0;
   right: 0;    
   width: 100%;
-  height: auto;
+  height: auto;  
   max-width: 100%;
-  background-color: black;
-  background: url(./DefaultBackground_BlackTable.jpg) no-repeat center center fixed; 
+  background-color: whitesmoke;
+  background: url(./DefaultBackground_WhiteWood.jpg) no-repeat center center fixed; 
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
@@ -48,7 +52,7 @@ html {
   transition-delay: 4s;
   -webkit-transition: opacity 8s  ease-in-out; /* Safari */
   transition: opacity 8s ease-in-out;
-  opacity: 1
+  opacity: 0.7
 }
 
 .main-bg.hidden {
@@ -74,22 +78,22 @@ html {
 }
 
 .App-header {
-  background-color: #555;
+  background-color: #white;
   height: 80px;
   padding: 2px;
-  color: white;  
+  color: #555;  
 }
 
 .App-title {
   float: left;
   display: block;
   padding: 2px;
-  font-size: 1.5em;
+  font-size: 1.5vw;
 }
 
 .App-subtitle {
   padding: 0px;
-  font-size: 1.0em;  
+  font-size: 1.0vw;  
   float: right;
 }
 
@@ -101,7 +105,7 @@ html {
   padding: 20px;
   background-color: Transparent;
   outline: none;
-  font-size: 1.0em;
+  font-size: 1.0vw;
 }
 
 .App-intro {
@@ -121,6 +125,44 @@ html {
   font-family: arial;
 }
 
+/* Float four columns side by side */
+.column {
+  float: left;
+  width: 33%;
+  padding: 0 10px;
+}
+
+/* Remove extra left and right margins, due to padding */
+/*   margin: 0 -5px; */
+.row {
+  align-items: center;
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Responsive columns */
+@media screen and (max-width: 600px) {
+  .column {
+    width: 100%;
+    display: block;
+    margin-bottom: 20px;
+  }
+}
+
+/* Style the counter cards */
+.App-card {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  padding: 16px;
+  text-align: center;
+  background-color: #f1f1f1;
+}
+
+
 .App-card-title {
   color: grey;
   font-size: 18px;
@@ -132,11 +174,11 @@ html {
   display: inline-block;
   padding: 8px;
   color: white;
-  background-color: #000;
+  background-color: rgb(68, 106, 138);
   text-align: center;
   cursor: pointer;
   width: 100%;
-  font-size: 18px;
+  font-size: 15px;
 }
 
 .App-card-a {

@@ -602,19 +602,19 @@ class MediaTimeline extends Component {
 		return (			
 					<div id='timeline' className='scrap-grid' style={{gridTemplateRows: gridStyle}}>
 						<header>
-							<h1 className='scrap-h1'>Heery Household Scrapbook</h1>
-							<h2>The Covid Times</h2>
+							<h1 className='scrap-h1'>{timelineContent.timeline_name}</h1>
+							<h2>{timelineContent.description}</h2>
 						</header>
 
 						{timelineContent.content.map((contentItem) => {
 							return <React.Fragment>
 										<figure className="scrap-fig" style={{gridColumn: imgPos[this.getItemRowIndex(timelineContent, contentItem)%2], gridRow: 'fig'+this.getItemRowIndex(timelineContent, contentItem)}} key={contentItem.title_on_date} id={contentItem.title_on_date}  								
 											onClick={() => this.editItem(contentItem)}>												
-												<MediaItem className="scrap-img" contentItem={contentItem}  
+												<MediaItem className="scrap-img" contentItem={contentItem} show_details={false}
 													ref={(item) => { this.saveRef( contentItem.title_on_date, item ); }}
 												/>									
 										</figure>
-										<p className="scrap-p" style={{gridColumn: pPos[this.getItemRowIndex(timelineContent, contentItem)%2], gridRow: 'p'+this.getItemRowIndex(timelineContent, contentItem), transform:'rotate(-0.8deg)', webkitTransform: 'rotate(-0.8deg)'}}>{contentItem.title} - {contentItem.comment}</p>
+										<p className="scrap-p" style={{gridColumn: pPos[this.getItemRowIndex(timelineContent, contentItem)%2], gridRow: 'p'+this.getItemRowIndex(timelineContent, contentItem), transform:'rotate(-0.8deg)', webkitTransform: 'rotate(-0.8deg)'}}><b>{contentItem.title}.</b> {contentItem.comment}</p>
 									</React.Fragment>
 						})}
 						
@@ -640,7 +640,7 @@ class MediaTimeline extends Component {
 									iconOnClick={() => this.editItem(contentItem)}
 									icon={contentItem.category_icon} 
 									>											
-										<MediaItem contentItem={contentItem} 
+										<MediaItem contentItem={contentItem}  show_details={true}
 											ref={(item) => { this.saveRef( contentItem.title_on_date, item ); }}
 										/>										
 									</VerticalTimelineElement>
