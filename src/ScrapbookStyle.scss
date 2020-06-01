@@ -4,25 +4,18 @@
 	box-sizing: border-box;
 }
 
-scrap-body {
-	font-family: 'Schoolbell', cursive;
-	font-size: 2rem;
-	margin: 0;
-	padding: 2rem;
-}
-
-scrap-h1 {
+.scrap-h1 {
 	margin: 0;
 	font-size: 3.8rem;
 }
 
-scrap-figure {
+.scrap-figure {
 	margin: 0;
 	background: rgba(lightBlue, 0.8);
 	box-shadow: -0.035rem 0.03rem 0.3rem rgba(0, 0, 0, 0.2);
 }
 
-scrap-p {
+.scrap-p {
 	margin: 0;
 	padding: 1.8rem;
 	background-color: aliceBlue;
@@ -31,7 +24,7 @@ scrap-p {
 	position: relative;
 }
 
-scrap-img {
+.scrap-img {
 	object-fit: cover;
 	width: 100%;
 	height: 100%;
@@ -39,11 +32,40 @@ scrap-img {
 }
 
 .scrap-grid {
+	font-family: 'Schoolbell', cursive;
+	font-size: 1.8rem;
+	margin: 0;
+	padding: 2rem;
 	--verticalPadding: 2rem;
 	--overlap: 6rem;
 	display: grid;
 	/* 6/5 grid from my compound grid generator: https://codepen.io/michellebarker/full/zYOMYWv */
 	grid-template-columns: 5fr 1fr 4fr 2fr 3fr 3fr 2fr 4fr 1fr 5fr;
+	grid-auto-rows: minmax(var(--verticalPadding), auto);
+	gap: 1rem;
+	max-width: 75rem;
+	margin: 0 auto;
+	align-items: center;
+	background: left top / 40rem no-repeat url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/85648/paint-splatter-1.svg), right bottom / 40rem no-repeat url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/85648/paint-splatter-2.svg);
+	
+	&::before,
+	&::after {
+		content: '';
+		display: block;
+	}
+	
+	&::before {
+		background: left center / 20rem no-repeat url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/85648/paint-splatter-3.svg);
+		grid-column: 3 / -3;
+		grid-row: 9 / span 4;
+		width: 100%;
+  	height: 400px;
+		position: relative;
+ 	 z-index: 2;
+	}
+}
+
+/* DELETE SAFELY
 	grid-template-rows: 
 		[header-start]
 		auto
@@ -70,33 +92,21 @@ scrap-img {
 		[p3-start]
 		minmax(0, auto)
 		[p3-end]
+		minmax(var(--verticalPadding), auto)		
+		[fig4-start]
+		var(--overlap)
+		[fig3-end]
 		minmax(var(--verticalPadding), auto)
-		[fig3-end];
-	grid-auto-rows: minmax(var(--verticalPadding), auto);
-	gap: 1rem;
-	max-width: 75rem;
-	margin: 0 auto;
-	align-items: center;
-	background: left top / 40rem no-repeat url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/85648/paint-splatter-1.svg), right bottom / 40rem no-repeat url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/85648/paint-splatter-2.svg);
-	
-	&::before,
-	&::after {
-		content: '';
-		display: block;
-	}
-	
-	&::before {
-		background: left center / 20rem no-repeat url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/85648/paint-splatter-3.svg);
-		grid-column: 3 / -3;
-		grid-row: 9 / span 4;
-		width: 100%;
-  	height: 400px;
-		position: relative;
- 	 z-index: 2;
-	}
-}
+		[p4-start]
+		minmax(0, auto)
+		[p4-end]
+		minmax(var(--verticalPadding), auto)
+		[fig4-end]
+		;
 
-scrap-header {
+*/
+
+header {
 	grid-column: 1 / -2;
 	grid-row: header;
 	padding: 2rem;
@@ -106,6 +116,7 @@ scrap-header {
 	background-color: aliceBlue;
 }
 
+/* CAN DELETE BELOW SAFELY 
 .scrap-fig {
 	&--1 {
 		grid-column: span 5 / -1;
@@ -121,13 +132,16 @@ scrap-header {
 		grid-column: span 5 / -2;
 		grid-row: fig3;
 		
-		img {
+		.scrap-img {
 			object-position: left;
 		}
 	}
-}
 
-scrap-p {
+}
+*/
+
+/* CAN DELETE BELOW SAFELY 
+.scrap-p {
 	&:first-of-type {
 		grid-column: 3 / span 4;
 		grid-row: p1;
@@ -136,7 +150,7 @@ scrap-p {
 	}
 	
 	&:nth-of-type(2) {
-		grid-column: span 3 / -3;
+		grid-column: span 3 / -2;
 		grid-row: p2;
 		transform: rotate(0.8deg);
 	}
@@ -146,7 +160,10 @@ scrap-p {
 		grid-row: p3;
 		transform: rotate(-0.7deg);
 	}
+
 }
+*/
+
 
 /* Aspect ratio – https://css-tricks.com/aspect-ratio-boxes/ */
 [style*="aspect_ratio"] {

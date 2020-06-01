@@ -39,12 +39,23 @@ class App extends Component {
 	}
 	
 
+	var cloud_config3 = {
+		s3_bucket: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket',
+		s3_folder: 'Covid',		// based on choice
+		banner_image: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket/Common/backgrounds/Scrapbook.jpg',
+		upload_url: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
+		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items',
+		music_url: './music/Gavin James - Always.mp3'
+	}
+
+
 	this.state = {
 		timelineChosen: false,
 		play: false,
 		timelines: {
 			"Caroline. Our Glue.": cloud_config1,
 			"Family = Life": cloud_config2,
+			"Heery's Scrapbook - Covid Times": cloud_config3
 		}
 	}
 	
@@ -149,6 +160,13 @@ class App extends Component {
 
 			{!this.state.timelineChosen && 
 				<div className="App">
+
+				<div className="App-card">
+				<ExifOrientationImg src={this.state.timelines["Heery's Scrapbook - Covid Times"].banner_image} className="App-card-thumbnail"/>
+				<h1>Heery's Scrapbook - Covid Times</h1>
+				<p><button className="App-card-button" onClick={() => this.handleChoice("Heery's Scrapbook - Covid Times")}>View Scrapbook</button></p>
+				</div>
+
 
 				<div className="App-card">
 				<ExifOrientationImg src={this.state.timelines["Caroline. Our Glue."].banner_image} className="App-card-thumbnail"/>

@@ -482,45 +482,37 @@ class MediaTimeline extends Component {
 			 return i+1;
 		 }
 	}
-
 	
-	return 100;
-	
-	/*
-
-	let figNum = "fig" + rowNum
-
-	var classNames = require('classnames');
-
-	//[`grid-row: ${figNum}`]: true
-	var imgPos = classNames({
-		'grid-column: span 5/-1': true,
-		'grid-row: fig10': true
-	});
-
-	/*
-	let imgPos = {
-		gridColumn: "span 5/-1",
-		gridRow: {figNum}
-	};
-
-		/*
-		randomize for some of these
-		  .fig--2 {
-			grid-column: 1/span 7;
-			grid-row: fig2;
-		  }
-		  .fig--3 {
-			grid-column: span 5/-2;
-			grid-row: fig3;
-		  }
-		  .fig--3 img {
-			object-position: left;
-		  }
-	
-	return imgPos;
-	*/
+	return 100;	
   }
+
+
+  /**
+   * generate the grid-area for grid-template-rows
+   */
+  getGridTemplateStyle() {
+
+	let tc = this.state.timelineData
+
+	let style = "[header-start] auto ";		
+
+	for( var i=0; i<tc.content.length; i++ ) {
+
+		if( i == 0 ) {
+			style += "[fig1-start] 3rem [header-end] minmax(var(--verticalPadding), auto) [p1-start] minmax(0, auto) [p1-end] minmax(var(--verticalPadding), auto) "
+		}
+		else {
+			//  [fig2-start] var(--overlap) [fig1-end] minmax(var(--verticalPadding), auto) [p2-start] minmax(0, auto) [p2-end] minmax(var(--verticalPadding), auto) [fig3-start] var(--overlap) [fig2-end] minmax(var(--verticalPadding), auto) [p3-start] minmax(0, auto) [p3-end] minmax(var(--verticalPadding), auto) [fig4-start] var(--overlap) [fig3-end] minmax(var(--verticalPadding), auto) [p4-start] minmax(0, auto) [p4-end] minmax(var(--verticalPadding), auto) [fig4-end];
+			style += "[fig" + (i+1) + "-start] var(--overlap) [fig" + i + "-end] minmax(var(--verticalPadding), auto) [p" + (i+1) + "-start] minmax(0, auto) [p" + (i+1) + "-end] minmax(var(--verticalPadding), auto) "
+		}
+
+	}
+
+	console.log( "gernerated grid style " + style )
+	return style	   
+
+  }
+
 
 
 
@@ -592,55 +584,47 @@ class MediaTimeline extends Component {
 
 		//used to say style="--aspect-ratio: 4/3;"   ...or 4/3 for middle one
 		let imgStyle = {
-			aspect_ratio: 3/4
+			aspect_ratio: 3/5
 		};
 		let vidStyle = {
 			aspect_ratio: 4/3
 		};
-				
-		/*
-								<figure className="scrap-fig scrap-fig--1" style={imgStyle}>
-							<img className="scrap-img" src='https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb&ixid=eyJhcHBfaWQiOjE0NTg5fQ' alt='Small child playing with toys'/>
-						</figure>
-						<p className="scrap-p">We played in Nana and Grandad’s garden. We picked apples and made apple crumble!</p>
-						<figure className="scrap-fig scrap-fig--2" style={vidStyle}>
-							<video controls autoPlay>
-								<source src="sample.mp4" type="video/mp4"/>
-								Your browser does not support the video tag.
-							</video>		  
-						</figure>
-						<p className="scrap-p">We had a game of football.</p>
-						<figure className="scrap-fig scrap-fig--3" style={imgStyle}>
-							<img className="scrap-img" src='https://images.unsplash.com/photo-1472162072942-cd5147eb3902?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb&ixid=eyJhcHBfaWQiOjE0NTg5fQ' alt='Child reading'/>
-						</figure>
-						<p className="scrap-p">We read a funny story together.</p>
 
-		*/
+		let gridStyle = this.getGridTemplateStyle()
+
+		let imgPos = [ "1/span 7", "span 5/-1" ]		// bit of randomness on -1 vs. -2 or 5/6/7 ...depending on size
+		let pPos = [ "span 3/-2", "3/span 4" ]  // bit of randomness
+
+				
 		  
+		console.log( timelineContent.content.length + " items to show")
+
 		return (			
-					<div id='timeline' className='scrap-body scrap-grid'>
-						<header className='scrap-header'>
+					<div id='timeline' className='scrap-grid' style={{gridTemplateRows: gridStyle}}>
+						<header>
 							<h1 className='scrap-h1'>Heery Household Scrapbook</h1>
 							<h2>The Covid Times</h2>
 						</header>
-						{timelineContent.content.map((contentItem) => {
-							return <div>
-										<figure className="scrap-fig" key={contentItem.title_on_date} id={contentItem.title_on_date}  
-											style={{gridColumn: 'span 5/-1', gridRow: 'fig'+this.getItemRowIndex(timelineContent, contentItem)}}
-											onClick={() => this.editItem(contentItem)}>
-												<img className="scrap-img" src={contentItem.media[0]} alt='Media'/>
-										</figure>
-										<p className="scrap-p">{contentItem.title} - {contentItem.comment}</p>
-									</div>
-						})}
 
-						<section className="end" ref={(section) => { this.EndOfTimeline = section; }}></section>
+						{timelineContent.content.map((contentItem) => {
+							return <React.Fragment>
+										<figure className="scrap-fig" style={{gridColumn: imgPos[this.getItemRowIndex(timelineContent, contentItem)%2], gridRow: 'fig'+this.getItemRowIndex(timelineContent, contentItem)}} key={contentItem.title_on_date} id={contentItem.title_on_date}  								
+											onClick={() => this.editItem(contentItem)}>												
+												<MediaItem className="scrap-img" contentItem={contentItem}  
+													ref={(item) => { this.saveRef( contentItem.title_on_date, item ); }}
+												/>									
+										</figure>
+										<p className="scrap-p" style={{gridColumn: pPos[this.getItemRowIndex(timelineContent, contentItem)%2], gridRow: 'p'+this.getItemRowIndex(timelineContent, contentItem), transform:'rotate(-0.8deg)', webkitTransform: 'rotate(-0.8deg)'}}>{contentItem.title} - {contentItem.comment}</p>
+									</React.Fragment>
+						})}
+						
 					</div>
 		);
 	}
 
-	//style={imgStyle}
-	//className={this.getImgPos(contentItem.title_on_date)}
+	//WORKS <img classNam="scrap-img" src={contentItem.media[0]} alt='Media'/>
+
+	//{contentItem.media.map((itm) => {
 	// <MediaItem contentItem={contentItem} 
 	//ref={(item) => { this.saveRef( contentItem.title_on_date, item ); }}/>										
    

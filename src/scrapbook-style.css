@@ -4,13 +4,6 @@
   box-sizing: border-box;
 }
 
-.scrap-body {
-  font-family: "Schoolbell", cursive;
-  font-size: 2rem;
-  margin: 0;
-  padding: 2rem;
-}
-
 .scrap-h1 {
   margin: 0;
   font-size: 3.8rem;
@@ -39,12 +32,15 @@
 }
 
 .scrap-grid {
+  font-family: "Schoolbell", cursive;
+  font-size: 1.8rem;
+  margin: 0;
+  padding: 2rem;
   --verticalPadding: 2rem;
   --overlap: 6rem;
   display: grid;
   /* 6/5 grid from my compound grid generator: https://codepen.io/michellebarker/full/zYOMYWv */
   grid-template-columns: 5fr 1fr 4fr 2fr 3fr 3fr 2fr 4fr 1fr 5fr;
-  grid-template-rows: [header-start] auto [fig1-start] 3rem [header-end] minmax(var(--verticalPadding), auto) [p1-start] minmax(0, auto) [p1-end] minmax(var(--verticalPadding), auto) [fig2-start] var(--overlap) [fig1-end] minmax(var(--verticalPadding), auto) [p2-start] minmax(0, auto) [p2-end] minmax(var(--verticalPadding), auto) [fig3-start] var(--overlap) [fig2-end] minmax(var(--verticalPadding), auto) [p3-start] minmax(0, auto) [p3-end] minmax(var(--verticalPadding), auto) [fig3-end];
   grid-auto-rows: minmax(var(--verticalPadding), auto);
   gap: 1rem;
   max-width: 75rem;
@@ -66,7 +62,47 @@
   z-index: 2;
 }
 
-.scrap-header {
+/* DELETE SAFELY
+	grid-template-rows: 
+		[header-start]
+		auto
+		[fig1-start]
+		3rem
+		[header-end]
+		minmax(var(--verticalPadding), auto)
+		[p1-start]
+		minmax(0, auto)
+		[p1-end]
+		minmax(var(--verticalPadding), auto) 
+		[fig2-start]
+		var(--overlap) 
+		[fig1-end]
+		minmax(var(--verticalPadding), auto)
+		[p2-start]
+		minmax(0, auto)
+		[p2-end]
+		minmax(var(--verticalPadding), auto)
+		[fig3-start]
+		var(--overlap)
+		[fig2-end]
+		minmax(var(--verticalPadding), auto)
+		[p3-start]
+		minmax(0, auto)
+		[p3-end]
+		minmax(var(--verticalPadding), auto)		
+		[fig4-start]
+		var(--overlap)
+		[fig3-end]
+		minmax(var(--verticalPadding), auto)
+		[p4-start]
+		minmax(0, auto)
+		[p4-end]
+		minmax(var(--verticalPadding), auto)
+		[fig4-end]
+		;
+
+*/
+header {
   grid-column: 1/-2;
   grid-row: header;
   padding: 2rem;
@@ -76,39 +112,52 @@
   background-color: aliceBlue;
 }
 
-.scrap-fig--1 {
-  grid-column: span 5/-1;
-  grid-row: fig1;
-}
-.scrap-fig--2 {
-  grid-column: 1/span 7;
-  grid-row: fig2;
-}
-.scrap-fig--3 {
-  grid-column: span 5/-2;
-  grid-row: fig3;
-}
-.scrap-fig--3 img {
-  object-position: left;
-}
+/* CAN DELETE BELOW SAFELY 
+.scrap-fig {
+	&--1 {
+		grid-column: span 5 / -1;
+		grid-row: fig1;
+	}
 
-.scrap-p:first-of-type {
-  grid-column: 3/span 4;
-  grid-row: p1;
-  z-index: 1;
-  transform: rotate(-1deg);
-}
-.scrap-p:nth-of-type(2) {
-  grid-column: span 3/-3;
-  grid-row: p2;
-  transform: rotate(0.8deg);
-}
-.scrap-p:nth-of-type(3) {
-  grid-column: 2/span 4;
-  grid-row: p3;
-  transform: rotate(-0.7deg);
-}
+	&--2 {
+		grid-column: 1 / span 7;
+		grid-row: fig2;
+	}
 
+	&--3 {
+		grid-column: span 5 / -2;
+		grid-row: fig3;
+
+		.scrap-img {
+			object-position: left;
+		}
+	}
+
+}
+*/
+/* CAN DELETE BELOW SAFELY 
+.scrap-p {
+	&:first-of-type {
+		grid-column: 3 / span 4;
+		grid-row: p1;
+		z-index: 1;
+		transform: rotate(-1deg);
+	}
+
+	&:nth-of-type(2) {
+		grid-column: span 3 / -2;
+		grid-row: p2;
+		transform: rotate(0.8deg);
+	}
+
+	&:nth-of-type(3) {
+		grid-column: 2 / span 4;
+		grid-row: p3;
+		transform: rotate(-0.7deg);
+	}
+
+}
+*/
 /* Aspect ratio – https://css-tricks.com/aspect-ratio-boxes/ */
 [style*=aspect_ratio] {
   position: relative;
