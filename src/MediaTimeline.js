@@ -396,7 +396,8 @@ class MediaTimeline extends Component {
    */
   setTimeline( tData ) {	  
 	  this.setState({				
-			timelineData: tData
+			timelineData: tData,
+			vizStyle: tData.viz_style
 	  });
 
 	  window.menuComponent.setMenuStyle( tData.viz_style );
@@ -511,7 +512,7 @@ class MediaTimeline extends Component {
 
 	}
 
-	console.log( "gernerated grid style " + style )
+	console.debug( "generated grid style " + style )
 	return style	   
 
   }
@@ -615,6 +616,7 @@ class MediaTimeline extends Component {
 											onClick={() => this.editItem(contentItem)}>												
 												<MediaItem className="scrap-img" contentItem={contentItem} show_details={false}
 													ref={(item) => { this.saveRef( contentItem.title_on_date, item ); }}
+													vizStyle={this.state.vizStyle}
 												/>									
 										</figure>
 										<p className="scrap-p" style={{gridColumn: pPos[this.getItemRowIndex(timelineContent, contentItem)%2], gridRow: 'p'+this.getItemRowIndex(timelineContent, contentItem), transform:'rotate(-0.8deg)', webkitTransform: 'rotate(-0.8deg)'}}>{contentItem.comment}</p>
@@ -645,6 +647,7 @@ class MediaTimeline extends Component {
 									>											
 										<MediaItem contentItem={contentItem}  show_details={true}
 											ref={(item) => { this.saveRef( contentItem.title_on_date, item ); }}
+											vizStyle={this.state.vizStyle}
 										/>										
 									</VerticalTimelineElement>
 						})}

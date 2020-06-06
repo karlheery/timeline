@@ -20,7 +20,8 @@ class MediaItem extends Component {
 		// set initial state
 		this.state = {
 			item: this.props.contentItem,
-			show_details: this.props.show_details
+			show_details: this.props.show_details,
+			vizStyle: this.props.vizStyle
 		};
 		
 		this.expandItem = this.expandItem.bind(this);
@@ -117,6 +118,8 @@ class MediaItem extends Component {
 		slidesToScroll: 1
 	};
 	
+
+	var imgStyle = ( ("Scrapbook" == this.state.vizStyle) ? "scrap-img-for-slider" : "App-itemimage" )
 	
 	if( !contentItem.media || !Array.isArray(contentItem.media) ) {
 		contentItem.media = [];
@@ -129,14 +132,22 @@ class MediaItem extends Component {
 				<p className='handwriting'><i>{contentItem.date}</i></p>				
 				)}
 
-				<Slider {...settings}>
+				{contentItem.media && (contentItem.media.length > 1 || (contentItem.media.length == 1 && !contentItem.media[0].toLowerCase().endsWith(('.mp4', '.avi', '.mov')))) && (
+					<Slider {...settings}>				
+					{					
+						contentItem.media.map(f => ( <div key={f}><ExifOrientationImg src={f} className={imgStyle} onClick={()=>this.openModal(f)}/></div> ))						
+					}
+					</Slider>
+				)}
 				
-				{					
-						contentItem.media.map(f => ( <div key={f}><ExifOrientationImg src={f} className='App-itemimage' onClick={()=>this.openModal(f)}/></div> ))						
-				}
-				
-				</Slider>
-				
+				{contentItem.media && contentItem.media.length == 1 && contentItem.media[0].toLowerCase().endsWith(('.mp4', '.avi', '.mov')) && (
+					<video controls autoPlay>
+						<source src={contentItem.media[0]} className='App-itemmovie' onClick={()=>this.openModal(contentItem.media[0])}/>
+						Your browser does not support the video tag.
+					</video>		  						
+					
+				)}
+
 
 				{this.state.lightboxOpen && (
 				<Lightbox

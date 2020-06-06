@@ -32,6 +32,11 @@
 	display: block;
 }
 
+.scrap-img-for-slider {	
+	height: 450px;
+	padding: 1px;
+}
+
 /* font-size used to be 1.5rem but it didnt respond well on phone - not sure where root element was it was relative to */
 .scrap-grid {
 	font-family: 'Schoolbell', cursive;
