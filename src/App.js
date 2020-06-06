@@ -97,6 +97,7 @@ class App extends Component {
 	this.setState({
 		timelineChosen: true,
 		timeline_name: name,
+		vizStyle: ( this.timeline ? this.timeline.vizStyle : "" ),
 		config: this.state.timelines[name],
 		play: false
 	});
@@ -127,7 +128,7 @@ class App extends Component {
 			/>
 			
 			<div className="App-right-menu" id="menu" name="menu">
-				<OptionsMenu timeline_name={this.state.timeline_name} config={this.state.config}/>
+				<OptionsMenu timeline_name={this.state.timeline_name} vizStyle={this.state.vizStyle} config={this.state.config} ref={(tl) => { this.optionsMenu = tl; }}/>
 			</div>										
 		
 			<div className="App-right-menu">

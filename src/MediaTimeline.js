@@ -398,6 +398,9 @@ class MediaTimeline extends Component {
 	  this.setState({				
 			timelineData: tData
 	  });
+
+	  window.menuComponent.setMenuStyle( tData.viz_style );
+
 	  console.log( "timeline data saved: " + this.state.timelineData );
   }
   
@@ -478,7 +481,7 @@ class MediaTimeline extends Component {
 	for( var i=0; i<tc.content.length; i++ ) {
 		   		
 		 if( tc.content[i].title_on_date === item.title_on_date ) {
-			 console.log( "item is at index " + (i+1) )
+			 //console.log( "item is at index " + (i+1) )
 			 return i+1;
 		 }
 	}
@@ -614,7 +617,7 @@ class MediaTimeline extends Component {
 													ref={(item) => { this.saveRef( contentItem.title_on_date, item ); }}
 												/>									
 										</figure>
-										<p className="scrap-p" style={{gridColumn: pPos[this.getItemRowIndex(timelineContent, contentItem)%2], gridRow: 'p'+this.getItemRowIndex(timelineContent, contentItem), transform:'rotate(-0.8deg)', webkitTransform: 'rotate(-0.8deg)'}}><b>{contentItem.title}.</b> {contentItem.comment}</p>
+										<p className="scrap-p" style={{gridColumn: pPos[this.getItemRowIndex(timelineContent, contentItem)%2], gridRow: 'p'+this.getItemRowIndex(timelineContent, contentItem), transform:'rotate(-0.8deg)', webkitTransform: 'rotate(-0.8deg)'}}>{contentItem.comment}</p>
 									</React.Fragment>
 						})}
 						

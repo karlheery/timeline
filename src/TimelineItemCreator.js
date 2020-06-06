@@ -43,7 +43,8 @@ class TimelineItemCreator extends Component {
 		category: "Friends",
 		fileList: [],
 		mediaList: [],
-		saveStatus: 0
+		saveStatus: 0,
+		vizStyle: this.props.vizStyle
 	}
 	
 	
@@ -125,6 +126,20 @@ class TimelineItemCreator extends Component {
 		};
   }
   
+
+
+  /**
+   * Change style in line with Timeline or Scrapbook
+   * @param {*} vStyle 
+   */
+  setMenuStyle( vStyle ) {	  
+    this.setState({
+		vizStyle: vStyle
+	})
+
+  }
+
+
   /**
    * set the staet of menu items so that menu renders in edit mode rather than new
    */   
@@ -231,8 +246,12 @@ class TimelineItemCreator extends Component {
 
 		// @TODO reinstate the setTimeout saveStatus: false ....for bad data entry		
 		if( !timelineItem.title || !timelineItem.date ) {
-			console.log( "wont save empty event for " + timelineItem ) ;
+			console.log( "setting defaults for " + timelineItem ) ;
 			
+			timelineItem.title = "Message:"
+			timelineItem.date = moment()
+			timelineItem.dateAsNumber = timelineItem.date.valueOf()			
+
 			//setTimeout( this.status.saveStatus = -1, 5000);
 		}			
 			
@@ -276,6 +295,8 @@ class TimelineItemCreator extends Component {
 			
 		}
 		else {
+			
+			console.log( "API Post: " +  this.state.config.content_api + " Payload: " + timelineItem );
 			
 			// NEW/EDIT RECORD
 			axios.post( this.state.config.content_api, {
@@ -338,7 +359,7 @@ class TimelineItemCreator extends Component {
 	  var name = '';
 	  var value = '';
 	  
-	  console.log( "object changed is " + object );
+	  //console.log( "object changed is " + object );
 	  
 	  if ( object instanceof moment ) {
 		  
@@ -420,6 +441,18 @@ class TimelineItemCreator extends Component {
 			this.setState({
 				[name]: value
 			})
+			
+			if( this.state.vizStyle == "Scrapbook" && name == "comment" ) {
+
+				var theDate = ( this.state.date ? this.state.date : moment() )
+
+				this.setState({
+					title: ( this.state.title ? this.state.title : "Message:" ),
+					date: theDate,
+					dateDisplay: theDate.format("dddd, Do MMM YYYY"), 
+					dateAsNumber: theDate.valueOf()				
+				});
+			}
 	  }
 		  
 	  this.setState({		
@@ -486,6 +519,9 @@ class TimelineItemCreator extends Component {
 	// but this more directly seems to solve it...
 	// https://www.npmjs.com/package/react-image-file-resizer
 	//
+	
+	//console.log( "rendering item creator for " + this.state.vizStyle );
+
     return (
 			
 		<div align="left">			
@@ -517,26 +553,38 @@ class TimelineItemCreator extends Component {
 						)
 				}
 				
-				<label htmlFor="title">Title*</label>        
-				<input type="text" name='title' id='title' value={titleText} size="30" className="menu-input" placeholder='Title or tagline'
-					onChange={this.handleChange.bind(this)}/>		
+				{this.state.vizStyle === "Scrapbook" &&
+					<input type="hidden" name='title' id='title' value="" size="30" style={{display: 'none'}} onChange={this.handleChange.bind(this)}/>		
+				}
+				
+				{this.state.vizStyle != "Scrapbook" &&
+					<React.Fragment>
+						<label htmlFor="title">Title*</label>        
+						<input type="text" name='title' id='title' value={titleText} size="30" className="menu-input" placeholder='Title or tagline' 
+							onChange={this.handleChange.bind(this)}/>		
+					</React.Fragment>
+				}
 
-				<form onChange={this.handleChange.bind(this)}>
-					<label htmlFor="Friends"><FaceIcon/></label><input type="radio" id="Friends" name="category" value="Friends" checked={this.state.category === "Friends"} />
-					<label htmlFor="Family">&nbsp;&nbsp;<SupervisorAccountIcon/></label><input type="radio" id="Family" name="category" value="Family" checked={this.state.category === "Family"} />
-					<label htmlFor="Love">&nbsp;&nbsp;<LoveIcon/></label><input type="radio" id="Love" name="category" value="Love" checked={this.state.category === "Love"} />
+
+				{this.state.vizStyle != "Scrapbook" &&
+					<React.Fragment>
+					<form onChange={this.handleChange.bind(this)}>
+						<label htmlFor="Friends"><FaceIcon/></label><input type="radio" id="Friends" name="category" value="Friends" checked={this.state.category === "Friends"} />
+						<label htmlFor="Family">&nbsp;&nbsp;<SupervisorAccountIcon/></label><input type="radio" id="Family" name="category" value="Family" checked={this.state.category === "Family"} />
+						<label htmlFor="Love">&nbsp;&nbsp;<LoveIcon/></label><input type="radio" id="Love" name="category" value="Love" checked={this.state.category === "Love"} />
+						<br/>
+						<label htmlFor="Work"><WorkIcon/></label><input type="radio" id="Work" name="category" value="Work" checked={this.state.category === "Work"}/>
+						<label htmlFor="School">&nbsp;&nbsp;<SchoolIcon/></label><input type="radio" id="School" name="category" value="School" checked={this.state.category === "School"}/>
+						<label htmlFor="Success">&nbsp;&nbsp;<StarIcon/></label><input type="radio" id="Success" name="category" value="Success" checked={this.state.category === "Success"}/>
+					</form>
+					
 					<br/>
-					<label htmlFor="Work"><WorkIcon/></label><input type="radio" id="Work" name="category" value="Work" checked={this.state.category === "Work"}/>
-					<label htmlFor="School">&nbsp;&nbsp;<SchoolIcon/></label><input type="radio" id="School" name="category" value="School" checked={this.state.category === "School"}/>
-					<label htmlFor="Success">&nbsp;&nbsp;<StarIcon/></label><input type="radio" id="Success" name="category" value="Success" checked={this.state.category === "Success"}/>
-				</form>
-				
-				<br/>
-				<label htmlFor="date">When* </label> (ish: <input type="checkbox" name='unsure-date' id='unsure-date' selected={this.state.unsure} onChange={this.handleChange.bind(this)}/>?)
-				<div className='subscript'>(YYYY-MM-DD)</div>
-				<DatePicker id="date" dateFormat="YYYY-MM-DD" selected={this.state.date} className="menu-input" size="12" placeholder='YYYY-MM-DD'
-					onChange={this.handleChange.bind(this)} /> 
-				
+					<label htmlFor="date">When* </label> (ish: <input type="checkbox" name='unsure-date' id='unsure-date' selected={this.state.unsure} onChange={this.handleChange.bind(this)}/>?)
+					<div className='subscript'>(YYYY-MM-DD)</div>
+					<DatePicker id="date" dateFormat="YYYY-MM-DD" selected={this.state.date} className="menu-input" size="12" placeholder='YYYY-MM-DD'
+						onChange={this.handleChange.bind(this)} /> 
+					</React.Fragment>
+				}	
 				
 				<label htmlFor="comment">Comment*</label>        
 				<textarea rows='4' columns='40' name='comment' id='comment' value={commentText} className="menu-input" placeholder="Comment (remember you are editing everyones, so include your initials)..."

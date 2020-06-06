@@ -10,6 +10,7 @@ class OptionsMenu extends React.Component {
     super(props)
     this.state = {
       timeline_name: props.timeline_name,
+      vizStyle: props.vizStyle,
       config: props.config,
       menuOpen: false
     }
@@ -57,6 +58,12 @@ class OptionsMenu extends React.Component {
   }
 
 
+  setMenuStyle ( vstyle ) {
+    this.state.vizStyle = vstyle
+    this.child.current.setMenuStyle(vstyle);        
+
+  }
+
   // This can be used to close the menu, e.g. when a user clicks a menu item
   closeMenu () {
     this.setState({menuOpen: false})
@@ -91,7 +98,7 @@ class OptionsMenu extends React.Component {
           isOpen={this.state.menuOpen}
           onStateChange={(state) => this.handleStateChange(state)}
         >
-		  <TimelineItemCreator timeline_name={this.state.timeline_name} config={this.state.config} ref={this.child}/>		          
+		  <TimelineItemCreator timeline_name={this.state.timeline_name} config={this.state.config} vizStyle={this.state.vizStyle} ref={this.child}/>		          
     </Menu>
 		      
     );
