@@ -206,6 +206,22 @@ html {
   padding: 5px;
 }
 
+/* background-color: #2196F3; */
+.App-itemimage-grid-container {  
+  display: grid;  
+  align-content: center;
+  grid-template-columns: auto auto auto;  
+  grid-gap: 2px;  
+  padding: 2px;
+}
+
+/* background-color: rgba(255, 255, 255, 0.8); */
+.App-itemimage-grid-container > div {  
+  text-align: center;
+  padding: 2px 0;
+  font-size: 10px;
+}
+
 .App-right-menu {
   overflow: hidden;
   float:right;

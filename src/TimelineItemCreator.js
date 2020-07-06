@@ -17,6 +17,8 @@ import './OptionsMenu.css'
 
 import 'react-datepicker/dist/react-datepicker.css';
 
+import ReactAvatarEditor from 'react-avatar-editor'
+
 //ES6
 import ToggleButton from 'react-toggle-button'
 
@@ -26,12 +28,15 @@ import SchoolIcon from '@material-ui/icons/School';
 import FaceIcon from '@material-ui/icons/FaceSharp';
 import LoveIcon from '@material-ui/icons/FavoriteSharp';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
+import RotateLeft from '@material-ui/icons/RotateLeft';
+import RotateRight from '@material-ui/icons/RotateRight';
 
 
   
 class TimelineItemCreator extends Component {
-    
+	  
   
+
   constructor(props) {
     super(props)
 			
@@ -42,6 +47,8 @@ class TimelineItemCreator extends Component {
 		isEdit: false,
 		category: "Friends",
 		fileList: [],
+		filesToUpload: [],
+		rotations: [],
 		mediaList: [],
 		saveStatus: 0,
 		vizStyle: this.props.vizStyle
@@ -49,8 +56,20 @@ class TimelineItemCreator extends Component {
 	
 	
 	window.itemComponent = this;
+	
+  }
+
+
+
+  componentDidMount() {
+
+	window.timelineCreator = this;	
 
   }
+
+
+  // needed for react avatar editor to serve up resulting image
+  setEditorRef = (editor) => this.editor = editor
 
   
   /** 
@@ -126,6 +145,14 @@ class TimelineItemCreator extends Component {
 		};
   }
   
+
+
+  printItem( item ) {
+	  console.log( "TIMELINE ITEM:\n" )
+	  console.log( "\t title_on_date: " + item.title_on_date )
+	  console.log( "\t comment: " + item.comment )
+	  console.log( "\t media: " + item.media )
+  }
 
 
   /**
@@ -236,6 +263,7 @@ class TimelineItemCreator extends Component {
    * Submit new or change timeline item, updating JSON record in DynamoDB via API Gateway
    */
   handleSubmit (event) {
+
 		console.log('Saving event for date: ' + this.state.dateDisplay);
 		event.preventDefault();		// @todo what does this do?
 	  
@@ -296,7 +324,47 @@ class TimelineItemCreator extends Component {
 		}
 		else {
 			
-			console.log( "API Post: " +  this.state.config.content_api + " Payload: " + timelineItem );
+			// if new entry with files to upload
+			if( !this.state.deleteItem && this.state.filesToUpload && this.state.filesToUpload.length > 0 ) {
+		
+				console.log('Uploading images first: ' + this.state.filesToUpload);
+				// now start a recursive call chain (to avoid bug where the file names being stolen during for loop)
+				var f = 0;	
+
+				var self = this
+				// handle the recursive file uploads ...waiting for completion before saving the record
+				new Promise( function(resolve, reject) { 
+					var doneOk = self.uploadFile( self.state.filesToUpload, f);
+
+					if( doneOk )
+						resolve(doneOk);
+					else
+						reject(doneOk);
+
+				}).then((result) => {
+					
+					// re-get the media list post-upload
+					timelineItem = this.getTimelineEventData();
+
+					console.log( "Now saving record data..." )
+					return self.saveRecord( timelineItem );				
+				}).catch(err => {
+					console.error( "Failed during upload of files - saved so far: " + this.state.media + " out of " + this.state.filesToUpload )
+				});
+			}
+			else {
+				this.saveRecord( timelineItem )
+			}
+		}
+	}
+
+
+	/**
+	 * Handle the API call to save the record
+	 */
+	saveRecord( timelineItem ) {
+
+			console.log( "API Post: " +  this.state.config.content_api + " Payload: " + this.printItem(timelineItem) );
 			
 			// NEW/EDIT RECORD
 			axios.post( this.state.config.content_api, {
@@ -331,12 +399,69 @@ class TimelineItemCreator extends Component {
 				});
 				
 			});						
+	}
+	
+  
+    
+  /**
+   * Handle rotation of image
+   */
+  async rotateImage( direction, file) {
+
+	var index = 0;
+
+	for( var f=0; f<this.state.filesToUpload.length; f++ ) {
+		if( this.state.filesToUpload[f].name === file.name ) {
+			index = f
 		}
+	}
+
+	//var index = this.state.filesToUpload.indexOf( file );
+
+	var rots = this.state.rotations;
+	var rotation = 0;
+	if( !rots ) {
+		rots = [this.state.filesToUpload.length];
+	}
+	else {
+		 rotation = rots[index]
+	}
+	
+	if( !rotation ) {
+		rotation = 0;
+	}
+
+	rotation = ( direction === "Left" ? rotation - 90 : rotation + 90 );
+	if ( rotation >= 360 || rotation <= -360 )
+		rotation = 0
+	
+	console.log( "rotating file "  + file.name + " to " + rotation )
+
+	rots[index] = rotation;
+	
+	var self = this;
+	var rotatePromise = new Promise( function(resolve, reject) { 
 		
-  }
-  
-  
-  
+		const blob = self.editor.getImage().toBlob(function(blob) {
+			var imageFile = new File([blob], file.name);  // option to add type info {type: "image/jpeg"}
+	
+			var ftoL = window.timelineCreator.state.filesToUpload
+			ftoL[index] = imageFile
+	
+			self.setState({
+				filesToUpload: ftoL,
+				rotations: rots 
+			});			
+		});
+
+		resolve(true);
+
+	});
+	
+	let result = await rotatePromise
+	console.log( "finished asynch rotation" )
+	
+  }	
   
   
   /**
@@ -521,14 +646,31 @@ class TimelineItemCreator extends Component {
 	//
 	
 	//console.log( "rendering item creator for " + this.state.vizStyle );
+	console.log( "rendering with rotations: " + this.state.rotations )
 
     return (
 			
 		<div align="left">			
 				<div className="dropzone">			
-				  <Dropzone size={40} onDrop={ this.onDrop.bind(this) }>
+				  <Dropzone size={40} onDrop={ this.onDrop.bind(this) } align="center">
 						<p className='handwriting'>Drag or click to upload pics.</p>
-				  </Dropzone>				  
+				  </Dropzone>
+
+				  <div className="App-itemimage-grid-container">
+				  {					
+						this.state.filesToUpload.map(f => <React.Fragment>
+							<div><RotateLeft onClick={() => this.rotateImage("Left",f)}/></div>
+							<div><ReactAvatarEditor 
+								key={f} 
+								width={40} height={40} 
+								image={f} 
+								ref={this.setEditorRef}
+								rotate={this.state.rotations[this.state.filesToUpload.indexOf(f)]}/>
+							</div>
+							<div><RotateRight onClick={() => this.rotateImage("Right",f)}/></div></React.Fragment> )
+				  }
+				  </div>
+				  
 				</div>
 				
 				<div className="subscript">Note: we are all editors of this one item...</div>
@@ -604,7 +746,7 @@ class TimelineItemCreator extends Component {
 				  <ul>
 					{					
 							this.state.fileList.map(f => 
-								( this.state.isEdit ? <li key={f} className='list-item'><img src={f} width="30"/>? <input type="checkbox" name='delete-file' id={f} onChange={this.handleChange.bind(this)}/></li>
+								( this.state.isEdit ? <li key={f} className='list-item'><img src={f} width="50" crossorigin="anonymous" onClick={() => this.editImage(f)}/>? <input type="checkbox" name='delete-file' id={f} onChange={this.handleChange.bind(this)}/></li>
 								: <li key={f} className='list-item'>{f}</li> ) )
 					}
 				  </ul>
@@ -619,42 +761,47 @@ class TimelineItemCreator extends Component {
   
   
   /**
-   * As the files are dropped, we automatically upload them to S3 using axios
+   * Edit an image by treating it like a fresh onDrop
+   * @param {*} file 
+   */
+  editImage(file) {
+	  var files = new Array();
+	  files.push(file)
+	  this.onDrop(files)
+  }
+
+
+
+  /**
+   * As the files are dropped, we prepare to upload them to S3 using axios
    * and change the state of the fileList as we go
    */  			 
   onDrop(files) {
 
-	var uploaded = [];
-	
-	var mediaFiles = this.state.media;		// start with the existing uploads
-	
-	if( !mediaFiles ) {
-		mediaFiles = [];
-	}
+	var uploaded = []		// always upload all the files again in case rotations changed  ...rather than this.. .( this.state.fileList ? this.state.fileList : [] );
+	var filesToUpload = files    // should be merged with already uploaded files t
+	var rotations =  ( this.state.rotations ? this.state.rotations : new Array(files.length) );	
+	var mediaFiles = ( this.state.media ?  this.state.media : [] );	
 	
 	// make sure there's a placeholder for these entries.
 	this.setState({
 		fileList: uploaded,
 		media: mediaFiles,
+		filesToUpload: filesToUpload,
+		rotations: rotations
 	});
 	
-			
-	// now start a recursive call chain (to avoid bug where the file names being stolen during for loop)
-	var f = 0;
-	
-	this.uploadFile(files, f);
-	
 	this.setState({ saveStatus: 2 });
-			
+						
   }
   
   
   
   
-  uploadFile(files, f) {
+  async uploadFile(files, f) {
 					
 		if( f >= files.length ) {
-			return;
+			return true;
 		}
 		
 		var file = files[f];
@@ -665,8 +812,10 @@ class TimelineItemCreator extends Component {
 			qualityRatio = 100
 		else
 			qualityRatio = Math.round( (TARGET_SIZE * 100) / qualityRatio );
-
+		
+		/*
 		console.log("about to resize file: " + file.name + " of size " + file.size + " to quality ratio " + qualityRatio);
+
 		Resizer.imageFileResizer(
 			file,
 			800,
@@ -680,8 +829,9 @@ class TimelineItemCreator extends Component {
 			},
 			'base64'
 		);
-		
-		console.log("preparing to upload...");
+		*/
+
+		//console.log("preparing to upload...");
 
 		var uploaded = this.state.fileList;
 		var mediaFiles = this.state.media;
@@ -691,8 +841,9 @@ class TimelineItemCreator extends Component {
 		var uniqueFileName  = tokens.join('');	// join the rest
 		uniqueFileName = uniqueFileName + "_" + f + "_" + moment().valueOf();		// add current time
 		uniqueFileName = uniqueFileName + "." + suffix;		// add the suffix again		
-	
-		axios.post( this.state.config.upload_url, {
+		console.log("uploading " + uniqueFileName );
+
+		var uploadPromise = axios.post( this.state.config.upload_url, {
 		  objectName: this.state.config.s3_folder +  '/' + uniqueFileName,
 		  contentType: file.type
 		})
@@ -719,7 +870,9 @@ class TimelineItemCreator extends Component {
 
 			  var s3File = this.state.config.s3_bucket + '/' + this.state.config.s3_folder + '/' + uniqueFileName;
 			  if( mediaFiles.indexOf( s3File < 0 ) ) {
+				console.log( "uploaded S3 URI: " +  s3File)
 				mediaFiles.push( s3File );
+				//s3Uris.push( s3File );	// because we cant wait for state!
 			  }
 			  
 			  // now update state so we rerender
@@ -728,16 +881,21 @@ class TimelineItemCreator extends Component {
 				media: mediaFiles,
 				uploadMessage: uploaded.length + " files just uploaded"
 			  });
-			  
-		
-			  // keep calling recursively until all files are up
-			  this.uploadFile(files, f+1)			  
+			  					  
 		  })
 
 		})
 		.catch(function (err) {
 		  console.log(err);
 		});
+
+
+		// wait for above uploads to complete so we can track media items gathering before saving even
+		await uploadPromise
+		
+		// keep calling recursively until all files are up
+		return this.uploadFile(files, f+1)			  
+
 	}
 	
   

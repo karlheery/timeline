@@ -125,6 +125,7 @@ class MediaItem extends Component {
 		contentItem.media = [];
 	}	
 					
+	// now i have react avatar i should need it to do best effort using ExifOrientationImg... contentItem.media.map(f => ( <div key={f}><ExifOrientationImg src={f} className={imgStyle} onClick={()=>this.openModal(f)}/></div> ))						
     return (
 			<div name="media">		
 				
@@ -135,13 +136,13 @@ class MediaItem extends Component {
 				{contentItem.media && (contentItem.media.length > 1 || (contentItem.media.length == 1 && !contentItem.media[0].toLowerCase().endsWith(('.mp4', '.avi', '.mov')))) && (
 					<Slider {...settings}>				
 					{					
-						contentItem.media.map(f => ( <div key={f}><ExifOrientationImg src={f} className={imgStyle} onClick={()=>this.openModal(f)}/></div> ))						
+						contentItem.media.map(f => ( <div key={f}><img src={f} className={imgStyle} onClick={()=>this.openModal(f)}/></div> ))						
 					}
 					</Slider>
 				)}
 				
 				{contentItem.media && contentItem.media.length == 1 && contentItem.media[0].toLowerCase().endsWith(('.mp4', '.avi', '.mov')) && (
-					<video controls autoPlay>
+					<video controls>
 						<source src={contentItem.media[0]} className='App-itemmovie' onClick={()=>this.openModal(contentItem.media[0])}/>
 						Your browser does not support the video tag.
 					</video>		  						

@@ -111,10 +111,10 @@ class App extends Component {
    */	 
   render() {	  		   	  			
 		
-		
     return (
 		<div className="main-area">
 			<div id="main-bg" className="main-bg"></div>
+
 
 			{this.state.timelineChosen	&&
 			<div>

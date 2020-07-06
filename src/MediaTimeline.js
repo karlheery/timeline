@@ -612,7 +612,7 @@ class MediaTimeline extends Component {
 
 						{timelineContent.content.map((contentItem) => {
 							return <React.Fragment>
-										<figure className="scrap-fig" style={{gridColumn: imgPos[this.getItemRowIndex(timelineContent, contentItem)%2], gridRow: 'fig'+this.getItemRowIndex(timelineContent, contentItem)}} key={contentItem.title_on_date} id={contentItem.title_on_date}  								
+										<figure className="scrap-fig" key={contentItem.title_on_date} style={{gridColumn: imgPos[this.getItemRowIndex(timelineContent, contentItem)%2], gridRow: 'fig'+this.getItemRowIndex(timelineContent, contentItem)}} key={contentItem.title_on_date} id={contentItem.title_on_date}  								
 											onClick={() => this.editItem(contentItem)}>												
 												<MediaItem className="scrap-img" contentItem={contentItem} show_details={false}
 													ref={(item) => { this.saveRef( contentItem.title_on_date, item ); }}
