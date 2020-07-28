@@ -619,7 +619,7 @@ class MediaTimeline extends Component {
 													vizStyle={this.state.vizStyle}
 												/>									
 										</figure>
-										<p className="scrap-p" style={{gridColumn: pPos[this.getItemRowIndex(timelineContent, contentItem)%2], gridRow: 'p'+this.getItemRowIndex(timelineContent, contentItem), transform:'rotate(-0.8deg)', webkitTransform: 'rotate(-0.8deg)'}}>{contentItem.comment}</p>
+										<p className="scrap-p" style={{gridColumn: pPos[this.getItemRowIndex(timelineContent, contentItem)%2], gridRow: 'p'+this.getItemRowIndex(timelineContent, contentItem), transform:'rotate(-0.8deg)', WebkitTransform: 'rotate(-0.8deg)'}}>{contentItem.comment}</p>
 									</React.Fragment>
 						})}
 						

@@ -54,9 +54,10 @@ class TimelineItemCreator extends Component {
 		vizStyle: this.props.vizStyle
 	}
 	
+	this.imageEditors = new Array();
 	
 	window.itemComponent = this;
-	
+
   }
 
 
@@ -68,8 +69,11 @@ class TimelineItemCreator extends Component {
   }
 
 
+
   // needed for react avatar editor to serve up resulting image
-  setEditorRef = (editor) => this.editor = editor
+  setImageEditorRef = (canvasElement) => {	  
+	  this.imageEditors[canvasElement.props.id] = canvasElement
+  }
 
   
   /** 
@@ -262,7 +266,7 @@ class TimelineItemCreator extends Component {
   /**
    * Submit new or change timeline item, updating JSON record in DynamoDB via API Gateway
    */
-  handleSubmit (event) {
+  async handleSubmit (event) {
 
 		console.log('Saving event for date: ' + this.state.dateDisplay);
 		event.preventDefault();		// @todo what does this do?
@@ -324,7 +328,7 @@ class TimelineItemCreator extends Component {
 		}
 		else {
 			
-			// if new entry with files to upload
+			// if new entry with files to upload, or if any new rotations to apply (@TODO test this latter case)
 			if( !this.state.deleteItem && this.state.filesToUpload && this.state.filesToUpload.length > 0 ) {
 		
 				console.log('Uploading images first: ' + this.state.filesToUpload);
@@ -332,15 +336,90 @@ class TimelineItemCreator extends Component {
 				var f = 0;	
 
 				var self = this
+
+
+				//var ftoL = window.timelineCreator.state.filesToUpload
+
+				// sycnhronously rotate the images and get the files ready for upload
+				/*
+				for( var i=0; i<ftoL.length; i++ ) {
+					
+					var index = i;
+					var fName = ftoL[index].name;
+
+					var rotatePromise = new Promise( function(resolve, reject) { 						
+						const blob = self.editor.getImage().toBlob(function(blob) {
+							var imageFile = new File([blob], fName);  // option to add type info {type: "image/jpeg"}							
+							resolve(imageFile);
+						});
+						reject(false);			
+					});
+					
+					let result = await rotatePromise
+					if( result ) 
+						ftoL[index] = result;
+					else
+						console.log( "failed to get rotated/cropped image file for upload")
+				}
+				*/
+
 				// handle the recursive file uploads ...waiting for completion before saving the record
-				new Promise( function(resolve, reject) { 
-					var doneOk = self.uploadFile( self.state.filesToUpload, f);
+				// reference for Promises in loops: https://itnext.io/https-medium-com-popov4ik4-what-about-promises-in-loops-e94c97ad39c0
+				//
+
+
+				// works
+				/*
+									/*
+					var index = 0
+					var fName = ftoL[index]
+					
+					var rotatePromise = new Promise( function(resolve, reject) { 						
+						const blob = self.editor.getImage().toBlob(function(blob) {
+							var imageFile = new File([blob], fName);  // option to add type info {type: "image/jpeg"}							
+							resolve(imageFile);
+						});						
+
+											}).then((result) => {
+					
+					ftoL[index] = result
+
+					*/
+
+				
+				new Promise( async function(resolve, reject) { 
+
+					var ftoL = self.state.filesToUpload
+					var newUploadList = [];
+
+					let readyForUpload = await Promise.all(ftoL.map(async(value) => { 
+						
+						const result = await new Promise( function(resolve, reject) { 						
+							const blob = self.imageEditors[value.name].getImage().toBlob(function(blob) {
+								console.log( "creating new image file for upload " + value.name)
+								var imageFile = new File([blob], value.name);  // option to add type info {type: "image/jpeg"}							
+								console.log( "image created for upload " + imageFile );
+								resolve(imageFile);
+						}, 'image/jpeg', 0.5 )});	
+					
+						//newUploadList.push(result)
+						return result;
+						
+						//return newUploadList; // important to return the value
+
+						// doubles up same images
+						//console.log( "all images ready for upload " + result );
+						//return result; // important to return the value
+					}));
+					
+					var doneOk = self.uploadFile( readyForUpload, f);
 
 					if( doneOk )
 						resolve(doneOk);
 					else
 						reject(doneOk);
 
+					
 				}).then((result) => {
 					
 					// re-get the media list post-upload
@@ -349,7 +428,7 @@ class TimelineItemCreator extends Component {
 					console.log( "Now saving record data..." )
 					return self.saveRecord( timelineItem );				
 				}).catch(err => {
-					console.error( "Failed during upload of files - saved so far: " + this.state.media + " out of " + this.state.filesToUpload )
+					console.error( "Failed during upload of files error: " + err )
 				});
 			}
 			else {
@@ -408,7 +487,7 @@ class TimelineItemCreator extends Component {
    */
   async rotateImage( direction, file) {
 
-	var index = 0;
+	var index = -1;
 
 	for( var f=0; f<this.state.filesToUpload.length; f++ ) {
 		if( this.state.filesToUpload[f].name === file.name ) {
@@ -416,12 +495,17 @@ class TimelineItemCreator extends Component {
 		}
 	}
 
+	if( index < 0 ) {
+		console.log( "failed to find " + file.name + " in " + this.state.filesToUpload )
+		return;
+	}
+
 	//var index = this.state.filesToUpload.indexOf( file );
 
 	var rots = this.state.rotations;
 	var rotation = 0;
 	if( !rots ) {
-		rots = [this.state.filesToUpload.length];
+		rots = new Array(this.state.filesToUpload.length);
 	}
 	else {
 		 rotation = rots[index]
@@ -438,30 +522,13 @@ class TimelineItemCreator extends Component {
 	console.log( "rotating file "  + file.name + " to " + rotation )
 
 	rots[index] = rotation;
-	
-	var self = this;
-	var rotatePromise = new Promise( function(resolve, reject) { 
-		
-		const blob = self.editor.getImage().toBlob(function(blob) {
-			var imageFile = new File([blob], file.name);  // option to add type info {type: "image/jpeg"}
-	
-			var ftoL = window.timelineCreator.state.filesToUpload
-			ftoL[index] = imageFile
-	
-			self.setState({
-				filesToUpload: ftoL,
-				rotations: rots 
-			});			
-		});
 
-		resolve(true);
+	this.setState({
+		rotations: rots 
+	});			
 
-	});
-	
-	let result = await rotatePromise
-	console.log( "finished asynch rotation" )
-	
-  }	
+	console.log( "finished asynch rotation" )	
+  }
   
   
   /**
@@ -661,10 +728,13 @@ class TimelineItemCreator extends Component {
 						this.state.filesToUpload.map(f => <React.Fragment>
 							<div><RotateLeft onClick={() => this.rotateImage("Left",f)}/></div>
 							<div><ReactAvatarEditor 
-								key={f} 
-								width={40} height={40} 
+								id={f.name}
+								key={f.name}
+								width={80} height={60} 
+								border={2}
 								image={f} 
-								ref={this.setEditorRef}
+								crossOrigin="anonymous"
+								ref={this.setImageEditorRef}
 								rotate={this.state.rotations[this.state.filesToUpload.indexOf(f)]}/>
 							</div>
 							<div><RotateRight onClick={() => this.rotateImage("Right",f)}/></div></React.Fragment> )
@@ -746,7 +816,7 @@ class TimelineItemCreator extends Component {
 				  <ul>
 					{					
 							this.state.fileList.map(f => 
-								( this.state.isEdit ? <li key={f} className='list-item'><img src={f} width="50" crossorigin="anonymous" onClick={() => this.editImage(f)}/>? <input type="checkbox" name='delete-file' id={f} onChange={this.handleChange.bind(this)}/></li>
+								( this.state.isEdit ? <li key={f} className='list-item'><img src={f} width="50" crossOrigin="anonymous" onClick={() => this.editImage(f)}/>? <input type="checkbox" name='delete-file' id={f} onChange={this.handleChange.bind(this)}/></li>
 								: <li key={f} className='list-item'>{f}</li> ) )
 					}
 				  </ul>
