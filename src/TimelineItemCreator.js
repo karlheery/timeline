@@ -30,6 +30,7 @@ import LoveIcon from '@material-ui/icons/FavoriteSharp';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
 import RotateLeft from '@material-ui/icons/RotateLeft';
 import RotateRight from '@material-ui/icons/RotateRight';
+import Delete from '@material-ui/icons/Delete';
 
 
   
@@ -46,16 +47,16 @@ class TimelineItemCreator extends Component {
 		disabled: true, 
 		isEdit: false,
 		category: "Friends",
-		fileList: [],
-		filesToUpload: [],
+		fileList: [],			// just the file names vs. media which holds full S3 URLs
+		filesToUpload: [],		// actual File objects - freshly uploaded or edited
 		rotations: [],
-		mediaList: [],
 		saveStatus: 0,
 		vizStyle: this.props.vizStyle
 	}
 	
 	this.imageEditors = new Array();
-	
+	this.optionsMenu = props.menu;
+
 	window.itemComponent = this;
 
   }
@@ -71,8 +72,8 @@ class TimelineItemCreator extends Component {
 
 
   // needed for react avatar editor to serve up resulting image
-  setImageEditorRef = (canvasElement) => {	  
-	  this.imageEditors[canvasElement.props.id] = canvasElement
+  setImageEditorRef = (canvasElement) => {
+	  if( canvasElement ) this.imageEditors[canvasElement.props.id] = canvasElement
   }
 
   
@@ -171,45 +172,31 @@ class TimelineItemCreator extends Component {
   }
 
 
+  clearAndExit() {
+	this.clearMenuState();
+	this.optionsMenu.closeMenu();
+  }
+
+
   /**
    * set the staet of menu items so that menu renders in edit mode rather than new
    */   
   setMenuState( item ) {
 	
 	console.log( "editing item " + item.title );
+	this.clearMenuState();
 	
-	// @TODO trouble parsing https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/Monaco 7:10:161537710565215.jpg
-	
-	// parse the list of files so we can see them nicer on the screen for deletion
-	//
-	var fileNames = [];
-	for( var f=0; item.media && f<item.media.length; f++ ) {		
 		
-		// @TODO deliberately disabled the file name parsing as I switch to thumbnails not file names for delete
-		//var tokens = item.media[f].split("/");
-		var tokens;
-		if( tokens && tokens.length > 1  ) {
-			fileNames.push(tokens[tokens.length-1]);			
-		}
-		else if ( tokens && tokens.length == 1 ) {
-			fileNames.push(tokens[0]);
-		}
-		else if( fileNames.indexOf(item.media[f]) < 0 ) {
-			fileNames.push(item.media[f]);
-		}
-	}
-	
 	var unsure_of_date = false;
 	if( item.date && item.date.length < 9 ) {	// full dates are stored as dddd, Do MMM YYYY (18 characters)
 		unsure_of_date = true
 	}
 	
 	var cal_date = moment(item.time_sortable);
-	/*moment(item.date, "dddd, Do MMM YYYY");
-	if( !cal_date ) {
-		cal_date = moment(item.date, "MMM YYYY");
-	}*/
 	
+	// add all files to edit pane for rotating etc.
+	this.addFilesToEditPane(item.media)
+
     this.setState({
 		title: item.title,
 		old_title: item.title_on_date,		// for deletion of old
@@ -219,9 +206,9 @@ class TimelineItemCreator extends Component {
 		dateDisplay: item.date,
 		unsure: unsure_of_date,
 		media: item.media,		
-		fileList: fileNames,
+		fileList: item.media,
 		comment: item.comment,
-		uploadMessage: "Delete?:",
+		uploadMessage: "",
 		isEdit: true
 	})
   }
@@ -249,7 +236,8 @@ class TimelineItemCreator extends Component {
 		isEdit: false,
 		disabled: true, 
 		fileList: [],
-		mediaList: [],
+		filesToUpload: [],
+		rotations: [],
 		saveStatus: 0
 	})
 	  
@@ -336,80 +324,40 @@ class TimelineItemCreator extends Component {
 				var f = 0;	
 
 				var self = this
-
-
-				//var ftoL = window.timelineCreator.state.filesToUpload
-
-				// sycnhronously rotate the images and get the files ready for upload
-				/*
-				for( var i=0; i<ftoL.length; i++ ) {
-					
-					var index = i;
-					var fName = ftoL[index].name;
-
-					var rotatePromise = new Promise( function(resolve, reject) { 						
-						const blob = self.editor.getImage().toBlob(function(blob) {
-							var imageFile = new File([blob], fName);  // option to add type info {type: "image/jpeg"}							
-							resolve(imageFile);
-						});
-						reject(false);			
-					});
-					
-					let result = await rotatePromise
-					if( result ) 
-						ftoL[index] = result;
-					else
-						console.log( "failed to get rotated/cropped image file for upload")
-				}
-				*/
-
-				// handle the recursive file uploads ...waiting for completion before saving the record
-				// reference for Promises in loops: https://itnext.io/https-medium-com-popov4ik4-what-about-promises-in-loops-e94c97ad39c0
-				//
-
-
-				// works
-				/*
-									/*
-					var index = 0
-					var fName = ftoL[index]
-					
-					var rotatePromise = new Promise( function(resolve, reject) { 						
-						const blob = self.editor.getImage().toBlob(function(blob) {
-							var imageFile = new File([blob], fName);  // option to add type info {type: "image/jpeg"}							
-							resolve(imageFile);
-						});						
-
-											}).then((result) => {
-					
-					ftoL[index] = result
-
-					*/
-
 				
 				new Promise( async function(resolve, reject) { 
 
-					var ftoL = self.state.filesToUpload
-					var newUploadList = [];
+					var ftoL = self.state.filesToUpload					
 
 					let readyForUpload = await Promise.all(ftoL.map(async(value) => { 
 						
 						const result = await new Promise( function(resolve, reject) { 						
 							const blob = self.imageEditors[value.name].getImage().toBlob(function(blob) {
-								console.log( "creating new image file for upload " + value.name)
-								var imageFile = new File([blob], value.name);  // option to add type info {type: "image/jpeg"}							
+								var name = ( value && value.name? value.name : value )
+
+								// if we were editing a server side file we need the short name again
+								if( name.indexOf("/") > -1 ) {
+										// parse the list of files so we can see have simple short names for reuploading existing S3 images after edit
+										// @TODO check trouble parsing https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/Monaco 7:10:161537710565215.jpg
+										//
+										var tokens = name.split("/");
+										if( tokens && tokens.length > 1  ) {
+											name = tokens[tokens.length-1];			
+										}
+										else if ( tokens && tokens.length == 1 ) {
+											name = tokens[0];
+										}
+										else {
+											console.error( "could not cleanup file name " + name );
+										}									
+								}
+								console.log( "creating new image file for upload " + name)
+								var imageFile = new File([blob], name, {type: "image/jpeg"});  // option to add type info {type: "image/jpeg"}							
 								console.log( "image created for upload " + imageFile );
 								resolve(imageFile);
 						}, 'image/jpeg', 0.5 )});	
 					
-						//newUploadList.push(result)
-						return result;
-						
-						//return newUploadList; // important to return the value
-
-						// doubles up same images
-						//console.log( "all images ready for upload " + result );
-						//return result; // important to return the value
+						return result;						
 					}));
 					
 					var doneOk = self.uploadFile( readyForUpload, f);
@@ -456,7 +404,7 @@ class TimelineItemCreator extends Component {
 				this.addEventToTimeline( result );
 				
 				// get identifier
-				var savedEvent = result.data.title;
+				var savedEvent = ( this.state.vizStyle == "Scrapbook" ? "" : result.data.title );
 		  
 				console.log( "successfully saved event " + savedEvent );	  
 				
@@ -543,6 +491,8 @@ class TimelineItemCreator extends Component {
 	  
   }
   
+
+
   /**
    * Handle changes to form by updating state
    */
@@ -606,6 +556,9 @@ class TimelineItemCreator extends Component {
 				  deleteFiles = []
 			  }
 			  deleteFiles.push( fileName );
+
+			  // remove deleted file from edit pane
+			  this.removeFromEditPane(fileName)			  
 			  			  
 			  this.setState({
 				  filesToDelete: deleteFiles
@@ -652,6 +605,148 @@ class TimelineItemCreator extends Component {
 	  });
   }
 
+
+
+
+	
+	/**
+	 * 
+	 * @param {*} files 
+	 */
+	addFilesToEditPane(files) {
+			
+		var uploaded = []		// always upload all the files again in case rotations changed  ...rather than this.. .( this.state.fileList ? this.state.fileList : [] );
+		var filesToUpload = ( this.state.filesToUpload ? this.state.filesToUpload : new Array(files.length) );	
+		filesToUpload = filesToUpload.concat(files) 
+		var rotations = ( this.state.rotations ? this.state.rotations : new Array(files.length) );	
+		var mediaFiles = ( this.state.media ?  this.state.media : [] );	
+		
+		// make sure there's a placeholder for these entries.
+		this.setState({
+			fileList: uploaded,
+			media: mediaFiles,
+			filesToUpload: filesToUpload,
+			rotations: rotations
+		});
+
+	}
+
+
+	/**
+	 * 
+	 * @param {*} fileName 
+	 */
+	removeFromEditPane(fileName) {
+
+		var i = this.state.filesToUpload.indexOf(fileName)
+		if( i < 0 ) {
+			console.error( "wasnt able to locate deleted file " + fileName + " in file edit pane file list " + this.state.filesToUpload );
+			return
+		}	
+		
+		var filesToUpload = this.state.filesToUpload
+		filesToUpload.splice( i, 1 )
+
+		this.setState({			
+			filesToUpload: filesToUpload
+		});
+	}
+
+
+	/**
+	 * As the files are dropped, we prepare to upload them to S3 using axios
+	 * and change the state of the fileList as we go
+	 */  			 
+	onDrop(files) {
+
+		this.addFilesToEditPane(files)
+		this.setState({ saveStatus: 2 });
+						
+	}
+
+
+
+	/**
+	 * Handle the Axios calls to post to AWS, recursively working through all files
+	 * 
+	 * @param {*} files 
+	 * @param {*} f 
+	 */
+	async uploadFile(files, f) {
+					
+	  if( f >= files.length ) {
+		  return true;
+	  }
+	  
+	  var file = files[f];						
+
+	  //console.log("preparing to upload...");
+
+	  var uploaded = this.state.fileList;
+	  var mediaFiles = this.state.media;
+			  
+	  var tokens = file.name.split(".");	// look for file extension		
+	  var suffix = tokens.splice(tokens.length-1,1);	// take off suffix
+	  var uniqueFileName  = tokens.join('');	// join the rest
+	  uniqueFileName = uniqueFileName + "_" + f + "_" + moment().valueOf();		// add current time
+	  uniqueFileName = uniqueFileName + "." + suffix;		// add the suffix again		
+	  console.log("uploading " + uniqueFileName );
+
+	  var uploadPromise = axios.post( this.state.config.upload_url, {
+		objectName: this.state.config.s3_folder +  '/' + uniqueFileName,
+		contentType: file.type
+	  })
+	  .then((result) => {
+		var signedUrl = result.data.signed_url;
+		
+		var options = {
+		  headers: {
+			'Content-Type': file.type
+		  },			
+		  crossDomain: true			
+		};
+
+		console.log( "now putting the file " + file + " with URL " + signedUrl );	  
+		
+		return axios.put(signedUrl, file, options)		
+		.then((result) => {
+			console.log(result);
+			
+			  // add files as we go
+			if( uploaded.indexOf( uniqueFileName ) < 0 ) {
+			  uploaded.push( uniqueFileName );
+			}
+
+			var s3File = this.state.config.s3_bucket + '/' + this.state.config.s3_folder + '/' + uniqueFileName;
+			if( mediaFiles.indexOf( s3File ) < 0 ) {
+			  console.log( "uploaded S3 URI: " +  s3File)
+			  mediaFiles.push( s3File );
+			  //s3Uris.push( s3File );	// because we cant wait for state!
+			}
+			
+			// now update state so we rerender
+			this.setState({
+			  fileList: uploaded,
+			  media: mediaFiles,
+			  uploadMessage: uploaded.length + " files just uploaded"
+			});
+								  
+		})
+
+	  })
+	  .catch(function (err) {
+		console.log(err);
+	  });
+
+
+	  // wait for above uploads to complete so we can track media items gathering before saving even
+	  await uploadPromise
+	  
+	  // keep calling recursively until all files are up
+	  return this.uploadFile(files, f+1)			  
+
+  }
+  
   
   
   /**
@@ -660,37 +755,6 @@ class TimelineItemCreator extends Component {
   render() {
 	  
 	var saveStatus = this.state.saveStatus;
-		
-	
-		
-		/*
-
-		const s3Url = 'http://khpublicbucket.s3-website-eu-west-1.amazonaws.com'	
-
-		  const uploadOptions = {
-			s3Path: '/Caroline/',		
-			signingUrl: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
-			signingUrlMethod: 'POST',
-			//server: '',		// the absence of this is defaulting it to localhost:3000/undefined during PUT which is causing 404. Adding it uses right file name but...
-			accept: 'image/*',
-			//signingUrlHeaders={{ additional: headers }}
-			//signingUrlQueryParams={{ additional: query-params }}
-			signingUrlWithCredentials: false,      // in case when need to pass authentication credentials via CORS
-			autoUpload: true		// @TODO change once we have a form/button!		
-    };
-	    
-
-		<div>
-		  <DropzoneS3Uploader
-			onFinish={this.handleFinishedUpload}
-			s3Url={s3Url}	
-			//maxSize={1024 * 1024 * 5}		
-			upload={uploadOptions}
-			/>
-					
-		*/
-
-		  //<input type="checkbox" name='del-{f.name}' id='del-{f.name}' selected=false onChange={this.handleChange.bind(this)}/>
 				
 		  
 	var titleText = this.state.title;
@@ -705,13 +769,6 @@ class TimelineItemCreator extends Component {
 		commentText = "";
 	}
 				
-	// need to rotate and resize image
-	// could use this demo which includes dropzone reference:
-	// https://www.npmjs.com/package/react-avatar-editor
-	// but this more directly seems to solve it...
-	// https://www.npmjs.com/package/react-image-file-resizer
-	//
-	
 	//console.log( "rendering item creator for " + this.state.vizStyle );
 	console.log( "rendering with rotations: " + this.state.rotations )
 
@@ -737,7 +794,9 @@ class TimelineItemCreator extends Component {
 								ref={this.setImageEditorRef}
 								rotate={this.state.rotations[this.state.filesToUpload.indexOf(f)]}/>
 							</div>
-							<div><RotateRight onClick={() => this.rotateImage("Right",f)}/></div></React.Fragment> )
+							<div><RotateRight onClick={() => this.rotateImage("Right",f)}/></div>
+							<div><Delete/><input type="checkbox" name='delete-file' id={f} onChange={this.handleChange.bind(this)}/></div>
+							</React.Fragment> )
 				  }
 				  </div>
 				  
@@ -807,19 +866,17 @@ class TimelineItemCreator extends Component {
 					onClick={ (saveStatus == 0 || saveStatus == 2) ? this.handleSubmit.bind(this) : null}
 				>
 				
-					{(saveStatus == 1 ? 'Saving Event' : (saveStatus == 0 ? 'Click to Save' : (saveStatus == 2 ? 'CLICK TO SAVE*' : 'Enter Title & Date (min.)' )))}
+					{(saveStatus == 1 ? 'Saving Event' : (saveStatus == 0 ? 'Click to Save' : (saveStatus == 2 ? ( this.state.deleteItem ? 'CLICK TO DELETE*' : 'CLICK TO SAVE*' ) : 'Enter Title & Date (min.)' )))}
 				</Button>
-				
+
+				<Button id='cancel-item-button' bsStyle='primary' bsClass='options-btn-red' 
+					onClick={ () => this.clearAndExit(this) }
+				>
+					Cancel
+				</Button>
 				
 				<aside>
 				  <p>{this.state.uploadMessage}</p>
-				  <ul>
-					{					
-							this.state.fileList.map(f => 
-								( this.state.isEdit ? <li key={f} className='list-item'><img src={f} width="50" crossOrigin="anonymous" onClick={() => this.editImage(f)}/>? <input type="checkbox" name='delete-file' id={f} onChange={this.handleChange.bind(this)}/></li>
-								: <li key={f} className='list-item'>{f}</li> ) )
-					}
-				  </ul>
 				</aside>
   
 			</div>
@@ -830,148 +887,21 @@ class TimelineItemCreator extends Component {
 
   
   
-  /**
-   * Edit an image by treating it like a fresh onDrop
-   * @param {*} file 
-   */
-  editImage(file) {
-	  var files = new Array();
-	  files.push(file)
-	  this.onDrop(files)
-  }
-
-
-
-  /**
-   * As the files are dropped, we prepare to upload them to S3 using axios
-   * and change the state of the fileList as we go
-   */  			 
-  onDrop(files) {
-
-	var uploaded = []		// always upload all the files again in case rotations changed  ...rather than this.. .( this.state.fileList ? this.state.fileList : [] );
-	var filesToUpload = files    // should be merged with already uploaded files t
-	var rotations =  ( this.state.rotations ? this.state.rotations : new Array(files.length) );	
-	var mediaFiles = ( this.state.media ?  this.state.media : [] );	
-	
-	// make sure there's a placeholder for these entries.
-	this.setState({
-		fileList: uploaded,
-		media: mediaFiles,
-		filesToUpload: filesToUpload,
-		rotations: rotations
-	});
-	
-	this.setState({ saveStatus: 2 });
-						
-  }
-  
-  
-  
-  
-  async uploadFile(files, f) {
-					
-		if( f >= files.length ) {
-			return true;
-		}
-		
-		var file = files[f];
-				
-		var TARGET_SIZE = 1.5 // MB
-		var qualityRatio = file.size / (1024*1024);
-		if ( qualityRatio < TARGET_SIZE )
-			qualityRatio = 100
-		else
-			qualityRatio = Math.round( (TARGET_SIZE * 100) / qualityRatio );
-		
-		/*
-		console.log("about to resize file: " + file.name + " of size " + file.size + " to quality ratio " + qualityRatio);
-
-		Resizer.imageFileResizer(
-			file,
-			800,
-			800,
-			'PNG',
-			qualityRatio,
-			0,
-			uri => {
-				file.data = uri;
-				console.log("resized file" + file + " to " + uri);
-			},
-			'base64'
-		);
-		*/
-
-		//console.log("preparing to upload...");
-
-		var uploaded = this.state.fileList;
-		var mediaFiles = this.state.media;
-				
-		var tokens = file.name.split(".");	// look for file extension		
-		var suffix = tokens.splice(tokens.length-1,1);	// take off suffix
-		var uniqueFileName  = tokens.join('');	// join the rest
-		uniqueFileName = uniqueFileName + "_" + f + "_" + moment().valueOf();		// add current time
-		uniqueFileName = uniqueFileName + "." + suffix;		// add the suffix again		
-		console.log("uploading " + uniqueFileName );
-
-		var uploadPromise = axios.post( this.state.config.upload_url, {
-		  objectName: this.state.config.s3_folder +  '/' + uniqueFileName,
-		  contentType: file.type
-		})
-		.then((result) => {
-		  var signedUrl = result.data.signed_url;
-		  
-		  var options = {
-			headers: {
-			  'Content-Type': file.type
-			},			
-			crossDomain: true			
-		  };
-
-		  console.log( "now putting the file " + file + " with URL " + signedUrl );	  
-		  
-		  return axios.put(signedUrl, file, options)		
-		  .then((result) => {
-			  console.log(result);
-			  
-				// add files as we go
-			  if( uploaded.indexOf( uniqueFileName < 0 ) ) {
-				uploaded.push( uniqueFileName );
-			  }
-
-			  var s3File = this.state.config.s3_bucket + '/' + this.state.config.s3_folder + '/' + uniqueFileName;
-			  if( mediaFiles.indexOf( s3File < 0 ) ) {
-				console.log( "uploaded S3 URI: " +  s3File)
-				mediaFiles.push( s3File );
-				//s3Uris.push( s3File );	// because we cant wait for state!
-			  }
-			  
-			  // now update state so we rerender
-			  this.setState({
-				fileList: uploaded,
-				media: mediaFiles,
-				uploadMessage: uploaded.length + " files just uploaded"
-			  });
-			  					  
-		  })
-
-		})
-		.catch(function (err) {
-		  console.log(err);
-		});
-
-
-		// wait for above uploads to complete so we can track media items gathering before saving even
-		await uploadPromise
-		
-		// keep calling recursively until all files are up
-		return this.uploadFile(files, f+1)			  
-
-	}
-	
   
   
 
   /*
+	  No longer use delete list
+	  
+	  				  <ul>
+					{					
+							this.state.fileList.map(f => 
+								( this.state.isEdit ? <li key={f} className='list-item'><img src={f} width="50" crossOrigin="anonymous" onClick={() => this.editImage(f)}/>? <input type="checkbox" name='delete-file' id={f} onChange={this.handleChange.bind(this)}/></li>
+								: <li key={f} className='list-item'>{f}</li> ) )
+					}
+				  </ul>
+
+
   
   			<DropzoneS3Uploader
 					onFinish={this.handleFinishedUpload}

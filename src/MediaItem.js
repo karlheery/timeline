@@ -8,7 +8,6 @@ import Lightbox from 'react-image-lightbox';
 import 'react-image-lightbox/style.css'; // This only needs to be imported once in your app
  
 import EditIcon from '@material-ui/icons/Edit';
-import ExifOrientationImg from 'react-exif-orientation-img'
 
 
 class MediaItem extends Component {
@@ -125,7 +124,7 @@ class MediaItem extends Component {
 		contentItem.media = [];
 	}	
 					
-	// now i have react avatar i should need it to do best effort using ExifOrientationImg... contentItem.media.map(f => ( <div key={f}><ExifOrientationImg src={f} className={imgStyle} onClick={()=>this.openModal(f)}/></div> ))						
+	// now i have react avatar for user rotating, i dont need to do any best effort using ExifOrientationImg...so removed this... contentItem.media.map(f => ( <div key={f}><ExifOrientationImg src={f} className={imgStyle} onClick={()=>this.openModal(f)}/></div> ))						
     return (
 			<div name="media">		
 				
@@ -178,15 +177,19 @@ class MediaItem extends Component {
 					</React.Fragment>
 				)}
 
-				<div align="right">
-					<EditIcon className="hoverable-img" align="right" onClick={() => window.timelineComponent.editItem(this.state.item)}/>
-				</div>
 				
 				
 			</div>						
 	);
   }
-  
+
+  /**
+   * Moved Edit button to text box in MediaTimeline up a level
+    				<div align="right" valign="top">
+					<EditIcon className="hoverable-img" onClick={() => window.timelineComponent.editItem(this.state.item)}/>
+				</div>
+
+   */
 }
 
 export default MediaItem;

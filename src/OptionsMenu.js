@@ -98,7 +98,7 @@ class OptionsMenu extends React.Component {
           isOpen={this.state.menuOpen}
           onStateChange={(state) => this.handleStateChange(state)}
         >
-		  <TimelineItemCreator timeline_name={this.state.timeline_name} config={this.state.config} vizStyle={this.state.vizStyle} ref={this.child}/>		          
+		  <TimelineItemCreator timeline_name={this.state.timeline_name} config={this.state.config} vizStyle={this.state.vizStyle} ref={this.child} menu={this}/>		          
     </Menu>
 		      
     );

@@ -22,6 +22,7 @@ import FaceIcon from '@material-ui/icons/FaceSharp';
 import LoveIcon from '@material-ui/icons/FavoriteSharp';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
 import { relativeTimeRounding } from 'moment';
+import EditIcon from '@material-ui/icons/Edit';
 
 
 class MediaTimeline extends Component {
@@ -619,7 +620,7 @@ class MediaTimeline extends Component {
 													vizStyle={this.state.vizStyle}
 												/>									
 										</figure>
-										<p className="scrap-p" style={{gridColumn: pPos[this.getItemRowIndex(timelineContent, contentItem)%2], gridRow: 'p'+this.getItemRowIndex(timelineContent, contentItem), transform:'rotate(-0.8deg)', WebkitTransform: 'rotate(-0.8deg)'}}>{contentItem.comment}</p>
+										<p className="scrap-p" style={{gridColumn: pPos[this.getItemRowIndex(timelineContent, contentItem)%2], gridRow: 'p'+this.getItemRowIndex(timelineContent, contentItem), transform:'rotate(-0.8deg)', WebkitTransform: 'rotate(-0.8deg)'}}>{contentItem.comment} <EditIcon className="hoverable-img" onClick={() => window.timelineComponent.editItem(contentItem)}/></p>										
 									</React.Fragment>
 						})}
 						
