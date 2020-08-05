@@ -6,7 +6,8 @@ import Slider from "react-slick";
 
 import Lightbox from 'react-image-lightbox';
 import 'react-image-lightbox/style.css'; // This only needs to be imported once in your app
- 
+import VizSensor from 'react-visibility-sensor';
+
 import EditIcon from '@material-ui/icons/Edit';
 
 
@@ -20,10 +21,15 @@ class MediaItem extends Component {
 		this.state = {
 			item: this.props.contentItem,
 			show_details: this.props.show_details,
-			vizStyle: this.props.vizStyle
+			vizStyle: this.props.vizStyle,
+			itemVisible: false			
 		};
 		
 		this.expandItem = this.expandItem.bind(this);
+
+		this.play = this.play.bind(this);
+		this.pause = this.pause.bind(this);
+		this.toggleSlider = this.toggleSlider.bind(this);
 		
   }
 	
@@ -37,7 +43,20 @@ class MediaItem extends Component {
 			//this.timerID = setInterval(() => this.doSOmething(), 1000 );
   }
 	
+
+  play() {
+    this.slider.slickPlay();
+  }
+  pause() {
+    this.slider.slickPause();
+  }
+
+  toggleSlider(slide) {
+    ( slide ? this.play() : this.pause() )
+  }
+  
 	
+
 	/**
 	 * update the item, perhaps as a result of an edit, so we can show changes in real-time	 
 	 */
@@ -132,12 +151,23 @@ class MediaItem extends Component {
 				<p className='handwriting'><i>{contentItem.date}</i></p>				
 				)}
 
+
 				{contentItem.media && (contentItem.media.length > 1 || (contentItem.media.length == 1 && !contentItem.media[0].toLowerCase().endsWith(('.mp4', '.avi', '.mov')))) && (
-					<Slider {...settings}>				
+					<VizSensor
+						onChange={(isVisible) => {
+							this.setState({itemVisible: isVisible});
+							this.toggleSlider(isVisible)
+						}}				
+					>		
+			
+					<Slider ref={slider => (this.slider = slider)} {...settings}>				
 					{					
 						contentItem.media.map(f => ( <div key={f}><img src={f} className={imgStyle} onClick={()=>this.openModal(f)}/></div> ))						
 					}
 					</Slider>
+
+					</VizSensor>
+				
 				)}
 				
 				{contentItem.media && contentItem.media.length == 1 && contentItem.media[0].toLowerCase().endsWith(('.mp4', '.avi', '.mov')) && (
@@ -176,8 +206,6 @@ class MediaItem extends Component {
 					<p className='handwriting'>{contentItem.comment}</p>
 					</React.Fragment>
 				)}
-
-				
 				
 			</div>						
 	);

@@ -46,8 +46,7 @@ class TimelineItemCreator extends Component {
 		config: this.props.config,
 		disabled: true, 
 		isEdit: false,
-		category: "Friends",
-		fileList: [],			// just the file names vs. media which holds full S3 URLs
+		category: "Friends",		
 		filesToUpload: [],		// actual File objects - freshly uploaded or edited
 		rotations: [],
 		saveStatus: 0,
@@ -90,19 +89,20 @@ class TimelineItemCreator extends Component {
 					return self.indexOf(item) == pos;
 			})
 		}
-		
+
 		this.setState({
-			media: uniqueMedia
+			media: uniqueMedia,
+			filesToUpload: uniqueMedia
 		});
-		
-		
+				
 		// @TODO  we're only derefencing files here rather than actually deleting them
-		if( this.state.filesToDelete && this.state.filesToDelete.length > 0 && this.state.media.length > 0 ) {					
+		if( this.state.filesToDelete && this.state.filesToDelete.length > 0 && uniqueMedia.length > 0 ) {					
 		
 			console.log( "deleting " + this.state.filesToDelete.length + " files from " + uniqueMedia.length + ": "+ uniqueMedia );
 			
 			for( var f=0; f<this.state.filesToDelete.length; f++ ) {
 				//newMediaList => newMediaList.filter(e => !e.endsWidth(this.state.filesToDelete[f]));
+				console.log( "attempting to dereference " + this.state.filesToDelete[f] );
 
 				var newMediaList = [];	
 						
@@ -116,7 +116,7 @@ class TimelineItemCreator extends Component {
 						newMediaList.indexOf(uniqueMedia[m]) < 0 ) {						
 						
 						newMediaList.push(uniqueMedia[m]);
-						console.log( "item " + this.state.title + " will have " + uniqueMedia[m] );
+						console.log( "item " + this.state.title + " will store media " + uniqueMedia[m] );
 					}
 					else {
 						console.log( "item " + this.state.title + " dereferencing media " + m + ": " + uniqueMedia[m] );
@@ -124,16 +124,17 @@ class TimelineItemCreator extends Component {
 					}
 				}
 				
-				console.log( "new media list is :" + newMediaList );
+				console.log( "new media list (" + newMediaList.length + ") is :" + newMediaList );
 				uniqueMedia = newMediaList;
 			}
 						
 		}
-			
-		
+					
 		this.setState({
-			media: uniqueMedia
+			media: uniqueMedia,
+			filesToUpload: uniqueMedia
 		});
+		
 
 		// create the timeline item to save & merge
 		return  {
@@ -156,7 +157,7 @@ class TimelineItemCreator extends Component {
 	  console.log( "TIMELINE ITEM:\n" )
 	  console.log( "\t title_on_date: " + item.title_on_date )
 	  console.log( "\t comment: " + item.comment )
-	  console.log( "\t media: " + item.media )
+	  console.log( "\t media (" + (item.media && item.media.length ? item.media.length : 0 ) + "): " + item.media )
   }
 
 
@@ -205,8 +206,7 @@ class TimelineItemCreator extends Component {
 		date: cal_date,
 		dateDisplay: item.date,
 		unsure: unsure_of_date,
-		media: item.media,		
-		fileList: item.media,
+		media: item.media,				
 		comment: item.comment,
 		uploadMessage: "",
 		isEdit: true
@@ -229,13 +229,11 @@ class TimelineItemCreator extends Component {
 		date: undefined,
 		dateDisplay: undefined,
 		unsure: undefined,
-		media: undefined,		
-		fileList: undefined,
+		media: undefined,
 		comment: undefined,
 		uploadMessage: undefined,
 		isEdit: false,
-		disabled: true, 
-		fileList: [],
+		disabled: true, 		
 		filesToUpload: [],
 		rotations: [],
 		saveStatus: 0
@@ -327,7 +325,7 @@ class TimelineItemCreator extends Component {
 				
 				new Promise( async function(resolve, reject) { 
 
-					var ftoL = self.state.filesToUpload					
+					var ftoL = self.state.filesToUpload;
 
 					let readyForUpload = await Promise.all(ftoL.map(async(value) => { 
 						
@@ -360,18 +358,18 @@ class TimelineItemCreator extends Component {
 						return result;						
 					}));
 					
-					var doneOk = self.uploadFile( readyForUpload, f);
+					var uploadedFileURIs = self.uploadFile( readyForUpload, f, []);
 
-					if( doneOk )
-						resolve(doneOk);
+					if( uploadedFileURIs )
+						resolve(uploadedFileURIs);
 					else
-						reject(doneOk);
+						reject(uploadedFileURIs);
 
 					
 				}).then((result) => {
 					
-					// re-get the media list post-upload
-					timelineItem = this.getTimelineEventData();
+					// re-set the media list post-upload
+					timelineItem.media = result;
 
 					console.log( "Now saving record data..." )
 					return self.saveRecord( timelineItem );				
@@ -615,15 +613,14 @@ class TimelineItemCreator extends Component {
 	 */
 	addFilesToEditPane(files) {
 			
-		var uploaded = []		// always upload all the files again in case rotations changed  ...rather than this.. .( this.state.fileList ? this.state.fileList : [] );
+		var uploaded = []		// always upload all the files again in case rotations changed @TODO - diff or override existing (dont append timestamp);
 		var filesToUpload = ( this.state.filesToUpload ? this.state.filesToUpload : new Array(files.length) );	
 		filesToUpload = filesToUpload.concat(files) 
 		var rotations = ( this.state.rotations ? this.state.rotations : new Array(files.length) );	
 		var mediaFiles = ( this.state.media ?  this.state.media : [] );	
 		
 		// make sure there's a placeholder for these entries.
-		this.setState({
-			fileList: uploaded,
+		this.setState({			
 			media: mediaFiles,
 			filesToUpload: filesToUpload,
 			rotations: rotations
@@ -646,9 +643,15 @@ class TimelineItemCreator extends Component {
 		
 		var filesToUpload = this.state.filesToUpload
 		filesToUpload.splice( i, 1 )
+		
+		var rotations = this.state.rotations		
+		if( i < rotations.length ) {
+			rotations.splice( i, 1 )
+		}
 
 		this.setState({			
-			filesToUpload: filesToUpload
+			filesToUpload: filesToUpload,
+			rotations: rotations
 		});
 	}
 
@@ -672,18 +675,14 @@ class TimelineItemCreator extends Component {
 	 * @param {*} files 
 	 * @param {*} f 
 	 */
-	async uploadFile(files, f) {
+	async uploadFile(files, f, uploadedSoFar) {
 					
 	  if( f >= files.length ) {
-		  return true;
+		  return uploadedSoFar;
 	  }
 	  
 	  var file = files[f];						
-
 	  //console.log("preparing to upload...");
-
-	  var uploaded = this.state.fileList;
-	  var mediaFiles = this.state.media;
 			  
 	  var tokens = file.name.split(".");	// look for file extension		
 	  var suffix = tokens.splice(tokens.length-1,1);	// take off suffix
@@ -712,23 +711,30 @@ class TimelineItemCreator extends Component {
 		.then((result) => {
 			console.log(result);
 			
-			  // add files as we go
-			if( uploaded.indexOf( uniqueFileName ) < 0 ) {
-			  uploaded.push( uniqueFileName );
+			/*
+			  // file names
+			if( uploadedSoFar.indexOf( uniqueFileName ) < 0 ) {
+				uploadedSoFar.push( uniqueFileName );
+			}
+			*/
+
+			// dereference the old one
+			var oldIndex =  uploadedSoFar.indexOf( file.name )
+			if( oldIndex >= 0 ) {
+				uploadedSoFar.splice( oldIndex, 1 )
 			}
 
 			var s3File = this.state.config.s3_bucket + '/' + this.state.config.s3_folder + '/' + uniqueFileName;
-			if( mediaFiles.indexOf( s3File ) < 0 ) {
+			if( uploadedSoFar.indexOf( s3File ) < 0 ) {
 			  console.log( "uploaded S3 URI: " +  s3File)
-			  mediaFiles.push( s3File );
+			  uploadedSoFar.push( s3File );
 			  //s3Uris.push( s3File );	// because we cant wait for state!
 			}
 			
 			// now update state so we rerender
-			this.setState({
-			  fileList: uploaded,
-			  media: mediaFiles,
-			  uploadMessage: uploaded.length + " files just uploaded"
+			this.setState({			  
+			  media: uploadedSoFar,
+			  uploadMessage: uploadedSoFar.length + " files uploaded"
 			});
 								  
 		})
@@ -743,7 +749,7 @@ class TimelineItemCreator extends Component {
 	  await uploadPromise
 	  
 	  // keep calling recursively until all files are up
-	  return this.uploadFile(files, f+1)			  
+	  return this.uploadFile(files, f+1, uploadedSoFar)			  
 
   }
   
