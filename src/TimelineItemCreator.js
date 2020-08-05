@@ -72,10 +72,49 @@ class TimelineItemCreator extends Component {
 
   // needed for react avatar editor to serve up resulting image
   setImageEditorRef = (canvasElement) => {
-	  if( canvasElement ) this.imageEditors[canvasElement.props.id] = canvasElement
+	  if( canvasElement ) {		  
+		var key = ( canvasElement.props.id ? canvasElement.props.id : canvasElement.props.image )
+		this.imageEditors[key] = canvasElement
+	  }
   }
 
-  
+
+
+  /**
+   * used for keys in HTML elements etc
+   * 
+   * @param {*} file 
+   */
+  parseFilenameFromURL(file) {
+
+	var name = ( file.name ? file.name : file );
+
+	// if we were editing a server side file we need the short name again
+	// parse the list of files so we can see have simple short names for reuploading existing S3 images after edit
+	// @TODO check trouble parsing https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/Monaco 7:10:161537710565215.jpg
+	//
+
+	if( name.indexOf("/") < 0 ) {
+		return name;
+	}
+	
+  	var tokens = name.split("/");
+	if( tokens && tokens.length > 1  ) {
+		return tokens[tokens.length-1];			
+	}
+	else if ( tokens && tokens.length == 1 ) {
+		return tokens[0];
+	}
+	else {
+		console.error( "could not cleanup file name " + name );
+		return name
+	}
+	return name
+
+  }	
+
+
+
   /** 
    * Pull timeline event data from state
    */   
@@ -329,26 +368,12 @@ class TimelineItemCreator extends Component {
 
 					let readyForUpload = await Promise.all(ftoL.map(async(value) => { 
 						
-						const result = await new Promise( function(resolve, reject) { 						
-							const blob = self.imageEditors[value.name].getImage().toBlob(function(blob) {
-								var name = ( value && value.name? value.name : value )
+						const result = await new Promise( function(resolve, reject) { 					
+							var name = ( value && value.name? value.name : value )
+							name = self.parseFilenameFromURL( name )
 
-								// if we were editing a server side file we need the short name again
-								if( name.indexOf("/") > -1 ) {
-										// parse the list of files so we can see have simple short names for reuploading existing S3 images after edit
-										// @TODO check trouble parsing https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/Monaco 7:10:161537710565215.jpg
-										//
-										var tokens = name.split("/");
-										if( tokens && tokens.length > 1  ) {
-											name = tokens[tokens.length-1];			
-										}
-										else if ( tokens && tokens.length == 1 ) {
-											name = tokens[0];
-										}
-										else {
-											console.error( "could not cleanup file name " + name );
-										}									
-								}
+							const blob = self.imageEditors[name].getImage().toBlob(function(blob) {								
+								
 								console.log( "creating new image file for upload " + name)
 								var imageFile = new File([blob], name, {type: "image/jpeg"});  // option to add type info {type: "image/jpeg"}							
 								console.log( "image created for upload " + imageFile );
@@ -414,6 +439,7 @@ class TimelineItemCreator extends Component {
 				});
 				
 				window.timelineComponent.updateItem( timelineItem );
+				this.clearAndExit(this)
 			})
 			.catch((err) => {
 				console.log(err);
@@ -433,20 +459,7 @@ class TimelineItemCreator extends Component {
    */
   async rotateImage( direction, file) {
 
-	var index = -1;
-
-	for( var f=0; f<this.state.filesToUpload.length; f++ ) {
-		if( this.state.filesToUpload[f].name === file.name ) {
-			index = f
-		}
-	}
-
-	if( index < 0 ) {
-		console.log( "failed to find " + file.name + " in " + this.state.filesToUpload )
-		return;
-	}
-
-	//var index = this.state.filesToUpload.indexOf( file );
+	var name = ( file.name ? file.name : file )
 
 	var rots = this.state.rotations;
 	var rotation = 0;
@@ -454,7 +467,7 @@ class TimelineItemCreator extends Component {
 		rots = new Array(this.state.filesToUpload.length);
 	}
 	else {
-		 rotation = rots[index]
+		 rotation = rots[name]
 	}
 	
 	if( !rotation ) {
@@ -465,9 +478,9 @@ class TimelineItemCreator extends Component {
 	if ( rotation >= 360 || rotation <= -360 )
 		rotation = 0
 	
-	console.log( "rotating file "  + file.name + " to " + rotation )
+	console.log( "rotating file "  + name + " to " + rotation )
 
-	rots[index] = rotation;
+	rots[name] = rotation;
 
 	this.setState({
 		rotations: rots 
@@ -542,33 +555,6 @@ class TimelineItemCreator extends Component {
 		  }
 		  
 	  }	  	  
-	  else if ( object.target.name === "delete-file" ) {
-		  
-		  var fileName = object.target.id;
-		  var deleteFiles = this.state.filesToDelete;
-			  
-		  // maintain a list of files to delete on save
-		  if( object.target.checked ) {			  			  
-			  
-			  if( !deleteFiles ) {
-				  deleteFiles = []
-			  }
-			  deleteFiles.push( fileName );
-
-			  // remove deleted file from edit pane
-			  this.removeFromEditPane(fileName)			  
-			  			  
-			  this.setState({
-				  filesToDelete: deleteFiles
-			  });			  			  
-			  
-			  
-		  } else {
-			  // remove item not longer to be deleted
-			  deleteFiles = deleteFiles.filter(e => e !== fileName);
-		  }
-		  
-	  }	
 	  else if ( object.target.name === "delete-toggle" ) {
 		  		    
 			this.setState({
@@ -601,6 +587,25 @@ class TimelineItemCreator extends Component {
 	  this.setState({		
 		saveStatus: 2
 	  });
+  }
+
+
+  removeImage(fileName) {
+	  		  
+	var deleteFiles = this.state.filesToDelete;
+	if( !deleteFiles ) {
+		deleteFiles = []
+	}
+	
+	deleteFiles.push( fileName );
+
+	// remove deleted file from edit pane
+	this.removeFromEditPane(fileName)			  
+					  
+	this.setState({
+		filesToDelete: deleteFiles
+	});			  			  			
+
   }
 
 
@@ -645,10 +650,9 @@ class TimelineItemCreator extends Component {
 		filesToUpload.splice( i, 1 )
 		
 		var rotations = this.state.rotations		
-		if( i < rotations.length ) {
-			rotations.splice( i, 1 )
-		}
-
+		var r = rotations.indexOf( fileName )
+		rotations.splice( r, 1 )
+		
 		this.setState({			
 			filesToUpload: filesToUpload,
 			rotations: rotations
@@ -791,17 +795,17 @@ class TimelineItemCreator extends Component {
 						this.state.filesToUpload.map(f => <React.Fragment>
 							<div><RotateLeft onClick={() => this.rotateImage("Left",f)}/></div>
 							<div><ReactAvatarEditor 
-								id={f.name}
-								key={f.name}
+								id={this.parseFilenameFromURL(f)}
+								key={this.parseFilenameFromURL(f)}
 								width={80} height={60} 
 								border={2}
 								image={f} 
 								crossOrigin="anonymous"
 								ref={this.setImageEditorRef}
-								rotate={this.state.rotations[this.state.filesToUpload.indexOf(f)]}/>
+								rotate={this.state.rotations[( f.name ? f.name : f )]}/>
 							</div>
 							<div><RotateRight onClick={() => this.rotateImage("Right",f)}/></div>
-							<div><Delete/><input type="checkbox" name='delete-file' id={f} onChange={this.handleChange.bind(this)}/></div>
+							<div><Delete onClick={() => this.removeImage(f)}/></div>
 							</React.Fragment> )
 				  }
 				  </div>
