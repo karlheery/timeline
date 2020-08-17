@@ -40,7 +40,7 @@ html {
   left: 0;
   right: 0;    
   width: 100%;
-  height: auto;  
+  height: 150%;  
   max-width: 100%;
   background-color: whitesmoke;
   background: url(./DefaultBackground_WhiteWood.jpg) no-repeat center center fixed; 
@@ -83,6 +83,20 @@ html {
   padding: 2px;
   color: #555;  
 }
+
+h1 {
+  font-family: "Schoolbell", cursive;
+  color: #555;
+  margin: 0;
+  font-size: 3.8rem;
+  text-align: center
+}
+
+
+h2 {
+  color: #555;  
+}
+
 
 .App-title {
   float: left;

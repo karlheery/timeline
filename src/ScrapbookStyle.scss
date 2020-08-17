@@ -53,8 +53,14 @@
 	max-width: 75rem;
 	margin: 0 auto;
 	align-items: center;
-	background: left top / 40rem no-repeat url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/85648/paint-splatter-1.svg), right bottom / 40rem no-repeat url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/85648/paint-splatter-2.svg);
+	/*background: left top / 40rem no-repeat url(https://khpublicbucket.s3-eu-west-1.amazonaws.com/Common/overlays/scrapbook_overlay6.png), right bottom / 40rem no-repeat url(https://khpublicbucket.s3-eu-west-1.amazonaws.com/Common/overlays/scrapbook_overlay1.png);*/
 	
+	/* 
+	https://s3-us-west-2.amazonaws.com/s.cdpn.io/85648/paint-splatter-1.svg
+	https://s3-us-west-2.amazonaws.com/s.cdpn.io/85648/paint-splatter-2.svg
+	https://s3-us-west-2.amazonaws.com/s.cdpn.io/85648/paint-splatter-3.svg
+	*/
+
 	&::before,
 	&::after {
 		content: '';
@@ -62,7 +68,7 @@
 	}
 	
 	&::before {
-		background: left center / 20rem no-repeat url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/85648/paint-splatter-3.svg);
+		/*background: left center / 20rem no-repeat url(https://khpublicbucket.s3-eu-west-1.amazonaws.com/Common/overlays/scrapbook_overlay5.png);*/
 		grid-column: 3 / -3;
 		grid-row: 9 / span 4;
 		width: 100%;

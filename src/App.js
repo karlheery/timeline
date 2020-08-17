@@ -42,7 +42,16 @@ class App extends Component {
 	var cloud_config3 = {
 		s3_bucket: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket',
 		s3_folder: 'Covid',		// based on choice
-		banner_image: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket/Common/backgrounds/Scrapbook.jpg',
+		banner_image: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket/Covid/backgrounds/StayAtHome.jpg',
+		upload_url: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
+		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items',
+		music_url: './music/Gavin James - Always.mp3'
+	}
+
+	var cloud_config4 = {
+		s3_bucket: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket',
+		s3_folder: 'TaraGlen',		// based on choice
+		banner_image: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket/TaraGlen/backgrounds/TaraGlenBackground.jpg',
 		upload_url: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
 		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items',
 		music_url: './music/Gavin James - Always.mp3'
@@ -55,7 +64,8 @@ class App extends Component {
 		timelines: {
 			"Caroline. Our Glue.": cloud_config1,
 			"Family = Life": cloud_config2,
-			"Heery's Scrapbook - Covid Times": cloud_config3
+			"Heery's Scrapbook - Covid Times": cloud_config3,
+			"Tara Glen Gang": cloud_config4
 		}
 	}
 	
@@ -146,7 +156,7 @@ class App extends Component {
 			
 		    <div className="App">
 				<header className="App-header">
-					<ExifOrientationImg src={this.state.config.banner_image} className="App-banner" alt="banner" align="left" />
+					<img src={this.state.config.banner_image} className="App-banner" alt="banner" align="left" />
 					<h1 className="App-title">{this.state.timeline_name}</h1>		  
 							
 							
@@ -162,13 +172,16 @@ class App extends Component {
 			{!this.state.timelineChosen && 
 				<div>
 
-				<br/>
+				<br/>				
 				<br/>
 
+				<div className="header">
+					<h1>Our Scrapbooks</h1>
+				</div>
 				<div className="row">
   				<div className="column">
     				<div className="App-card">
-						<ExifOrientationImg src={this.state.timelines["Heery's Scrapbook - Covid Times"].banner_image} className="App-card-thumbnail"/>
+						<img src={this.state.timelines["Heery's Scrapbook - Covid Times"].banner_image} className="App-card-thumbnail"/>
 						<p><button className="App-card-button" onClick={() => this.handleChoice("Heery's Scrapbook - Covid Times")}>Heery's Scrapbook - Covid Times</button></p>
 					</div>
 				</div>
@@ -176,17 +189,29 @@ class App extends Component {
 
 				<div className="column">
     				<div className="App-card">						
-						<ExifOrientationImg src={this.state.timelines["Caroline. Our Glue."].banner_image} className="App-card-thumbnail"/>
+						<img src={this.state.timelines["Caroline. Our Glue."].banner_image} className="App-card-thumbnail"/>
 						<p><button className="App-card-button" onClick={() => this.handleChoice("Caroline. Our Glue.")}>Caroline. Our Glue.</button></p>
 					</div>
 				</div>
+				</div>
 
+				<br/>
+				<br/>
+
+				<div className="row">
 				<div className="column">
     				<div className="App-card">						
-						<ExifOrientationImg src={this.state.timelines["Family = Life"].banner_image} className="App-card-thumbnail"/>
+						<img src={this.state.timelines["Family = Life"].banner_image} className="App-card-thumbnail"/>
 						<p><button className="App-card-button" onClick={() => this.handleChoice("Family = Life")}>Family = Life</button></p>
 					</div>	
 				</div>
+				<div className="column">
+    				<div className="App-card">						
+						<img src={this.state.timelines["Tara Glen Gang"].banner_image} className="App-card-thumbnail"/>
+						<p><button className="App-card-button" onClick={() => this.handleChoice("Tara Glen Gang")}>Tara Glen Gang</button></p>
+					</div>	
+				</div>
+
 				</div>								
 
 				<br/>
