@@ -1,13 +1,16 @@
 import React, { Component } from 'react';
 import './App.css';
 import './OptionsMenu.css';
+import './InputDialog.css';
 import MediaTimeline from './MediaTimeline';
 import OptionsMenu from './OptionsMenu';
 
 import Sound from 'react-sound';
 
 import { Button, PlayerIcon } from 'react-player-controls'
-import ExifOrientationImg from 'react-exif-orientation-img'
+//import ExifOrientationImg from 'react-exif-orientation-img'
+
+import OtpInput from 'react-otp-input';
 
 
 
@@ -26,7 +29,8 @@ class App extends Component {
 		banner_image: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/backgrounds/BannerIcon.jpg',
 		upload_url: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
 		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items',
-		music_url: './music/Tom Baxter - Better.mp3'
+		music_url: './music/Tom Baxter - Better.mp3',
+		accessModel: 'PUBLIC'
 	}
 
 	var cloud_config2 = {
@@ -35,7 +39,8 @@ class App extends Component {
 		banner_image: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket/Family/backgrounds/HeeryFamilyIcon.jpg',
 		upload_url: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
 		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items',
-		music_url: './music/Ed Sheeran - Photograph.mp3'
+		music_url: './music/Ed Sheeran - Photograph.mp3',
+		accessModel: 'PUBLIC'
 	}
 	
 
@@ -45,7 +50,8 @@ class App extends Component {
 		banner_image: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket/Covid/backgrounds/StayAtHome.jpg',
 		upload_url: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
 		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items',
-		music_url: './music/Gavin James - Always.mp3'
+		music_url: './music/Gavin James - Always.mp3',
+		accessModel: 'PUBLIC'
 	}
 
 	var cloud_config4 = {
@@ -54,7 +60,9 @@ class App extends Component {
 		banner_image: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket/TaraGlen/backgrounds/TaraGlenBackground.jpg',
 		upload_url: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
 		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items',
-		music_url: './music/Pitbull - Timber ft Kesha.mp3'
+		music_url: './music/Pitbull - Timber ft Kesha.mp3',
+		accessModel: 'PRIVATE',
+		accessCode: "2020"
 	}
 
 
@@ -72,7 +80,8 @@ class App extends Component {
 			"Family = Life": cloud_config2,
 			"Heery's Scrapbook - Covid Times": cloud_config3,
 			"Tara Glen Gang": cloud_config4
-		}
+		},
+		codeInput: ""
 	}
 	
 	//this.togglePlay = this.togglePlay.bind(this);
@@ -137,18 +146,63 @@ class App extends Component {
 	var name = this.state.urlCodes[code];
 	if( !name ) console.error( "failed to map code " + code + " to a name in " + this.state.urlCodes )
 
+	// default to access only if its public
+	var enableAccess = ( this.state.timelines[name].accessModel == "PUBLIC" ? true : false )
+	if( !enableAccess ) console.log( "will prompt for access code for access model: "  + this.state.timelines[name].accessModel )
+
 	this.setState({
 		timelineChosen: true,
 		timeline_code: code,
 		timeline_name: name,
 		vizStyle: ( this.timeline ? this.timeline.vizStyle : "" ),
 		config: this.state.timelines[name],
+		accessEnabled: enableAccess,
 		play: false
 	});		
 		
   }
 	
+
+
+  /**
+   * handle inputting of access code, character by character
+   * @param {*} codeInput 
+   */
+  handleCodeInput = codeInput => {
+	  this.setState({ codeInput });
+	  this.checkAccessCode( codeInput )
+  }
+
+
+
+  /**
+   * Check OTP input against configured access code
+   * 
+   */
+  checkAccessCode( code ) {
 	
+	if( code && code.length == 4 ) {
+
+		console.log( "checking entered code: " + code + " against config " + this.state.config );
+
+		if( code == this.state.config.accessCode ) {
+			this.setState({		
+				accessEnabled: true,
+				errorMessage: ""
+			});		
+		}
+		else {
+			this.setState({		
+				errorMessage: "Incorrect code - please try again",
+				codeInput: ""
+			});		
+		}
+	
+	}
+
+  }
+
+
   
   /**
    * Render the top banner and the main timeline page
@@ -156,6 +210,7 @@ class App extends Component {
   render() {	  		   	  			
 	
 	// sharing link should produce: { window.location.href + "?scrapbookName=" + this.state.timeline_code}
+	// passcode using https://reactjsexample.com/otp-input-component-for-react/
 
     return (
 		<div className="main-area">
@@ -198,7 +253,27 @@ class App extends Component {
 							
 				</header>					
 				<div>
-    				<MediaTimeline timeline_name={this.state.timeline_name} config={this.state.config} ref={(tl) => { this.timeline = tl; }}/>											
+					{this.state.accessEnabled &&
+    					<MediaTimeline timeline_name={this.state.timeline_name} config={this.state.config} ref={(tl) => { this.timeline = tl; }}/>											
+					}
+
+					{!this.state.accessEnabled &&
+						<div>
+							<h1>Enter code:</h1>
+							<OtpInput
+								value={this.state.codeInput}
+								onChange={this.handleCodeInput}
+								shoshouldAutoFocus={true}
+								isInputNum={true}
+								numInputs={4}
+								separator={<span>-</span>}
+								containerStyle={"input-container"}
+								inputStyle={"inputStyle"}
+							/>					  
+							<br/>
+							{this.state.errorMessage}
+						</div>
+					}
 				</div>
 
 			</div>

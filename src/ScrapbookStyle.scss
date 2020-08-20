@@ -28,7 +28,7 @@
 .scrap-img {
 	object-fit: cover;
 	max-width: 100%;	
-	height: 30vw;
+	height: 50vw;
 	display: block;
 }
 
@@ -46,13 +46,13 @@
 	margin: 0;
 	padding: 2vw;
 	--verticalPadding: 2vw;
-	--overlap: 6vw;
+	--overlap: 1vw;
 	display: grid;
 	/* 6/5 grid from my compound grid generator: https://codepen.io/michellebarker/full/zYOMYWv */
 	grid-template-columns: 5fr 1fr 4fr 2fr 3fr 3fr 2fr 4fr 1fr 5fr;
 	grid-auto-rows: minmax(var(--verticalPadding), auto);
 	gap: 1rem;
-	max-width: 75vw;
+	max-width: 85vw;
 	margin: 0 auto;
 	align-items: center;
 	/*background: left top / 40rem no-repeat url(https://khpublicbucket.s3-eu-west-1.amazonaws.com/Common/overlays/scrapbook_overlay6.png), right bottom / 40rem no-repeat url(https://khpublicbucket.s3-eu-west-1.amazonaws.com/Common/overlays/scrapbook_overlay1.png);*/

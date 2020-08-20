@@ -21,6 +21,7 @@
     "react-image-file-resizer": "^0.2.0",
     "react-image-lightbox": "^5.1.0",
     "react-native-exif": "^0.4.0",
+    "react-otp-input": "^2.0.2",
     "react-player-controls": "^1.0.0-beta.0",
     "react-s3-uploader": "^4.8.0",
     "react-scripts": "^1.1.5",
