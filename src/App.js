@@ -61,11 +61,17 @@ class App extends Component {
 	this.state = {
 		timelineChosen: false,
 		play: false,
+		urlCodes: {
+			"CarolineOurGlue": "Caroline. Our Glue.",
+			"FamilyLife": "Family = Life",
+			"HeerysScrapbookCovidTimes": "Heery's Scrapbook - Covid Times",
+			"TaraGlenGang": "Tara Glen Gang"
+		},
 		timelines: {
-			"CarolineOurGlue": cloud_config1,
-			"FamilyLife": cloud_config2,
-			"HeerysScrapbookCovidTimes": cloud_config3,
-			"TaraGlenGang": cloud_config4
+			"Caroline. Our Glue.": cloud_config1,
+			"Family = Life": cloud_config2,
+			"Heery's Scrapbook - Covid Times": cloud_config3,
+			"Tara Glen Gang": cloud_config4
 		}
 	}
 	
@@ -107,7 +113,7 @@ class App extends Component {
 	var linkParams = new URLSearchParams( window.location.search )
 	var choice = linkParams.get("scrapbookName")
 
-	if( choice && this.state.timelines && this.state.timelines[choice] ) {
+	if( choice && this.state.urlCodes && this.state.urlCodes[choice] ) {
 
 		this.setState({
 			urlParam: window.location.search
@@ -117,17 +123,23 @@ class App extends Component {
 	}
 
 	// if it was deep-linked in we need to clear that now
-	//window.history.replaceState(null, null, window.location.pathname);
+	window.history.replaceState(null, null, window.location.pathname);
 
   }
+  
+
 
   /**
    * Handle choice of timeline on main page by rendering MediaTimeilne it
    */
-  handleChoice( name ) {
+  handleChoice( code ) {
+
+	var name = this.state.urlCodes[code];
+	if( !name ) console.error( "failed to map code " + code + " to a name in " + this.state.urlCodes )
 
 	this.setState({
 		timelineChosen: true,
+		timeline_code: code,
 		timeline_name: name,
 		vizStyle: ( this.timeline ? this.timeline.vizStyle : "" ),
 		config: this.state.timelines[name],
@@ -143,6 +155,7 @@ class App extends Component {
    */	 
   render() {	  		   	  			
 	
+	// sharing link should produce: { window.location.href + "?scrapbookName=" + this.state.timeline_code}
 
     return (
 		<div className="main-area">
@@ -180,7 +193,7 @@ class App extends Component {
 		    <div className="App">
 				<header className="App-header">
 					<img src={this.state.config.banner_image} className="App-banner" alt="banner" align="left" />
-					<h1 className="App-title">{this.state.timeline_name}</h1>		  
+					<h1 className="App-title">{this.state.timeline_name}</h1>		  					
 							
 							
 				</header>					
@@ -205,14 +218,14 @@ class App extends Component {
 
 				<div className="column">
     				<div className="App-card">						
-						<img src={this.state.timelines["TaraGlenGang"].banner_image} className="App-card-thumbnail"/>
+						<img src={this.state.timelines["Tara Glen Gang"].banner_image} className="App-card-thumbnail"/>
 						<p><button className="App-card-button" onClick={() => this.handleChoice("TaraGlenGang")}>Tara Glen Gang</button></p>
 					</div>	
 				</div>
 
   				<div className="column">
     				<div className="App-card">
-						<img src={this.state.timelines["HeerysScrapbookCovidTimes"].banner_image} className="App-card-thumbnail"/>
+						<img src={this.state.timelines["Heery's Scrapbook - Covid Times"].banner_image} className="App-card-thumbnail"/>
 						<p><button className="App-card-button" onClick={() => this.handleChoice("HeerysScrapbookCovidTimes")}>Heery's Scrapbook - Covid Times</button></p>
 					</div>
 				</div>
@@ -225,14 +238,14 @@ class App extends Component {
 				<div className="row">
 				<div className="column">
     				<div className="App-card">						
-						<img src={this.state.timelines["FamilyLife"].banner_image} className="App-card-thumbnail"/>
+						<img src={this.state.timelines["Family = Life"].banner_image} className="App-card-thumbnail"/>
 						<p><button className="App-card-button" onClick={() => this.handleChoice("FamilyLife")}>Family = Life</button></p>
 					</div>	
 				</div>
 				
 				<div className="column">
     				<div className="App-card">						
-						<img src={this.state.timelines["CarolineOurGlue"].banner_image} className="App-card-thumbnail"/>
+						<img src={this.state.timelines["Caroline. Our Glue."].banner_image} className="App-card-thumbnail"/>
 						<p><button className="App-card-button" onClick={() => this.handleChoice("CarolineOurGlue")}>Caroline. Our Glue.</button></p>
 					</div>
 				</div>
