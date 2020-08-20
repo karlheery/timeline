@@ -800,7 +800,7 @@ class TimelineItemCreator extends Component {
 								width={80} height={60} 
 								border={2}
 								image={f} 
-								crossOrigin="anonymous"
+								crossOrigin="use-credentials"
 								ref={this.setImageEditorRef}
 								rotate={this.state.rotations[( f.name ? f.name : f )]}/>
 							</div>

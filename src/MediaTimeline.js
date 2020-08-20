@@ -332,7 +332,7 @@ class MediaTimeline extends Component {
 		console.log( "querying timeline with params " + queryParams );
 				
 	  	axios.get( this.state.config.content_api, {
-			 params: queryParams
+			 //params: queryParams
 		})
 		.then((result) => {			// these arrows are used so we can call other methods and setState (indirectly) from within
 			

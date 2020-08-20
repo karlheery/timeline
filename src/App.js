@@ -54,7 +54,7 @@ class App extends Component {
 		banner_image: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket/TaraGlen/backgrounds/TaraGlenBackground.jpg',
 		upload_url: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
 		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items',
-		music_url: './music/Gavin James - Always.mp3'
+		music_url: './music/Pitbull - Timber ft Kesha.mp3'
 	}
 
 
@@ -62,10 +62,10 @@ class App extends Component {
 		timelineChosen: false,
 		play: false,
 		timelines: {
-			"Caroline. Our Glue.": cloud_config1,
-			"Family = Life": cloud_config2,
-			"Heery's Scrapbook - Covid Times": cloud_config3,
-			"Tara Glen Gang": cloud_config4
+			"CarolineOurGlue": cloud_config1,
+			"FamilyLife": cloud_config2,
+			"HeerysScrapbookCovidTimes": cloud_config3,
+			"TaraGlenGang": cloud_config4
 		}
 	}
 	
@@ -100,6 +100,28 @@ class App extends Component {
 
 
   /**
+   * Handle deep link in URL as page loads
+   */
+  componentDidMount() {
+
+	var linkParams = new URLSearchParams( window.location.search )
+	var choice = linkParams.get("scrapbookName")
+
+	if( choice && this.state.timelines && this.state.timelines[choice] ) {
+
+		this.setState({
+			urlParam: window.location.search
+		});
+		
+		this.handleChoice( choice );
+	}
+
+	// if it was deep-linked in we need to clear that now
+	//window.history.replaceState(null, null, window.location.pathname);
+
+  }
+
+  /**
    * Handle choice of timeline on main page by rendering MediaTimeilne it
    */
   handleChoice( name ) {
@@ -110,8 +132,8 @@ class App extends Component {
 		vizStyle: ( this.timeline ? this.timeline.vizStyle : "" ),
 		config: this.state.timelines[name],
 		play: false
-	});
-	
+	});		
+		
   }
 	
 	
@@ -120,7 +142,8 @@ class App extends Component {
    * Render the top banner and the main timeline page
    */	 
   render() {	  		   	  			
-		
+	
+
     return (
 		<div className="main-area">
 			<div id="main-bg" className="main-bg"></div>
@@ -179,20 +202,21 @@ class App extends Component {
 					<h1>Our Scrapbooks</h1>
 				</div>
 				<div className="row">
-  				<div className="column">
-    				<div className="App-card">
-						<img src={this.state.timelines["Heery's Scrapbook - Covid Times"].banner_image} className="App-card-thumbnail"/>
-						<p><button className="App-card-button" onClick={() => this.handleChoice("Heery's Scrapbook - Covid Times")}>Heery's Scrapbook - Covid Times</button></p>
-					</div>
-				</div>
-
 
 				<div className="column">
     				<div className="App-card">						
-						<img src={this.state.timelines["Caroline. Our Glue."].banner_image} className="App-card-thumbnail"/>
-						<p><button className="App-card-button" onClick={() => this.handleChoice("Caroline. Our Glue.")}>Caroline. Our Glue.</button></p>
+						<img src={this.state.timelines["TaraGlenGang"].banner_image} className="App-card-thumbnail"/>
+						<p><button className="App-card-button" onClick={() => this.handleChoice("TaraGlenGang")}>Tara Glen Gang</button></p>
+					</div>	
+				</div>
+
+  				<div className="column">
+    				<div className="App-card">
+						<img src={this.state.timelines["HeerysScrapbookCovidTimes"].banner_image} className="App-card-thumbnail"/>
+						<p><button className="App-card-button" onClick={() => this.handleChoice("HeerysScrapbookCovidTimes")}>Heery's Scrapbook - Covid Times</button></p>
 					</div>
 				</div>
+				
 				</div>
 
 				<br/>
@@ -201,15 +225,16 @@ class App extends Component {
 				<div className="row">
 				<div className="column">
     				<div className="App-card">						
-						<img src={this.state.timelines["Family = Life"].banner_image} className="App-card-thumbnail"/>
-						<p><button className="App-card-button" onClick={() => this.handleChoice("Family = Life")}>Family = Life</button></p>
+						<img src={this.state.timelines["FamilyLife"].banner_image} className="App-card-thumbnail"/>
+						<p><button className="App-card-button" onClick={() => this.handleChoice("FamilyLife")}>Family = Life</button></p>
 					</div>	
 				</div>
+				
 				<div className="column">
     				<div className="App-card">						
-						<img src={this.state.timelines["Tara Glen Gang"].banner_image} className="App-card-thumbnail"/>
-						<p><button className="App-card-button" onClick={() => this.handleChoice("Tara Glen Gang")}>Tara Glen Gang</button></p>
-					</div>	
+						<img src={this.state.timelines["CarolineOurGlue"].banner_image} className="App-card-thumbnail"/>
+						<p><button className="App-card-button" onClick={() => this.handleChoice("CarolineOurGlue")}>Caroline. Our Glue.</button></p>
+					</div>
 				</div>
 
 				</div>								
