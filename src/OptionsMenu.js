@@ -65,7 +65,7 @@ class OptionsMenu extends React.Component {
   }
 
   // This can be used to close the menu, e.g. when a user clicks a menu item
-  closeMenu () {
+  closeMenu () {    
     this.setState({menuOpen: false})
 	  this.child.current.clearMenuState();
   }

@@ -275,7 +275,8 @@ class TimelineItemCreator extends Component {
 		disabled: true, 		
 		filesToUpload: [],
 		rotations: [],
-		saveStatus: 0
+		saveStatus: 0,
+		filePreloadComplete: false	
 	})
 	  
   }
@@ -627,9 +628,11 @@ class TimelineItemCreator extends Component {
 		// make sure there's a placeholder for these entries.
 		this.setState({			
 			media: mediaFiles,
-			filesToUpload: filesToUpload,
+			filesToUpload: this.preloadFiles(filesToUpload),
+			filePreloadComplete: true,
 			rotations: rotations
 		});
+		
 
 	}
 
@@ -669,6 +672,65 @@ class TimelineItemCreator extends Component {
 		this.addFilesToEditPane(files)
 		this.setState({ saveStatus: 2 });
 						
+	}
+
+
+	async fetchFile( fileRef ) {
+
+		// it's either a URL to S3 or an actual File object already
+		if( fileRef && typeof fileRef === 'string' && fileRef.startsWith("http")) {
+
+			console.log( "retrieving file from URL " + fileRef )
+			var self = this;
+
+			let r = await fetch(fileRef, {method: 'GET', mode: 'cors'});
+			let b = await r.blob();
+			var fname = self.parseFilenameFromURL( fileRef )
+			var f = new File([b], fname, {type: "image/jpeg"})
+			return f;
+
+			  /*
+			  // paste into dev tool to test
+			  // fetch("https://s3-eu-west-1.amazonaws.com/khpublicbucket/TaraGlen/761E7CAD-7E80-462D-8EDA-582720A130B1_0_1597709364999.jpeg", { "method": "GET",  "mode": "cors" });
+
+	
+					method: 'GET', // *GET, POST, PUT, DELETE, etc.
+					mode: 'cors', // no-cors, *cors, same-origin
+					cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+					credentials: 'same-origin', // include, *same-origin, omit
+					headers: {
+							'Content-Type': 'application/json'
+						 'Content-Type': 'application/x-www-form-urlencoded',
+					},			
+				*/
+		}
+		else {
+			return fileRef
+		}
+	}
+
+
+	/**
+	 * Initiate fetch on file URLs where its needed as it doesnt seem like React Avator is handling the GET properly (with CORS) so we need to do explicit
+	 */
+	preloadFiles( fileList ) {
+		
+		var loadedFiles = new Array();
+		
+		// do any fetch files, awaiting responses
+		for( var f=0; f<fileList.length; f++ ) {
+			var file = fileList[f];
+
+			if( file && typeof file === "string" ) {
+				this.fetchFile(file).then(function(result) {
+					file = result;
+				});
+			}			
+
+			loadedFiles[f] = file;
+		}
+
+		return loadedFiles;
 	}
 
 
@@ -781,6 +843,7 @@ class TimelineItemCreator extends Component {
 				
 	//console.log( "rendering item creator for " + this.state.vizStyle );
 	console.log( "rendering with rotations: " + this.state.rotations )
+	
 
     return (
 			
@@ -791,7 +854,7 @@ class TimelineItemCreator extends Component {
 				  </Dropzone>
 
 				  <div className="App-itemimage-grid-container">
-				  {					
+				  {	this.state.filePreloadComplete && 				
 						this.state.filesToUpload.map(f => <React.Fragment>
 							<div><RotateLeft onClick={() => this.rotateImage("Left",f)}/></div>
 							<div><ReactAvatarEditor 
@@ -800,7 +863,7 @@ class TimelineItemCreator extends Component {
 								width={80} height={60} 
 								border={2}
 								image={f} 
-								crossOrigin="use-credentials"
+								crossOrigin="anonymous"
 								ref={this.setImageEditorRef}
 								rotate={this.state.rotations[( f.name ? f.name : f )]}/>
 							</div>

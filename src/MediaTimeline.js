@@ -139,6 +139,7 @@ class MediaTimeline extends Component {
 	
 	// now open the menu with this item as its state
 	window.menuComponent.openMenuToEdit( item );	
+	
   }
   
   
@@ -613,14 +614,18 @@ class MediaTimeline extends Component {
 
 						{timelineContent.content.map((contentItem) => {
 							return <React.Fragment>
-										<figure className="scrap-fig" key={contentItem.title_on_date} style={{gridColumn: imgPos[this.getItemRowIndex(timelineContent, contentItem)%2], gridRow: 'fig'+this.getItemRowIndex(timelineContent, contentItem)}} key={contentItem.title_on_date} id={contentItem.title_on_date}  								
-											onClick={() => this.editItem(contentItem)}>												
+										<figure className="scrap-fig" key={contentItem.title_on_date} 
+											style={{gridColumn: imgPos[this.getItemRowIndex(timelineContent, contentItem)%2], gridRow: 'fig'+this.getItemRowIndex(timelineContent, contentItem)}} key={contentItem.title_on_date} id={contentItem.title_on_date}
+											onClick={() => window.menuComponent.closeMenu()}
+										>												
 												<MediaItem className="scrap-img" contentItem={contentItem} show_details={false}
 													ref={(item) => { this.saveRef( contentItem.title_on_date, item ); }}
 													vizStyle={this.state.vizStyle}
 												/>									
 										</figure>
-										<p className="scrap-p" style={{gridColumn: pPos[this.getItemRowIndex(timelineContent, contentItem)%2], gridRow: 'p'+this.getItemRowIndex(timelineContent, contentItem), transform:'rotate(-0.8deg)', WebkitTransform: 'rotate(-0.8deg)'}}>{contentItem.comment} <EditIcon className="hoverable-img" onClick={() => window.timelineComponent.editItem(contentItem)}/></p>										
+										<p className="scrap-p" style={{gridColumn: pPos[this.getItemRowIndex(timelineContent, contentItem)%2], gridRow: 'p'+this.getItemRowIndex(timelineContent, contentItem), transform:'rotate(-0.8deg)', WebkitTransform: 'rotate(-0.8deg)'}}>{contentItem.comment} 
+											<EditIcon className="hoverable-img" onClick={() => window.timelineComponent.editItem(contentItem)}/>
+										</p>										
 									</React.Fragment>
 						})}
 						
