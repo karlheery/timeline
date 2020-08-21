@@ -323,9 +323,6 @@ class TimelineItemCreator extends Component {
 			})
 			.then((result) => {
 			
-				// merge this event with timeline ...as opposed to re-getting the whole thing
-				this.removeEventFromTimeline( timelineItem.old_title );
-				
 				// get identifier
 				var savedEvent = timelineItem.old_title;
 		  
@@ -424,9 +421,6 @@ class TimelineItemCreator extends Component {
 			})
 			.then((result) => {
 				
-				// merge this event with timeline ...as opposed to re-getting the whole thing
-				this.addEventToTimeline( result );
-				
 				// get identifier
 				var savedEvent = ( this.state.vizStyle == "Scrapbook" ? "" : result.data.title );
 		  
@@ -491,19 +485,6 @@ class TimelineItemCreator extends Component {
   }
   
   
-  /**
-   * Handle merge of timeline item and route user to it on the screen
-   */
-  addEventToTimeline( timelineItem ) {
-	  
-	  // @TODO
-  }
-  
-  removeEventFromTimeline( itemName ) {
-	  
-  }
-  
-
 
   /**
    * Handle changes to form by updating state
@@ -683,7 +664,9 @@ class TimelineItemCreator extends Component {
 			console.log( "retrieving file from URL " + fileRef )
 			var self = this;
 
-			let r = await fetch(fileRef, {method: 'GET', mode: 'cors'});
+			// no-cache and origin is essential to avoiding non-deterministic CORS issues
+			// read: https://stackoverflow.com/questions/44800431/caching-effect-on-cors-no-access-control-allow-origin-header-is-present-on-th
+			let r = await fetch(fileRef, {method: 'GET', mode: 'cors', cache: 'no-cache', referrerPolicy: 'origin'});
 			let b = await r.blob();
 			var fname = self.parseFilenameFromURL( fileRef )
 			var f = new File([b], fname, {type: "image/jpeg"})

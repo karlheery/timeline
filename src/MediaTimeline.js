@@ -159,15 +159,22 @@ class MediaTimeline extends Component {
    updateItem( item ) {
 	   
 	   var timelineContent = this.state.timelineData;
-	   
+	   var foundIt = false;
+
 	   for( var i=0; i<timelineContent.content.length; i++ ) {
 		   
 		   // replace the item
 			if( timelineContent.content[i].title_on_date === item.title_on_date ) {
 				timelineContent.content[i] = item;
+				foundIt = true;
 			}
 	   }
 	   
+	   // new item - append it
+	   if( !foundIt ) {
+			timelineContent.content.push(item)
+	   }
+
   	   // reset state
 	   this.setTimeline( timelineContent );
 
