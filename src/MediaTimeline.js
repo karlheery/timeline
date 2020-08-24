@@ -612,11 +612,11 @@ class MediaTimeline extends Component {
 		  
 		console.log( timelineContent.content.length + " items to show")
 
-		return (			
+		return (	<React.Fragment>
 					<div id='timeline' className='scrap-grid' style={{gridTemplateRows: gridStyle}}>
 						<header>
 							<h1 className='scrap-h1'>{timelineContent.timeline_name}</h1>
-							<h2>{timelineContent.description}</h2>
+							<h2 className='scrap-h2'>{timelineContent.description}</h2>
 						</header>
 
 						{timelineContent.content.map((contentItem) => {
@@ -630,13 +630,21 @@ class MediaTimeline extends Component {
 													vizStyle={this.state.vizStyle}
 												/>									
 										</figure>
-										<p className="scrap-p" style={{gridColumn: pPos[this.getItemRowIndex(timelineContent, contentItem)%2], gridRow: 'p'+this.getItemRowIndex(timelineContent, contentItem), transform:'rotate(-0.8deg)', WebkitTransform: 'rotate(-0.8deg)'}}>{contentItem.comment} 
+										<p className="scrap-p" style={{gridColumn: pPos[this.getItemRowIndex(timelineContent, contentItem)%2], gridRow: 'p'+this.getItemRowIndex(timelineContent, contentItem), transform:'rotate(-0.8deg)', WebkitTransform: 'rotate(-0.8deg)'}}>
+											{contentItem.comment} 
+											<br/>
 											<EditIcon className="hoverable-img" onClick={() => window.timelineComponent.editItem(contentItem)}/>
 										</p>										
 									</React.Fragment>
 						})}
-						
+											
 					</div>
+
+					<div>
+						<h2 className="scrap-p">The End.<br/>...or is it. Let's keep adding!</h2>
+						<section className="end" ref={(section) => { this.EndOfTimeline = section; }}></section>		
+					</div>
+					</React.Fragment>		
 		);
 	}
 
@@ -666,8 +674,13 @@ class MediaTimeline extends Component {
 						})}
 					</VerticalTimeline>					
 
-					<section className="end" ref={(section) => { this.EndOfTimeline = section; }}></section>
-
+					
+					<div>
+						<h2>The End.</h2>
+						<p>...or is it. Let's keep adding!</p>
+						<section className="end" ref={(section) => { this.EndOfTimeline = section; }}></section>		
+					</div>
+						
 				</div>				
 	);
 

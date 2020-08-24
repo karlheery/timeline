@@ -87,7 +87,7 @@ class TimelineItemCreator extends Component {
    */
   parseFilenameFromURL(file) {
 
-	var name = ( file.name ? file.name : file );
+	var name = ( file.name ? file.name : ( typeof file === 'string' ? file : "unknown" ) );
 
 	// if we were editing a server side file we need the short name again
 	// parse the list of files so we can see have simple short names for reuploading existing S3 images after edit
@@ -346,7 +346,9 @@ class TimelineItemCreator extends Component {
 					saveStatus: 0
 				});
 				
-			});			
+			});		
+			
+			this.clearAndExit(this)
 			
 		}
 		else {
@@ -362,7 +364,19 @@ class TimelineItemCreator extends Component {
 				
 				new Promise( async function(resolve, reject) { 
 
-					var ftoL = self.state.filesToUpload;
+					// split images from videos temporarily
+					var ftoL = new Array();
+					var vtoL = new Array();
+					for( var c=0; c<self.state.filesToUpload.length; c++ ) {						
+						let checkType = self.state.filesToUpload[c];
+
+						if( (checkType.type && checkType.type.startsWith("video")) || 
+							(!checkType.type && ['mp4', '.avi', 'mov'].indexOf( checkType.split('.').pop()) >= 0 )) {							
+							vtoL.push( checkType );
+						} else {	// assume image
+							ftoL.push( checkType );
+						}
+					}
 
 					let readyForUpload = await Promise.all(ftoL.map(async(value) => { 
 						
@@ -370,8 +384,7 @@ class TimelineItemCreator extends Component {
 							var name = ( value && value.name? value.name : value )
 							name = self.parseFilenameFromURL( name )
 
-							const blob = self.imageEditors[name].getImage().toBlob(function(blob) {								
-								
+							const blob = self.imageEditors[name].getImage().toBlob(function(blob) {																
 								console.log( "creating new image file for upload " + name)
 								var imageFile = new File([blob], name, {type: "image/jpeg"});  // option to add type info {type: "image/jpeg"}							
 								console.log( "image created for upload " + imageFile );
@@ -381,7 +394,7 @@ class TimelineItemCreator extends Component {
 						return result;						
 					}));
 					
-					var uploadedFileURIs = self.uploadFile( readyForUpload, f, []);
+					var uploadedFileURIs = self.uploadFile( readyForUpload.concat(vtoL), f, []);
 
 					if( uploadedFileURIs )
 						resolve(uploadedFileURIs);
@@ -717,6 +730,19 @@ class TimelineItemCreator extends Component {
 	}
 
 
+	
+	isMovie(checkType) {
+
+		// if not preloaded yet - do nothing useful - send them through as if images (dont filter them out altogether as preloadimages gets called later)
+		if( (checkType.type && checkType.type.startsWith("video")) || 
+			(!checkType.type && typeof checkType === 'string' && ['mp4', '.avi', 'mov'].indexOf( checkType.toLowerCase().split('.').pop()) >= 0 )) {
+			return true;
+		} else { // assume image
+			return false;
+		}
+	
+	}
+
 
 	/**
 	 * Handle the Axios calls to post to AWS, recursively working through all files
@@ -732,78 +758,153 @@ class TimelineItemCreator extends Component {
 	  
 	  var file = files[f];						
 	  //console.log("preparing to upload...");
-			  
-	  var tokens = file.name.split(".");	// look for file extension		
-	  var suffix = tokens.splice(tokens.length-1,1);	// take off suffix
-	  var uniqueFileName  = tokens.join('');	// join the rest
-	  uniqueFileName = uniqueFileName + "_" + f + "_" + moment().valueOf();		// add current time
-	  uniqueFileName = uniqueFileName + "." + suffix;		// add the suffix again		
-	  console.log("uploading " + uniqueFileName );
-
-	  var uploadPromise = axios.post( this.state.config.upload_url, {
-		objectName: this.state.config.s3_folder +  '/' + uniqueFileName,
-		contentType: file.type
-	  })
-	  .then((result) => {
-		var signedUrl = result.data.signed_url;
 		
-		var options = {
-		  headers: {
-			'Content-Type': file.type
-		  },			
-		  crossDomain: true			
-		};
-
-		console.log( "now putting the file " + file + " with URL " + signedUrl );	  
-		
-		return axios.put(signedUrl, file, options)		
-		.then((result) => {
-			console.log(result);
-			
-			/*
-			  // file names
-			if( uploadedSoFar.indexOf( uniqueFileName ) < 0 ) {
-				uploadedSoFar.push( uniqueFileName );
-			}
-			*/
-
-			// dereference the old one
-			var oldIndex =  uploadedSoFar.indexOf( file.name )
-			if( oldIndex >= 0 ) {
-				uploadedSoFar.splice( oldIndex, 1 )
-			}
-
-			var s3File = this.state.config.s3_bucket + '/' + this.state.config.s3_folder + '/' + uniqueFileName;
-			if( uploadedSoFar.indexOf( s3File ) < 0 ) {
-			  console.log( "uploaded S3 URI: " +  s3File)
-			  uploadedSoFar.push( s3File );
-			  //s3Uris.push( s3File );	// because we cant wait for state!
-			}
-			
-			// now update state so we rerender
-			this.setState({			  
-			  media: uploadedSoFar,
-			  uploadMessage: uploadedSoFar.length + " files uploaded"
-			});
-								  
-		})
-
-	  })
-	  .catch(function (err) {
-		console.log(err);
-	  });
-
-
-	  // wait for above uploads to complete so we can track media items gathering before saving even
-	  await uploadPromise
+	  // we dont edit movies so we dont reload them - just maintain a reference them ...but only if they have been uploaded before
+	  if( this.isMovie(file) && typeof file === 'string' && file.toLowerCase().startsWith("https")  ) {
+		uploadedSoFar.push( file );		
 	  
+	  	// now update state so we rerender
+	  	this.setState({			  
+			media: uploadedSoFar,
+			uploadMessage: uploadedSoFar.length + " files uploaded"
+	  	});
+	  }
+	  else {
+
+		var tokens = file.name.split(".");	// look for file extension		
+		var suffix = tokens.splice(tokens.length-1,1);	// take off suffix
+		var uniqueFileName  = tokens.join('');	// join the rest
+		uniqueFileName = uniqueFileName + "_" + f + "_" + moment().valueOf();		// add current time
+		uniqueFileName = uniqueFileName + "." + suffix;		// add the suffix again		
+		console.log("uploading " + uniqueFileName );
+
+		var uploadPromise = axios.post( this.state.config.upload_url, {
+			objectName: this.state.config.s3_folder +  '/' + uniqueFileName,
+			contentType: file.type
+		})
+		.then((result) => {
+			var signedUrl = result.data.signed_url;
+			
+			var options = {
+			headers: {
+				'Content-Type': file.type
+			},			
+			crossDomain: true			
+			};
+
+			console.log( "now putting the file " + file + " with URL " + signedUrl );	  
+			
+			return axios.put(signedUrl, file, options)		
+			.then((result) => {
+				console.log(result);
+				
+				// dereference the old one
+				var oldIndex =  uploadedSoFar.indexOf( file.name )
+				if( oldIndex >= 0 ) {
+					uploadedSoFar.splice( oldIndex, 1 )
+				}
+
+				var s3File = this.state.config.s3_bucket + '/' + this.state.config.s3_folder + '/' + uniqueFileName;
+				if( uploadedSoFar.indexOf( s3File ) < 0 ) {
+					console.log( "uploaded S3 URI: " +  s3File)
+					uploadedSoFar.push( s3File );				
+				}
+				
+				// now update state so we rerender
+				this.setState({			  
+				media: uploadedSoFar,
+				uploadMessage: uploadedSoFar.length + " files uploaded"
+				});
+									
+			})
+
+		})
+		.catch(function (err) {
+			console.log(err);
+		});
+
+
+		// wait for above uploads to complete so we can track media items gathering before saving even
+		await uploadPromise
+	  }
 	  // keep calling recursively until all files are up
 	  return this.uploadFile(files, f+1, uploadedSoFar)			  
 
   }
   
   
+  /**
+   * 
+   * Before displaying thumbnail lets get pro-rata image dimensions (requiring us to convert to Image first)
+   * @param {*} file 
+   */
+  getImageWidth( file ) {
+	
+	const reader = new FileReader();
+	var imageFile = new Image();
+
+  	reader.addEventListener("load", function () {
+		
+		// convert image file to base64 string
+		if (typeof file !== "string") {
+			imageFile.src = reader.result;
+		}
+		
+		// the longest side gets 80, the other gets a pro-rata of that.THE ONLOAD ISNT TRIGGERED HERE SO FALLING INTO THIS "0" CONDITION
+		if( imageFile.width > imageFile.height || imageFile.height == 0 || imageFile.width == 0 ) {
+			return 80
+		}
+		else {
+			return imageFile.width / imageFile.height * 80 
+		}	  
+
+  	}, false);
+
+  	if (typeof file === "string") {
+		imageFile.src = file 
+	} else {
+		reader.readAsDataURL(file);		
+	}
+	  
+  }
   
+
+
+  /**
+   * 
+   * Before displaying thumbnail lets get pro-rata image dimensions (requiring us to convert to Image first)
+   * @param {*} file 
+   */
+  getImageHeight( file ) {
+	const reader = new FileReader();
+	var imageFile = new Image();
+
+  	reader.addEventListener("load", function () {
+	    // convert image file to base64 string
+		if (typeof file !== "string") {
+			imageFile.src = reader.result;
+		}
+		
+		// the longest side gets 80, the other gets a pro-rata of that. THE ONLOAD ISNT TRIGGERED HERE SO FALLING INTO THIS "0" CONDITION
+		if( imageFile.height > imageFile.width || imageFile.height == 0 || imageFile.width == 0 ) {
+			return 80
+		}
+		else {
+			return imageFile.height / imageFile.width * 80 
+		}	   
+
+	}, false);
+
+	if (typeof file === "string") {
+		imageFile.src = file 
+	} else {
+		reader.readAsDataURL(file);		
+	}
+	
+  }
+
+
+
   /**
    * Handle the rendering of the form
    */
@@ -826,7 +927,21 @@ class TimelineItemCreator extends Component {
 				
 	//console.log( "rendering item creator for " + this.state.vizStyle );
 	console.log( "rendering with rotations: " + this.state.rotations )
-	
+		
+	// split images from videos temporarily
+	var ftoL = new Array();
+	var vtoL = new Array();
+	for( var c=0; c<this.state.filesToUpload.length; c++ ) {
+		let checkType = this.state.filesToUpload[c];
+						
+		// if not preloaded yet - do nothing useful - send them through as if images (dont filter them out altogether as preloadimages gets called later)
+		if( (checkType.type && checkType.type.startsWith("video")) || 
+			(!checkType.type  && typeof checkType === 'string' && ['mp4', '.avi', 'mov'].indexOf( checkType.toLowerCase().split('.').pop()) >= 0 )) {
+			vtoL.push( checkType );
+		} else { // assume image
+			ftoL.push( checkType );
+		}
+	}
 
     return (
 			
@@ -838,12 +953,13 @@ class TimelineItemCreator extends Component {
 
 				  <div className="App-itemimage-grid-container">
 				  {	this.state.filePreloadComplete && 				
-						this.state.filesToUpload.map(f => <React.Fragment>
+						ftoL.map(f => <React.Fragment>
 							<div><RotateLeft onClick={() => this.rotateImage("Left",f)}/></div>
 							<div><ReactAvatarEditor 
 								id={this.parseFilenameFromURL(f)}
 								key={this.parseFilenameFromURL(f)}
-								width={80} height={60} 
+								width={80} 
+								height={60}
 								border={2}
 								image={f} 
 								crossOrigin="anonymous"
@@ -855,6 +971,10 @@ class TimelineItemCreator extends Component {
 							</React.Fragment> )
 				  }
 				  </div>
+
+				  {vtoL && vtoL.length>0 &&
+				  	<p>{vtoL.length} video(s) chosen</p>
+				  }
 				  
 				</div>
 				

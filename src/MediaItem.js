@@ -114,6 +114,22 @@ class MediaItem extends Component {
 	}
 
 
+	
+	
+	isMovie(checkType) {
+
+		// if not preloaded yet - do nothing useful - send them through as if images (dont filter them out altogether as preloadimages gets called later)
+		if( (checkType.type && checkType.type.startsWith("video")) || 
+			(!checkType.type && typeof checkType === 'string' && ['mp4', '.avi', 'mov'].indexOf( checkType.toLowerCase().split('.').pop()) >= 0 )) {
+			return true;
+		} else { // assume image
+			return false;
+		}
+	
+
+	}
+
+
   /**
    * Build and display the timeline
    */
@@ -152,7 +168,7 @@ class MediaItem extends Component {
 				)}
 
 
-				{contentItem.media && (contentItem.media.length > 1 || (contentItem.media.length == 1 && !contentItem.media[0].toLowerCase().endsWith(('.mp4', '.avi', '.mov')))) && (
+				{contentItem.media && (contentItem.media.length > 1 || (contentItem.media.length == 1 && !(this.isMovie(contentItem.media[0])))) && (
 					<VizSensor
 						onChange={(isVisible) => {
 							this.setState({itemVisible: isVisible});
@@ -170,11 +186,21 @@ class MediaItem extends Component {
 				
 				)}
 				
-				{contentItem.media && contentItem.media.length == 1 && contentItem.media[0].toLowerCase().endsWith(('.mp4', '.avi', '.mov')) && (
-					<video controls>
+				{contentItem.media && contentItem.media.length == 1 && this.isMovie(contentItem.media[0]) && (
+
+					<VizSensor
+						onChange={(isVisible) => {
+							this.setState({itemVisible: isVisible});
+							// need to play video now - react-video needed https://video-react.js.org/components/player/							
+							// autoPlay="autoplay" 
+						}}				
+					>	
+					<video preload="auto" controls="controls">
 						<source src={contentItem.media[0]} className='App-itemmovie' onClick={()=>this.openModal(contentItem.media[0])}/>
 						Your browser does not support the video tag.
-					</video>		  						
+					</video>		  
+
+					</VizSensor>						
 					
 				)}
 
