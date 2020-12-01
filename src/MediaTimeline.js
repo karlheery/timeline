@@ -10,6 +10,7 @@ import { VerticalTimeline, VerticalTimelineElement }  from 'react-vertical-timel
 import 'react-vertical-timeline-component/style.min.css';
 
 import MediaItem  from './MediaItem';
+import PolaroidDisplay from './PolaroidDisplay';
 
 import axios from 'axios';
 
@@ -391,7 +392,7 @@ class MediaTimeline extends Component {
 		})
 		.catch((err) => {
 			console.error( err );
-			alert("Cant show timeline right now - sorry! Check your internet connetion? The following is just a sampler", err);
+			alert("Cant show timeline right now - sorry! Check your internet connection? The following is just a sampler", err);
 			this.setTimeline( this.exampleTimeline );
 		});
 		
@@ -592,8 +593,29 @@ class MediaTimeline extends Component {
 	);
 	*/		
 
+	if( this.state.timelineData && this.state.timelineData.viz_style && this.state.timelineData.viz_style === "Polaroid" ) {
+		console.log( "Displaying in Polaroid mode");
+
+		return ( 
+			<React.Fragment>
+					<div id='timeline' className='scrap-grid'>
+						<header>
+							<h1 className='scrap-h1'>{timelineContent.timeline_name}</h1>
+							<h2 className='scrap-h2'>{timelineContent.description}</h2>
+						</header>
+						
+						<canvas id="mediaview" width={900} height={600} ref={this.refCallback} />
+						<PolaroidDisplay timeline_name={this.state.timeline_name} canvasArea='mediaview' timelineContent={timelineContent} />
+					</div>
+
+			</React.Fragment>	
+		);
+
+	}	
+	
 	
 	if( this.state.timelineData && this.state.timelineData.viz_style && this.state.timelineData.viz_style === "Scrapbook" ) {
+		console.log( "Displaying in Scrapbook mode");
 
 		//used to say style="--aspect-ratio: 4/3;"   ...or 4/3 for middle one
 		let imgStyle = {
@@ -655,6 +677,9 @@ class MediaTimeline extends Component {
 	//ref={(item) => { this.saveRef( contentItem.title_on_date, item ); }}/>										
    
    
+	// ELSE the default view...
+
+	console.log( "Displaying in VerticalTimeline mode");
 	return (
 				<div id='timeline'>
 					<VerticalTimeline>

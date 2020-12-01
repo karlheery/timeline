@@ -301,7 +301,7 @@ class App extends Component {
   				<div className="column">
     				<div className="App-card">
 						<img src={this.state.timelines["Heery's Scrapbook - Covid Times"].banner_image} className="App-card-thumbnail"/>
-						<p><button className="App-card-button" onClick={() => this.handleChoice("HeerysScrapbookCovidTimes")}>Heery's Scrapbook - Covid Times</button></p>
+						<p><button className="App-card-button" onClick={() => this.handleChoice("	")}>Heery's Scrapbook - Covid Times</button></p>
 					</div>
 				</div>
 				
