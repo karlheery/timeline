@@ -66,6 +66,17 @@ class App extends Component {
 	}
 
 
+	var cloud_config5 = {
+		s3_bucket: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket',
+		s3_folder: 'Christmas',		// based on choice
+		banner_image: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket/Christmas/backgrounds/Snowflake.jpg',
+		upload_url: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
+		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items',
+		music_url: './music/Michael Buble - Have Yourself A Merry Little Christmas.mp3',
+		accessModel: 'PUBLIC'
+	}
+
+
 	this.state = {
 		timelineChosen: false,
 		play: false,
@@ -73,13 +84,15 @@ class App extends Component {
 			"CarolineOurGlue": "Caroline. Our Glue.",
 			"FamilyLife": "Family = Life",
 			"HeerysScrapbookCovidTimes": "Heery's Scrapbook - Covid Times",
-			"TaraGlenGang": "Tara Glen Gang"
+			"TaraGlenGang": "Tara Glen Gang",
+			"Christmas": "Christmas"
 		},
 		timelines: {
 			"Caroline. Our Glue.": cloud_config1,
 			"Family = Life": cloud_config2,
 			"Heery's Scrapbook - Covid Times": cloud_config3,
-			"Tara Glen Gang": cloud_config4
+			"Tara Glen Gang": cloud_config4,
+			"Christmas": cloud_config5
 		},
 		codeInput: ""
 	}
@@ -329,6 +342,24 @@ class App extends Component {
 
 				<br/>
 				<br/>
+
+				<div className="row">
+				<div className="column">
+    				<div className="App-card">						
+						<img src={this.state.timelines["Family = Life"].banner_image} className="App-card-thumbnail"/>
+						<p><button className="App-card-button" onClick={() => this.handleChoice("Christmas")}>Christmas</button></p>
+					</div>	
+				</div>
+				
+				<div className="column">
+				
+				</div>
+
+				</div>								
+
+				<br/>
+				<br/>
+
 
 			</div>}
 
