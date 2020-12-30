@@ -24,7 +24,7 @@ class PolaroidDisplay extends Component {
         // set initial state
         this.state = {
             timeline_name: this.props.timeline_name,
-            timelineContent: this.props.content,
+            timelineContent: this.props.timelineContent,
             medialist: this.medialist,
             config: this.props.config,
             canvasArea: this.props.canvasArea,

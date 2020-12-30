@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { PropTypes } from 'react'
 
 import './scrapbook-style.css';
+import './flipbook-style.css';
 
 // consider toggling with a tiled photo gallery
 // ...like: https://github.com/neptunian/react-photo-gallery
@@ -11,6 +12,7 @@ import 'react-vertical-timeline-component/style.min.css';
 
 import MediaItem  from './MediaItem';
 import PolaroidDisplay from './PolaroidDisplay';
+import FlipbookDisplay from './FlipbookDisplay';
 
 import axios from 'axios';
 
@@ -37,7 +39,7 @@ class MediaTimeline extends Component {
         name: "Caroline's Timeline",
             background: "",
 			description: "A beautiful life...",
-			vizStyle: "Scrapbook",
+			viz_style: "Polaroid",
             bucket_url: "",
             basedir: "",
             name_contains: "",
@@ -410,7 +412,11 @@ class MediaTimeline extends Component {
 			vizStyle: tData.viz_style
 	  });
 
-	  window.menuComponent.setMenuStyle( tData.viz_style );
+	  // toggle menu style to suit viz type, if it exists yet
+	  if( window.menuComponent ) {
+		  window.menuComponent.setMenuStyle( tData.viz_style );
+	  }
+
 
 	  console.log( "timeline data saved: " + this.state.timelineData );
   }
@@ -612,6 +618,21 @@ class MediaTimeline extends Component {
 		);
 
 	}	
+
+
+	if( this.state.timelineData && this.state.timelineData.viz_style && this.state.timelineData.viz_style === "Flipbook" ) {
+		console.log( "Displaying in Flipbook mode");
+
+		return ( 
+			<React.Fragment>
+					<div id='timeline' className='book-grid'>
+						<FlipbookDisplay timeline_name={this.state.timeline_name} timelineContent={timelineContent} cover={this.state.config.banner_image} />						
+					</div>
+
+			</React.Fragment>	
+		);
+
+	}	
 	
 	
 	if( this.state.timelineData && this.state.timelineData.viz_style && this.state.timelineData.viz_style === "Scrapbook" ) {
@@ -663,20 +684,13 @@ class MediaTimeline extends Component {
 					</div>
 
 					<div>
-						<h2 className="scrap-p">The End.<br/>...or is it. Let's keep adding!</h2>
+						
 						<section className="end" ref={(section) => { this.EndOfTimeline = section; }}></section>		
 					</div>
 					</React.Fragment>		
 		);
 	}
 
-	//WORKS <img classNam="scrap-img" src={contentItem.media[0]} alt='Media'/>
-
-	//{contentItem.media.map((itm) => {
-	// <MediaItem contentItem={contentItem} 
-	//ref={(item) => { this.saveRef( contentItem.title_on_date, item ); }}/>										
-   
-   
 	// ELSE the default view...
 
 	console.log( "Displaying in VerticalTimeline mode");

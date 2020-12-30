@@ -4,8 +4,8 @@ import './OptionsMenu.css';
 import './InputDialog.css';
 import MediaTimeline from './MediaTimeline';
 import OptionsMenu from './OptionsMenu';
-
 import Sound from 'react-sound';
+import Snowfall from 'react-snowfall'
 
 import { Button, PlayerIcon } from 'react-player-controls'
 //import ExifOrientationImg from 'react-exif-orientation-img'
@@ -73,6 +73,18 @@ class App extends Component {
 		upload_url: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
 		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items',
 		music_url: './music/Michael Buble - Have Yourself A Merry Little Christmas.mp3',
+		effect: 'snow',
+		accessModel: 'PUBLIC'
+	}
+
+	var cloud_config6 = {
+		s3_bucket: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket',
+		s3_folder: 'NightBeforeXMas',		// based on choice
+		banner_image: 'https://khpublicbucket.s3-eu-west-1.amazonaws.com/NightBeforeXMas/XmasBook_Cover.jpg',
+		upload_url: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
+		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items',
+		music_url: ['./audiobooks/NightBeforeXMas/Section1.mp3', './audiobooks/NightBeforeXMas/Section2.mp3', './audiobooks/NightBeforeXMas/Section3.mp3', './audiobooks/NightBeforeXMas/Section4.mp3', './audiobooks/NightBeforeXMas/Section5.mp3'],
+		effect: 'snow',
 		accessModel: 'PUBLIC'
 	}
 
@@ -83,16 +95,18 @@ class App extends Component {
 		urlCodes: {
 			"CarolineOurGlue": "Caroline. Our Glue.",
 			"FamilyLife": "Family = Life",
-			"HeerysScrapbookCovidTimes": "Heery's Scrapbook - Covid Times",
+			"Covid": "Heery's Scrapbook - Covid Times",
 			"TaraGlenGang": "Tara Glen Gang",
-			"Christmas": "Christmas"
+			"Christmas": "Christmas",
+			"NightBeforeXMas": "The Night Before Christmas"			
 		},
 		timelines: {
 			"Caroline. Our Glue.": cloud_config1,
 			"Family = Life": cloud_config2,
 			"Heery's Scrapbook - Covid Times": cloud_config3,
 			"Tara Glen Gang": cloud_config4,
-			"Christmas": cloud_config5
+			"Christmas": cloud_config5,
+			"The Night Before Christmas": cloud_config6
 		},
 		codeInput: ""
 	}
@@ -145,7 +159,7 @@ class App extends Component {
 	}
 
 	// if it was deep-linked in we need to clear that now
-	window.history.replaceState(null, null, window.location.pathname);
+	window.history.replaceState(null, null, window.location.pathname);	
 
   }
   
@@ -162,12 +176,13 @@ class App extends Component {
 	// default to access only if its public
 	var enableAccess = ( this.state.timelines[name].accessModel == "PUBLIC" ? true : false )
 	if( !enableAccess ) console.log( "will prompt for access code for access model: "  + this.state.timelines[name].accessModel )
-
+	
 	this.setState({
 		timelineChosen: true,
 		timeline_code: code,
 		timeline_name: name,
 		vizStyle: ( this.timeline ? this.timeline.vizStyle : "" ),
+		effect: this.state.timelines[name].effect,
 		config: this.state.timelines[name],
 		accessEnabled: enableAccess,
 		play: false
@@ -222,6 +237,7 @@ class App extends Component {
    */	 
   render() {	  		   	  			
 	
+	
 	// sharing link should produce: { window.location.href + "?scrapbookName=" + this.state.timeline_code}
 	// passcode using https://reactjsexample.com/otp-input-component-for-react/
 
@@ -229,6 +245,11 @@ class App extends Component {
 		<div className="main-area">
 			<div id="main-bg" className="main-bg"></div>
 
+			{this.state.effect == "snow" &&  <Snowfall  			
+  				color="white"
+  				snowflakeCount={250}
+				/>
+			}
 
 			{this.state.timelineChosen	&&
 			<div>
@@ -314,8 +335,16 @@ class App extends Component {
   				<div className="column">
     				<div className="App-card">
 						<img src={this.state.timelines["Heery's Scrapbook - Covid Times"].banner_image} className="App-card-thumbnail"/>
-						<p><button className="App-card-button" onClick={() => this.handleChoice("	")}>Heery's Scrapbook - Covid Times</button></p>
+						<p><button className="App-card-button" onClick={() => this.handleChoice("Covid")}>Heery's Scrapbook - Covid Times</button></p>
 					</div>
+				</div>
+
+
+				<div className="column">
+    				<div className="App-card">						
+						<img src={this.state.timelines["Family = Life"].banner_image} className="App-card-thumbnail"/>
+						<p><button className="App-card-button" onClick={() => this.handleChoice("FamilyLife")}>Family = Life</button></p>
+					</div>	
 				</div>
 				
 				</div>
@@ -324,12 +353,6 @@ class App extends Component {
 				<br/>
 
 				<div className="row">
-				<div className="column">
-    				<div className="App-card">						
-						<img src={this.state.timelines["Family = Life"].banner_image} className="App-card-thumbnail"/>
-						<p><button className="App-card-button" onClick={() => this.handleChoice("FamilyLife")}>Family = Life</button></p>
-					</div>	
-				</div>
 				
 				<div className="column">
     				<div className="App-card">						
@@ -338,24 +361,24 @@ class App extends Component {
 					</div>
 				</div>
 
-				</div>								
-
-				<br/>
-				<br/>
-
-				<div className="row">
 				<div className="column">
     				<div className="App-card">						
-						<img src={this.state.timelines["Family = Life"].banner_image} className="App-card-thumbnail"/>
+						<img src={this.state.timelines["Christmas"].banner_image} className="App-card-thumbnail"/>
 						<p><button className="App-card-button" onClick={() => this.handleChoice("Christmas")}>Christmas</button></p>
 					</div>	
 				</div>
 				
 				<div className="column">
-				
+					<div className="App-card">						
+						<img src={this.state.timelines["The Night Before Christmas"].banner_image} className="App-card-thumbnail"/>
+						<p><button className="App-card-button" onClick={() => this.handleChoice("NightBeforeXMas")}>The Night Before Christmas</button></p>
+					</div>
 				</div>
 
 				</div>								
+
+				<br/>
+				<br/>
 
 				<br/>
 				<br/>

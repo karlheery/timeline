@@ -8,6 +8,7 @@ I build and ship it serverless using:
 
 	npm run build; aws s3 sync build/ s3://<bucket-name>
 	
+  aws s3 cp s3://<photos>/media/Christmas s3://<public>/Christmas --include "Christmas" --recursive --no-paginate
 
 Useful links:
 - https://web.dev/responsive-web-design-basics/#media-queries
