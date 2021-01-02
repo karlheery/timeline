@@ -157,7 +157,7 @@ class App extends Component {
 			urlParam: window.location.search
 		});
 		
-		this.handleChoice( choice );
+		this.handlePreChoice( choice );
 	}
 
 	// if it was deep-linked in we need to clear that now
@@ -166,6 +166,26 @@ class App extends Component {
   }
   
 
+  
+  /**
+   * Handle pre-choice of a timeline via a URL parameter by hiding the rest
+   */
+  handlePreChoice( code ) {
+
+	var name = this.state.urlCodes[code];
+	if( !name ) console.error( "failed to map code " + code + " to a name in " + this.state.urlCodes )
+
+	this.setState({
+		timelineChosen: false,
+		timeline_code: code,
+		timeline_name: name,
+		play: false,
+		isIntroFinished: false
+	});		
+		
+  }
+
+	
 
   /**
    * Handle choice of timeline on main page by rendering MediaTimeilne it
@@ -257,6 +277,11 @@ class App extends Component {
 	
   }
 
+
+  handleSoundEvent( errorCode, description ) {
+	console.error( "Error on sound event with " + errorCode + ": " + description )
+  }
+
   
   /**
    * Render the top banner and the main timeline page
@@ -272,7 +297,12 @@ class App extends Component {
 			<div id="main-bg" className="main-bg"></div>
 			
 			{this.state.timelineChosen && this.state.config.music_intro_url && !this.state.isIntroFinished &&
-				<Sound url={this.state.config.music_intro_url} playStatus={Sound.status.PLAYING} onFinishedPlaying={this.finishedIntro.bind(this)}/>
+				<Sound url={this.state.config.music_intro_url} 
+					autoLoad={true} 
+					playStatus={Sound.status.PLAYING} 
+					onError={this.handleSoundEvent.bind(this)}
+					onFinishedPlaying={this.finishedIntro.bind(this)}
+				/>
 			}
 
 			{this.state.timelineChosen && this.state.isIntroFinished &&
@@ -355,32 +385,38 @@ class App extends Component {
 				<br/>
 
 				<div className="header">
-					<h1>Our Scrapbooks</h1>
+					<h1>Our Stories</h1>
 				</div>
 				<div className="row">
 
+				{!this.state.timelineChosen && (!this.state.timeline_name || (this.state.timeline_name && this.state.timeline_name === "Tara Glen Gang")) && 
 				<div className="column">
     				<div className="App-card">						
 						<img src={this.state.timelines["Tara Glen Gang"].banner_image} className="App-card-thumbnail"/>
 						<p><button className="App-card-button" onClick={() => this.handleChoice("TaraGlenGang")}>Tara Glen Gang</button></p>
 					</div>	
 				</div>
+  				}
 
+				{!this.state.timelineChosen && (!this.state.timeline_name || (this.state.timeline_name && this.state.timeline_name === "Heery's Scrapbook - Covid Times")) && 
   				<div className="column">
     				<div className="App-card">
 						<img src={this.state.timelines["Heery's Scrapbook - Covid Times"].banner_image} className="App-card-thumbnail"/>
 						<p><button className="App-card-button" onClick={() => this.handleChoice("Covid")}>Heery's Scrapbook - Covid Times</button></p>
 					</div>
 				</div>
+  				}
 
 
+				{!this.state.timelineChosen && (!this.state.timeline_name || (this.state.timeline_name && this.state.timeline_name === "Family = Life")) && 
 				<div className="column">
     				<div className="App-card">						
 						<img src={this.state.timelines["Family = Life"].banner_image} className="App-card-thumbnail"/>
 						<p><button className="App-card-button" onClick={() => this.handleChoice("FamilyLife")}>Family = Life</button></p>
 					</div>	
 				</div>
-				
+  				}
+
 				</div>
 
 				<br/>
@@ -388,26 +424,32 @@ class App extends Component {
 
 				<div className="row">
 				
+				{!this.state.timelineChosen && (!this.state.timeline_name || (this.state.timeline_name && this.state.timeline_name === "Caroline. Our Glue.")) && 
 				<div className="column">
     				<div className="App-card">						
 						<img src={this.state.timelines["Caroline. Our Glue."].banner_image} className="App-card-thumbnail"/>
 						<p><button className="App-card-button" onClick={() => this.handleChoice("CarolineOurGlue")}>Caroline. Our Glue.</button></p>
 					</div>
 				</div>
+  				}
 
+				{!this.state.timelineChosen && (!this.state.timeline_name || (this.state.timeline_name && this.state.timeline_name === "Christmas")) && 
 				<div className="column">
     				<div className="App-card">						
 						<img src={this.state.timelines["Christmas"].banner_image} className="App-card-thumbnail"/>
 						<p><button className="App-card-button" onClick={() => this.handleChoice("Christmas")}>Christmas</button></p>
 					</div>	
 				</div>
-				
+  				}
+
+				{!this.state.timelineChosen && (!this.state.timeline_name || (this.state.timeline_name && this.state.timeline_name === "The Night Before Christmas")) && 
 				<div className="column">
 					<div className="App-card">						
 						<img src={this.state.timelines["The Night Before Christmas"].banner_image} className="App-card-thumbnail"/>
 						<p><button className="App-card-button" onClick={() => this.handleChoice("NightBeforeXMas")}>The Night Before Christmas</button></p>
 					</div>
 				</div>
+				}
 
 				</div>								
 
