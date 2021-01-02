@@ -187,7 +187,8 @@ class App extends Component {
 		effect: this.state.timelines[name].effect,
 		config: this.state.timelines[name],
 		accessEnabled: enableAccess,
-		play: false
+		play: false,
+		isIntroFinished: false
 	});		
 		
   }
@@ -241,9 +242,10 @@ class App extends Component {
 	var newPos = 8
 	
 	this.setState({		
-		play: true,
-		playPosition: newPos
+		play: true
+		//, 		playPosition: newPos
 	});	
+	
 	
   }
 
@@ -269,21 +271,23 @@ class App extends Component {
 		<div className="main-area">
 			<div id="main-bg" className="main-bg"></div>
 			
-			{this.state.timelineChosen	&& this.state.config.music_intro_url && !this.state.isIntroFinished &&
+			{this.state.timelineChosen && this.state.config.music_intro_url && !this.state.isIntroFinished &&
 				<Sound url={this.state.config.music_intro_url} playStatus={Sound.status.PLAYING} onFinishedPlaying={this.finishedIntro.bind(this)}/>
 			}
 
-			{this.state.timelineChosen	&&
+			{this.state.timelineChosen && this.state.isIntroFinished &&
+				<Sound
+				url={this.state.config.music_url}
+				playStatus={ (this.state.play ? Sound.status.PLAYING : Sound.status.PAUSED) }
+				//playFromPosition={this.state.playPosition}
+				//onLoading={this.handleSongLoading}
+				//onPlaying={this.handleSongPlaying}
+				//onFinishedPlaying={this.handleSongFinishedPlaying}
+				/>
+			}
+
+			{this.state.timelineChosen && 
 			<div>
-			<Sound
-			  url={this.state.config.music_url}
-			  playStatus={ (this.state.play ? Sound.status.PLAYING : Sound.status.PAUSED) }
-			  //playFromPosition={this.state.playPosition}
-			  //onLoading={this.handleSongLoading}
-			  //onPlaying={this.handleSongPlaying}
-			  //onFinishedPlaying={this.handleSongFinishedPlaying}
-			/>
-			
 			<div className="App-right-menu" id="menu" name="menu">
 				<OptionsMenu timeline_name={this.state.timeline_name} vizStyle={this.state.vizStyle} config={this.state.config} ref={(tl) => { this.optionsMenu = tl; }}/>
 			</div>										

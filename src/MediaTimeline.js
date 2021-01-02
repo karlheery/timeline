@@ -739,8 +739,6 @@ class MediaTimeline extends Component {
 
 					
 					<div>
-						<h2>The End.</h2>
-						<p>...or is it. Let's keep adding!</p>
 						<section className="end" ref={(section) => { this.EndOfTimeline = section; }}></section>		
 					</div>
 						
