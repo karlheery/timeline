@@ -83,6 +83,7 @@ class App extends Component {
 		banner_image: 'https://khpublicbucket.s3-eu-west-1.amazonaws.com/NightBeforeXMas/XmasBook_Cover.jpg',
 		upload_url: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
 		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items',
+		music_intro_url: './music/NightBeforeChristmas-AshIntro.mp3',
 		music_url: './music/NightBeforeXMas.mp3',
 		effect: 'snow',
 		accessModel: 'PUBLIC'
@@ -246,6 +247,14 @@ class App extends Component {
 	
   }
 
+
+  finishedIntro() {
+	this.setState({		
+		isIntroFinished: true
+	});	
+	
+  }
+
   
   /**
    * Render the top banner and the main timeline page
@@ -260,6 +269,10 @@ class App extends Component {
 		<div className="main-area">
 			<div id="main-bg" className="main-bg"></div>
 			
+			{this.state.timelineChosen	&& this.state.config.music_intro_url && !this.state.isIntroFinished &&
+				<Sound url={this.state.config.music_intro_url} playStatus={Sound.status.PLAYING} onFinishedPlaying={this.finishedIntro.bind(this)}/>
+			}
+
 			{this.state.timelineChosen	&&
 			<div>
 			<Sound
@@ -324,7 +337,7 @@ class App extends Component {
 			{this.state.effect == "snow" &&  <Snowfall  			
 				className="in-front"
   				color="white"
-  				snowflakeCount={250}
+  				snowflakeCount={200}
 				/>
 			}
 
