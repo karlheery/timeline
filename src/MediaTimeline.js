@@ -242,13 +242,31 @@ class MediaTimeline extends Component {
    * 
    */
   startScrolling() {	
-	// scroll direction forward
+
+
+	if( this.displayCanScroll() ) {
+		// scroll direction forward
 	
-	if( this.scrolling === 0 && this.numberScrollers === 0 ) {
-		this.scrolling = +1;
-		this.numberScrollers += 1;
-		this.nextScroll();
+		if( this.scrolling === 0 && this.numberScrollers === 0 ) {
+			this.scrolling = +1;
+			this.numberScrollers += 1;
+			this.nextScroll();
+		}
 	}
+  }
+
+
+  /**
+   * Certain displays dont do scrolling so ignore
+   */
+  displayCanScroll() {
+	if( this.state.timelineData.viz_style && 
+		( this.state.timelineData.viz_style === "Polaroid" || this.state.timelineData.viz_style === "Flipbook" ) ) {
+			return false;
+	} else {	
+			return true;
+	}
+
   }
 
 
@@ -535,6 +553,17 @@ class MediaTimeline extends Component {
 
 
 
+  /**
+   * Handle click on display (e.g. Flipbook changing page)
+   * ...bubbling it up to next level
+   */
+  handleDisplayClick( e ) {
+
+	if( this.state.timelineData.viz_style === "Flipbook" ) {
+		this.props.onDisplayClick( e )
+	}
+
+  }
 
   
   /**
@@ -600,8 +629,6 @@ class MediaTimeline extends Component {
 	*/		
 
 	if( this.state.timelineData && this.state.timelineData.viz_style && this.state.timelineData.viz_style === "Polaroid" ) {
-		console.log( "Displaying in Polaroid mode");
-
 		return ( 
 			<React.Fragment>
 					<div id='timeline' className='scrap-grid'>
@@ -620,13 +647,11 @@ class MediaTimeline extends Component {
 	}	
 
 
-	if( this.state.timelineData && this.state.timelineData.viz_style && this.state.timelineData.viz_style === "Flipbook" ) {
-		console.log( "Displaying in Flipbook mode");
-
+	if( this.state.timelineData && this.state.timelineData.viz_style && this.state.timelineData.viz_style === "Flipbook" ) {		
 		return ( 
 			<React.Fragment>
 					<div id='timeline' className='book-grid'>
-						<FlipbookDisplay timeline_name={this.state.timeline_name} timelineContent={timelineContent} cover={this.state.config.banner_image} />						
+						<FlipbookDisplay timeline_name={this.state.timeline_name} timelineContent={timelineContent} cover={this.state.config.banner_image} onDisplayClick={this.handleDisplayClick.bind(this)} />						
 					</div>
 
 			</React.Fragment>	
@@ -636,7 +661,6 @@ class MediaTimeline extends Component {
 	
 	
 	if( this.state.timelineData && this.state.timelineData.viz_style && this.state.timelineData.viz_style === "Scrapbook" ) {
-		console.log( "Displaying in Scrapbook mode");
 
 		//used to say style="--aspect-ratio: 4/3;"   ...or 4/3 for middle one
 		let imgStyle = {

@@ -83,7 +83,7 @@ class App extends Component {
 		banner_image: 'https://khpublicbucket.s3-eu-west-1.amazonaws.com/NightBeforeXMas/XmasBook_Cover.jpg',
 		upload_url: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
 		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items',
-		music_url: ['./audiobooks/NightBeforeXMas/Section1.mp3', './audiobooks/NightBeforeXMas/Section2.mp3', './audiobooks/NightBeforeXMas/Section3.mp3', './audiobooks/NightBeforeXMas/Section4.mp3', './audiobooks/NightBeforeXMas/Section5.mp3'],
+		music_url: './music/NightBeforeXMas.mp3',
 		effect: 'snow',
 		accessModel: 'PUBLIC'
 	}
@@ -92,6 +92,7 @@ class App extends Component {
 	this.state = {
 		timelineChosen: false,
 		play: false,
+		playPosition: 0,
 		urlCodes: {
 			"CarolineOurGlue": "Caroline. Our Glue.",
 			"FamilyLife": "Family = Life",
@@ -231,6 +232,20 @@ class App extends Component {
   }
 
 
+  /**
+   * Handle click on display (e.g. Flipbook changing page)
+   */
+  handleDisplayClick( e ) {
+	
+	var newPos = 8
+	
+	this.setState({		
+		play: true,
+		playPosition: newPos
+	});	
+	
+  }
+
   
   /**
    * Render the top banner and the main timeline page
@@ -244,19 +259,13 @@ class App extends Component {
     return (
 		<div className="main-area">
 			<div id="main-bg" className="main-bg"></div>
-
-			{this.state.effect == "snow" &&  <Snowfall  			
-  				color="white"
-  				snowflakeCount={250}
-				/>
-			}
-
+			
 			{this.state.timelineChosen	&&
 			<div>
 			<Sound
 			  url={this.state.config.music_url}
 			  playStatus={ (this.state.play ? Sound.status.PLAYING : Sound.status.PAUSED) }
-			  playFromPosition={300 /* in milliseconds */}
+			  //playFromPosition={this.state.playPosition}
 			  //onLoading={this.handleSongLoading}
 			  //onPlaying={this.handleSongPlaying}
 			  //onFinishedPlaying={this.handleSongFinishedPlaying}
@@ -288,7 +297,7 @@ class App extends Component {
 				</header>					
 				<div>
 					{this.state.accessEnabled &&
-    					<MediaTimeline timeline_name={this.state.timeline_name} config={this.state.config} ref={(tl) => { this.timeline = tl; }}/>											
+    					<MediaTimeline timeline_name={this.state.timeline_name} config={this.state.config} ref={(tl) => { this.timeline = tl; }} onDisplayClick={this.handleDisplayClick.bind(this)} />						
 					}
 
 					{!this.state.accessEnabled &&
@@ -311,6 +320,14 @@ class App extends Component {
 				</div>
 
 			</div>
+
+			{this.state.effect == "snow" &&  <Snowfall  			
+				className="in-front"
+  				color="white"
+  				snowflakeCount={250}
+				/>
+			}
+
 			</div>
 			}
 

@@ -52,7 +52,7 @@ class FlipbookDisplay extends Component {
         });
   
         // set interval for the timer between showing photos
-        this.timer = setInterval(() => this.nextButtonClick(this), 10000 );        	
+        //this.timer = setInterval(() => this.nextButtonClick(this), 10000 );        	
         
     }
 
@@ -82,6 +82,8 @@ class FlipbookDisplay extends Component {
         this.setState({
           page: e.data,
         });
+
+        this.props.onDisplayClick( e.data )
     };
 
 
@@ -96,8 +98,6 @@ class FlipbookDisplay extends Component {
             timelineContent = {};
             timelineContent.content = [];
         }
-
-        console.log( "Displaying flipbook: " + timelineContent.description )
 
         return (
             <React.Fragment>	
@@ -235,9 +235,9 @@ class FlipbookDisplay extends Component {
     togglePlayPause() {
         
         if( this.state.playOrPauseAction == "Play" ) {
-            this.timer = setInterval(this.nextButtonClick, 10000);
+            //this.timer = setInterval(this.nextButtonClick, 10000);
             this.setState({playOrPauseAction: "Pause"});
-            console.log( "(re)starting photo show");
+            console.log( "(re)starting show");
         } else {
             window.mediaCanvas.pauseShow();
         }
