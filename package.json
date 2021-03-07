@@ -26,6 +26,7 @@
     "react-otp-input": "^2.0.2",
     "react-pageflip": "^1.0.0",
     "react-player-controls": "^1.0.0-beta.0",
+    "react-responsive-modal": "^6.0.1",
     "react-s3-uploader": "^4.8.0",
     "react-scripts": "^1.1.5",
     "react-scroll": "^1.7.10",

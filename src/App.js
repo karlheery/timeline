@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import './App.css';
 import './OptionsMenu.css';
 import './InputDialog.css';
+
+import axios from 'axios';
+
 import MediaTimeline from './MediaTimeline';
 import OptionsMenu from './OptionsMenu';
 import Sound from 'react-sound';
@@ -11,6 +14,9 @@ import { Button, PlayerIcon } from 'react-player-controls'
 //import ExifOrientationImg from 'react-exif-orientation-img'
 
 import OtpInput from 'react-otp-input';
+import AddToPhotosIcon from '@material-ui/icons/AddToPhotos';
+import Axios from 'axios';
+
 
 
 
@@ -21,95 +27,12 @@ class App extends Component {
 	  
 	super(props);
 	
-
-	// @TODO hardcoding for now - some replace based on choice of timeline
-	var cloud_config1 = {
-		s3_bucket: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket',
-		s3_folder: 'Caroline',		// based on choice
-		banner_image: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/backgrounds/BannerIcon.jpg',
-		upload_url: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
-		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items',
-		music_url: './music/Tom Baxter - Better.mp3',
-		accessModel: 'PUBLIC'
-	}
-
-	var cloud_config2 = {
-		s3_bucket: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket',
-		s3_folder: 'Family',		// based on choice
-		banner_image: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket/Family/backgrounds/HeeryFamilyIcon.jpg',
-		upload_url: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
-		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items',
-		music_url: './music/Ed Sheeran - Photograph.mp3',
-		accessModel: 'PUBLIC'
-	}
-	
-
-	var cloud_config3 = {
-		s3_bucket: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket',
-		s3_folder: 'Covid',		// based on choice
-		banner_image: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket/Covid/backgrounds/StayAtHome.jpg',
-		upload_url: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
-		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items',
-		music_url: './music/Gavin James - Always.mp3',
-		accessModel: 'PUBLIC'
-	}
-
-	var cloud_config4 = {
-		s3_bucket: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket',
-		s3_folder: 'TaraGlen',		// based on choice
-		banner_image: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket/TaraGlen/backgrounds/TaraGlenBackground.jpg',
-		upload_url: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
-		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items',
-		music_url: './music/Pitbull - Timber ft Kesha.mp3',
-		accessModel: 'PRIVATE',
-		accessCode: "2020"
-	}
-
-
-	var cloud_config5 = {
-		s3_bucket: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket',
-		s3_folder: 'Christmas',		// based on choice
-		banner_image: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket/Christmas/backgrounds/Snowflake.jpg',
-		upload_url: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
-		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items',
-		music_url: './music/Michael Buble - Have Yourself A Merry Little Christmas.mp3',
-		effect: 'snow',
-		accessModel: 'PUBLIC'
-	}
-
-	var cloud_config6 = {
-		s3_bucket: 'https://s3-eu-west-1.amazonaws.com/khpublicbucket',
-		s3_folder: 'NightBeforeXMas',		// based on choice
-		banner_image: 'https://khpublicbucket.s3-eu-west-1.amazonaws.com/NightBeforeXMas/XmasBook_Cover.jpg',
-		upload_url: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/proxy',
-		content_api: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/items',
-		music_intro_url: './music/NightBeforeChristmas-AshIntro.mp3',
-		music_url: './music/NightBeforeXMas.mp3',
-		effect: 'snow',
-		accessModel: 'PUBLIC'
-	}
-
-
 	this.state = {
+		all_timelines_uri: 'https://8capod29t2.execute-api.eu-west-1.amazonaws.com/Prod/timelines',
 		timelineChosen: false,
+		single_timeline: null,
 		play: false,
-		playPosition: 0,
-		urlCodes: {
-			"CarolineOurGlue": "Caroline. Our Glue.",
-			"FamilyLife": "Family = Life",
-			"Covid": "Heery's Scrapbook - Covid Times",
-			"TaraGlenGang": "Tara Glen Gang",
-			"Christmas": "Christmas",
-			"NightBeforeXMas": "The Night Before Christmas"			
-		},
-		timelines: {
-			"Caroline. Our Glue.": cloud_config1,
-			"Family = Life": cloud_config2,
-			"Heery's Scrapbook - Covid Times": cloud_config3,
-			"Tara Glen Gang": cloud_config4,
-			"Christmas": cloud_config5,
-			"The Night Before Christmas": cloud_config6
-		},
+		playPosition: 0,		
 		codeInput: ""
 	}
 	
@@ -151,38 +74,81 @@ class App extends Component {
 	var linkParams = new URLSearchParams( window.location.search )
 	var choice = linkParams.get("scrapbookName")
 
-	if( choice && this.state.urlCodes && this.state.urlCodes[choice] ) {
-
-		this.setState({
-			urlParam: window.location.search
-		});
-		
-		this.handlePreChoice( choice );
-	}
-
-	// if it was deep-linked in we need to clear that now
-	window.history.replaceState(null, null, window.location.pathname);	
-
+	var all_timelines = this.preloadTimelines( choice )
+	
   }
   
 
-  
+  /** 
+   *  Lookup the timelines from our backend
+   */
+  preloadTimelines( choice ) {
+
+	var uploadPromise = axios.get( this.state.all_timelines_uri )
+	.then((result) => {
+		
+		var results = result.data;
+		console.log( "just retrieved ALL TIMELINES: " + results );
+
+		this.setState({			  
+			all_timelines: results
+		});			
+			
+		return results;
+
+	})
+	.then((all_timelines) => {
+		
+		if( choice ) {
+			this.handlePreChoice( choice, all_timelines );
+		}
+		return all_timelines;
+
+	})
+	.catch(function (err) {
+		console.log("failed to retreive all timelines");
+		console.log(err);
+	});
+
+  }
+
+
+
+
+
+
   /**
    * Handle pre-choice of a timeline via a URL parameter by hiding the rest
    */
-  handlePreChoice( code ) {
+  handlePreChoice( code, all_timelines ) {
 
-	var name = this.state.urlCodes[code];
-	if( !name ) console.error( "failed to map code " + code + " to a name in " + this.state.urlCodes )
+	var single_timeline = null
 
-	this.setState({
-		timelineChosen: false,
-		timeline_code: code,
-		timeline_name: name,
-		play: false,
-		isIntroFinished: false
-	});		
-		
+	for( var i=0; all_timelines && i<all_timelines.length; i++ ) {
+		if( code === all_timelines[i].url_code ) {
+			single_timeline = all_timelines[i]
+		}
+	}
+	
+	if( !single_timeline ) {
+		console.error( "failed to map code " + code + " to a name in " + all_timelines )
+	}
+	else {
+
+		this.setState({
+			urlParam: window.location.search,			
+			timelineChosen: false,
+			timeline_code: code,
+			single_timeline: single_timeline,
+			timeline_name: single_timeline.timeline_name,
+			play: false,
+			isIntroFinished: false
+		});		
+
+		// if it was deep-linked in we need to clear that now
+		window.history.replaceState(null, null, window.location.pathname);	
+	}
+
   }
 
 	
@@ -190,22 +156,18 @@ class App extends Component {
   /**
    * Handle choice of timeline on main page by rendering MediaTimeilne it
    */
-  handleChoice( code ) {
-
-	var name = this.state.urlCodes[code];
-	if( !name ) console.error( "failed to map code " + code + " to a name in " + this.state.urlCodes )
+  handleChoice( timeline_config ) {
 
 	// default to access only if its public
-	var enableAccess = ( this.state.timelines[name].accessModel == "PUBLIC" ? true : false )
-	if( !enableAccess ) console.log( "will prompt for access code for access model: "  + this.state.timelines[name].accessModel )
+	var enableAccess = ( timeline_config.accessModel == "PUBLIC" ? true : false )
+	if( !enableAccess ) console.log( "will prompt for access code for access model: "  + timeline_config.accessModel )
 	
-	this.setState({
+	this.setState({		
 		timelineChosen: true,
-		timeline_code: code,
-		timeline_name: name,
-		vizStyle: ( this.timeline ? this.timeline.vizStyle : "" ),
-		effect: this.state.timelines[name].effect,
-		config: this.state.timelines[name],
+		timeline_code: timeline_config.accessCode,
+		timeline_name: timeline_config.timeline_name,
+		vizStyle: ( this.timeline ? this.timeline.vizStyle : "" ),		
+		config: timeline_config,
 		accessEnabled: enableAccess,
 		play: false,
 		isIntroFinished: false
@@ -368,7 +330,7 @@ class App extends Component {
 
 			</div>
 
-			{this.state.effect == "snow" &&  <Snowfall  			
+			{this.state.config.effect == "snow" &&  <Snowfall  			
 				className="in-front"
   				color="white"
   				snowflakeCount={200}
@@ -389,66 +351,23 @@ class App extends Component {
 				</div>
 				<div className="row">
 
-				{!this.state.timelineChosen && (!this.state.timeline_name || (this.state.timeline_name && this.state.timeline_name === "Tara Glen Gang")) && 
-				<div className="column">
-    				<div className="App-card">						
-						<img src={this.state.timelines["Tara Glen Gang"].banner_image} className="App-card-thumbnail"/>
-						<p><button className="App-card-button" onClick={() => this.handleChoice("TaraGlenGang")}>Tara Glen Gang</button></p>
-					</div>	
-				</div>
+				{ this.state.single_timeline &&
+					<div className="column">
+    					<div className="App-card">						
+							<img src={this.state.single_timeline.banner_image} className="App-card-thumbnail"/>
+							<p><button className="App-card-button" onClick={() => this.handleChoice(this.state.single_timeline)}>{this.state.single_timeline.timeline_name}</button></p>
+						</div>	
+						<br/><br/></div> 
   				}
 
-				{!this.state.timelineChosen && (!this.state.timeline_name || (this.state.timeline_name && this.state.timeline_name === "Heery's Scrapbook - Covid Times")) && 
-  				<div className="column">
-    				<div className="App-card">
-						<img src={this.state.timelines["Heery's Scrapbook - Covid Times"].banner_image} className="App-card-thumbnail"/>
-						<p><button className="App-card-button" onClick={() => this.handleChoice("Covid")}>Heery's Scrapbook - Covid Times</button></p>
-					</div>
-				</div>
-  				}
-
-
-				{!this.state.timelineChosen && (!this.state.timeline_name || (this.state.timeline_name && this.state.timeline_name === "Family = Life")) && 
-				<div className="column">
-    				<div className="App-card">						
-						<img src={this.state.timelines["Family = Life"].banner_image} className="App-card-thumbnail"/>
-						<p><button className="App-card-button" onClick={() => this.handleChoice("FamilyLife")}>Family = Life</button></p>
-					</div>	
-				</div>
-  				}
-
-				</div>
-
-				<br/>
-				<br/>
-
-				<div className="row">
-				
-				{!this.state.timelineChosen && (!this.state.timeline_name || (this.state.timeline_name && this.state.timeline_name === "Caroline. Our Glue.")) && 
-				<div className="column">
-    				<div className="App-card">						
-						<img src={this.state.timelines["Caroline. Our Glue."].banner_image} className="App-card-thumbnail"/>
-						<p><button className="App-card-button" onClick={() => this.handleChoice("CarolineOurGlue")}>Caroline. Our Glue.</button></p>
-					</div>
-				</div>
-  				}
-
-				{!this.state.timelineChosen && (!this.state.timeline_name || (this.state.timeline_name && this.state.timeline_name === "Christmas")) && 
-				<div className="column">
-    				<div className="App-card">						
-						<img src={this.state.timelines["Christmas"].banner_image} className="App-card-thumbnail"/>
-						<p><button className="App-card-button" onClick={() => this.handleChoice("Christmas")}>Christmas</button></p>
-					</div>	
-				</div>
-  				}
-
-				{!this.state.timelineChosen && (!this.state.timeline_name || (this.state.timeline_name && this.state.timeline_name === "The Night Before Christmas")) && 
-				<div className="column">
-					<div className="App-card">						
-						<img src={this.state.timelines["The Night Before Christmas"].banner_image} className="App-card-thumbnail"/>
-						<p><button className="App-card-button" onClick={() => this.handleChoice("NightBeforeXMas")}>The Night Before Christmas</button></p>
-					</div>
-				</div>
+				{ !this.state.single_timeline && this.state.all_timelines &&
+				this.state.all_timelines.map(f => ( <div className="column">
+    					<div className="App-card">						
+							<img src={f.banner_image} className="App-card-thumbnail"/>
+							<p><button className="App-card-button" onClick={() => this.handleChoice(f)}>{f.timeline_name}</button></p>
+						</div>	
+						<br/><br/></div> 
+				)) 
 				}
 
 				</div>								
@@ -456,9 +375,28 @@ class App extends Component {
 				<br/>
 				<br/>
 
+				<div className="row">
+				
+				{!this.state.timelineChosen && (!this.state.timeline_name || (this.state.timeline_name && this.state.timeline_name === "New Timeline")) && 
+				<div className="column">
+    				<div className="App-newcard">						
+						<br/>
+						<br/>
+						<AddToPhotosIcon fontSize="large" />						
+						<br/>
+						<br/>
+					</div>
+				</div>
+  				}
+				</div>					
+
 				<br/>
 				<br/>
 
+				<br/>
+				<br/>
+				
+									
 
 			</div>}
 
