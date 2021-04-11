@@ -147,7 +147,7 @@ h2 {
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
   max-width: 300px;
   margin: auto;
-  text-align: center;
+  text-align: center;  
   font-family: arial;
 }
 
@@ -156,9 +156,14 @@ h2 {
   max-width: 300px;
   margin: auto;
   text-align: center;
+  background-color: whitesmoke;
+  opacity: 0.5;
   font-family: arial;
 }
 
+.App-newcard:hover {
+  opacity: 1.0;
+}
 
 /* Float four columns side by side */
 .column {

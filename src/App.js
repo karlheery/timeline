@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
 import './App.css';
 import './OptionsMenu.css';
+import './TimelineDetailsForm.css';
 import './InputDialog.css';
 
 import axios from 'axios';
 
 import MediaTimeline from './MediaTimeline';
 import OptionsMenu from './OptionsMenu';
+import TimelineDetailsForm from './TimelineDetailsForm';
 import Sound from 'react-sound';
 import Snowfall from 'react-snowfall'
 
@@ -176,6 +178,15 @@ class App extends Component {
   }
 	
 
+  /**
+   * Show a modal to capture data and create a new timeline
+   * @param {*} codeInput 
+   */
+   createNew() {
+		this.detailsMenu.handleClickOpen(true);
+   }
+
+
 
   /**
    * handle inputting of access code, character by character
@@ -342,6 +353,9 @@ class App extends Component {
 
 			{!this.state.timelineChosen && 
 				<div>
+				<div className="App-right-menu" id="menu" name="menu">
+					<TimelineDetailsForm ref={(tl) => { this.detailsMenu = tl; }}/>
+				</div>
 
 				<br/>				
 				<br/>
@@ -379,11 +393,15 @@ class App extends Component {
 				
 				{!this.state.timelineChosen && (!this.state.timeline_name || (this.state.timeline_name && this.state.timeline_name === "New Timeline")) && 
 				<div className="column">
-    				<div className="App-newcard">						
+    				<div className="App-newcard" onClick={() => this.createNew()}>						
 						<br/>
+						<br/>		
+						<br/>						
+						<AddToPhotosIcon fontSize="large"/>						
+						<br/>		
+						Add your story
 						<br/>
-						<AddToPhotosIcon fontSize="large" />						
-						<br/>
+						<br/>		
 						<br/>
 					</div>
 				</div>

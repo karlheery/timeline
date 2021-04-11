@@ -84,8 +84,6 @@ class MediaItem extends Component {
   
   openModal(file) {
 		
-		console.log("open image here " + file );	// @TODO	
-
 		var contentItem = this.state.item;
 		var index = contentItem.media.findIndex(obj => obj==file);
 		console.log("at index " + index  );	
