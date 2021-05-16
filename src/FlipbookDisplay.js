@@ -1,6 +1,7 @@
     import React, { Component } from 'react';
 import { PropTypes } from 'react'
 import EXIF from 'exif-js'
+import Magnifier from "react-magnifier";
 
 import MediaItem  from './MediaItem';
 
@@ -104,12 +105,10 @@ class FlipbookDisplay extends Component {
             <div>
                 <HTMLFlipBook 
                      width={550}
-                     height={550}
+                     height={550}                     
                      size="stretch"
-                     minWidth={315}
-                     maxWidth={1000}
-                     minHeight={315}
-                     maxHeight={1000}
+                     minWidth={315}                     
+                     minHeight={315}                     
                      maxShadowOpacity={0.5}
                      showCover={true}
                      mobileScrollSupport={true}
@@ -281,7 +280,7 @@ const Page = React.forwardRef((props, ref) => {
         <div className="page" ref={ref}>
             <div className="page-content">
             <h2 className="page-header">{props.chapter}</h2>
-            <div className="page-image"><img src={props.picture} className="page-image"/></div>
+            <div className="page-image"><Magnifier src={props.picture} className="page-image" zoomImgSrc={props.picture} mgShape="square" zoomFactor={1.10} mgWidth={300} mgHeight={200}/></div>
             <div className="page-text">{props.children}</div>
             <div className="page-footer">{props.number + 1}</div>
             </div>
@@ -292,10 +291,13 @@ const Page = React.forwardRef((props, ref) => {
             <div className="page" ref={ref}>
                 <div className="page-content">
                 <h2 className="page-header">{props.chapter}</h2>
-                <div className="page-image"><img src={props.picture} className="page-image"/></div>
+                <div className="page-image"><Magnifier src={props.picture} className="page-image" zoomImgSrc={props.picture} mgShape="square" zoomFactor={1.10} mgWidth={300} mgHeight={200}/></div>
                 <div className="page-footer">{props.number + 1}</div>
                 </div>
             </div>
         );
     }
 });
+
+// <img src={props.picture} 
+// zoomImgSrc={props.picture} mgShape="square" zoomFactor={1.10} mgWidth={300} mgHeight={200}

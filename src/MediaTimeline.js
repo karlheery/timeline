@@ -366,6 +366,7 @@ class MediaTimeline extends Component {
 		.then((result) => {			// these arrows are used so we can call other methods and setState (indirectly) from within
 			
 			console.log( "successfully retrieved timeline data " + JSON.stringify(result.data) );	  
+			console.log( "timeline content item count " + (result.data.content ? result.data.content.length : 0 ) );	  
 			
 			/**
 				{

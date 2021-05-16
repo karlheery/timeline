@@ -8,7 +8,7 @@ import axios from 'axios';
 
 import MediaTimeline from './MediaTimeline';
 import OptionsMenu from './OptionsMenu';
-import TimelineDetailsForm from './TimelineDetailsForm';
+import DetailsFormCreator from './TimelineDetailsForm';
 import Sound from 'react-sound';
 import Snowfall from 'react-snowfall'
 
@@ -52,6 +52,10 @@ class App extends Component {
 		var newPlayState = !this.state.play
 
 		console.log( "toggling play to " + newPlayState );
+
+		if( newPlayState ) {
+			console.log( "playing " + this.state.config.music_url )
+		}
 		
 		this.setState({
 			play: newPlayState
@@ -183,9 +187,18 @@ class App extends Component {
    * @param {*} codeInput 
    */
    createNew() {
-		this.detailsMenu.handleClickOpen(true);
+		//this.detailsMenu.handleClickOpen(true);
+		this.setState({
+            formOpen: true
+        });
    }
 
+   closeNew  = () =>  {
+		console.log("closing details form")
+		this.setState({
+			formOpen: false
+		});
+   }
 
 
   /**
@@ -261,7 +274,8 @@ class App extends Component {
    */	 
   render() {	  		   	  			
 	
-	
+	//ref={(tl) => { this.detailsMenu = tl; }}
+
 	// sharing link should produce: { window.location.href + "?scrapbookName=" + this.state.timeline_code}
 	// passcode using https://reactjsexample.com/otp-input-component-for-react/
 
@@ -278,7 +292,7 @@ class App extends Component {
 				/>
 			}
 
-			{this.state.timelineChosen && this.state.isIntroFinished &&
+			{this.state.timelineChosen && ( this.state.isIntroFinished || !this.state.config.music_intro_url  ) &&
 				<Sound
 				url={this.state.config.music_url}
 				playStatus={ (this.state.play ? Sound.status.PLAYING : Sound.status.PAUSED) }
@@ -354,7 +368,7 @@ class App extends Component {
 			{!this.state.timelineChosen && 
 				<div>
 				<div className="App-right-menu" id="menu" name="menu">
-					<TimelineDetailsForm ref={(tl) => { this.detailsMenu = tl; }}/>
+					<DetailsFormCreator isOpen={this.state.formOpen} handleDetailsFormClose={this.closeNew} />
 				</div>
 
 				<br/>				

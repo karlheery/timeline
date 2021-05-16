@@ -7,6 +7,7 @@ import Slider from "react-slick";
 import Lightbox from 'react-image-lightbox';
 import 'react-image-lightbox/style.css'; // This only needs to be imported once in your app
 import VizSensor from 'react-visibility-sensor';
+import Image from 'material-ui-image';
 
 import EditIcon from '@material-ui/icons/Edit';
 
