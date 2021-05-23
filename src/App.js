@@ -193,11 +193,23 @@ class App extends Component {
         });
    }
 
-   closeNew  = () =>  {
+   
+   /**
+	* Handle the call from child component to close the timeline creation screen
+
+	* @param {*} shortCode 
+	*/
+   closeNew = (shortCode) =>  {		
 		console.log("closing details form")
 		this.setState({
 			formOpen: false
 		});
+
+		if( shortCode ) {
+			console.log("created new timeline with short code: " + shortCode )				
+			this.preloadTimelines( shortCode )
+		}
+		
    }
 
 
@@ -326,12 +338,13 @@ class App extends Component {
 				<header className="App-header">
 					<img src={this.state.config.banner_image} className="App-banner" alt="banner" align="left" />
 					<h1 className="App-title">{this.state.timeline_name}</h1>		  					
-							
-							
 				</header>					
 				<div>
 					{this.state.accessEnabled &&
-    					<MediaTimeline timeline_name={this.state.timeline_name} config={this.state.config} ref={(tl) => { this.timeline = tl; }} onDisplayClick={this.handleDisplayClick.bind(this)} />						
+						<div>
+    					<MediaTimeline timeline_name={this.state.timeline_name} config={this.state.config} ref={(tl) => { this.timeline = tl; }} onDisplayClick={this.handleDisplayClick.bind(this)} />
+						{this.state.config && this.state.config.url_code && <p className="App-subtitle">{window.location.href}?scrapbookName={this.state.config.url_code}</p>}
+						</div>
 					}
 
 					{!this.state.accessEnabled &&
@@ -368,7 +381,7 @@ class App extends Component {
 			{!this.state.timelineChosen && 
 				<div>
 				<div className="App-right-menu" id="menu" name="menu">
-					<DetailsFormCreator isOpen={this.state.formOpen} handleDetailsFormClose={this.closeNew} />
+					<DetailsFormCreator isOpen={this.state.formOpen} handleDetailsFormClose={this.closeNew} backend_uri={this.state.all_timelines_uri}/>
 				</div>
 
 				<br/>				

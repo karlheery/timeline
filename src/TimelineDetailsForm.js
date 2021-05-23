@@ -63,7 +63,8 @@ class TimelineDetailsForm extends React.Component {
     constructor (props) {
         super(props)
         this.state = {
-            closeForm: false
+            closeForm: false,
+            backend_uri: props.backend_uri
         }
         
         console.log( "creating timeline details form" );
@@ -83,13 +84,15 @@ class TimelineDetailsForm extends React.Component {
     }
 
 
+
     handleSave() {
      
         // temporarily put in saving mode
         this.props.setValues({...this.props.values, ['save_status']: 1})            
-        
+ 
+        console.log( "saving new timeline to backend " + this.state.backend_uri + ":\n" + JSON.stringify(this.props.values) )
 
-    	var createPromise = axios.put( this.state.all_timelines_uri )
+    	var createPromise = axios.put( this.state.backend_uri, this.props.values )
         .then((result) => {
             
             var results = result.data;
@@ -101,6 +104,9 @@ class TimelineDetailsForm extends React.Component {
         .then((all_timelines) => {
             
             this.props.setValues({...this.props.values, ['save_status']: 2})            
+
+            // pass back the name of the pipeline we've just created to pre-select
+            this.props.closeDetailsForm( this.props.values.shortName )
 
         })
         .catch(function (err) {
@@ -154,7 +160,7 @@ class TimelineDetailsForm extends React.Component {
             }
         }
         
-        this.props.setValues({...this.props.values, [name]: value, ['pin']: newPin})
+        this.props.setValues({...this.props.values, [name]: value, ['accessCode']: newPin})
 
     }
     
@@ -162,10 +168,6 @@ class TimelineDetailsForm extends React.Component {
 
 
     render() {
-
-        if( this.props.isOpen ) {
-            console.log( "Displaying TimelineDetailsForm..." );
-        }
 
         const classes = useStyles();                      
         const values = this.props.values;
@@ -214,12 +216,12 @@ class TimelineDetailsForm extends React.Component {
                                             
                         <FormControlLabel control={<Switch checked={(values.accessModel !== "PUBLIC")} onChange={this.handleSwitchChange} name="accessModel" />} label="Private?"/>
                         {values.accessModel == "PRIVATE" && <TextField required margin="dense" 
-                            name="pin" 
-                            id="pin"  
+                            name="accessCode" 
+                            id="accessCode"  
                             label="4-digit Access PIN" 
                             type="text" 
                             onChange={this.handleTextInputChange}
-                            value={values.pin}
+                            value={values.accessCode}
                             variant="outlined" 
                             fullWidth/>
                         }
@@ -248,12 +250,10 @@ class TimelineDetailsForm extends React.Component {
 
 
 export default function DetailsFormCreator(props) {
-    console.log( "showing new timeline details form")
-
     const [values, setValues]  = useState(initialFValues);    
 
     return (
-        <TimelineDetailsForm values={values} isOpen={props.isOpen} values={values} setValues={setValues} closeDetailsForm={props.handleDetailsFormClose} />
+        <TimelineDetailsForm values={values} isOpen={props.isOpen} values={values} setValues={setValues} backend_uri={props.backend_uri} closeDetailsForm={props.handleDetailsFormClose} />
     )
 };
 
