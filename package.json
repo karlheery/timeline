@@ -35,6 +35,7 @@
     "react-scripts": "^1.1.5",
     "react-scroll": "^1.7.10",
     "react-scroll-to-component": "^1.0.2",
+    "react-share": "^4.4.0",
     "react-slick": "^0.23.1",
     "react-snowfall": "^1.0.2",
     "react-sound": "^1.2.0",

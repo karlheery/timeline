@@ -9,6 +9,7 @@ import axios from 'axios';
 import MediaTimeline from './MediaTimeline';
 import OptionsMenu from './OptionsMenu';
 import DetailsFormCreator from './TimelineDetailsForm';
+import Sharing from './Sharing';
 import Sound from 'react-sound';
 import Snowfall from 'react-snowfall'
 
@@ -18,7 +19,6 @@ import { Button, PlayerIcon } from 'react-player-controls'
 import OtpInput from 'react-otp-input';
 import AddToPhotosIcon from '@material-ui/icons/AddToPhotos';
 import Axios from 'axios';
-
 
 
 
@@ -291,10 +291,15 @@ class App extends Component {
 	// sharing link should produce: { window.location.href + "?scrapbookName=" + this.state.timeline_code}
 	// passcode using https://reactjsexample.com/otp-input-component-for-react/
 
+	var full_url = window.location.href
+	if( this.state.config && this.state.config.url_code ) {
+		full_url = full_url + "?scrapbookName=" + this.state.config.url_code
+	}
+
     return (
 		<div className="main-area">
 			<div id="main-bg" className="main-bg"></div>
-			
+
 			{this.state.timelineChosen && this.state.config.music_intro_url && !this.state.isIntroFinished &&
 				<Sound url={this.state.config.music_intro_url} 
 					autoLoad={true} 
@@ -319,8 +324,7 @@ class App extends Component {
 			<div>
 			<div className="App-right-menu" id="menu" name="menu">
 				<OptionsMenu timeline_name={this.state.timeline_name} vizStyle={this.state.vizStyle} config={this.state.config} ref={(tl) => { this.optionsMenu = tl; }}/>
-			</div>										
-		
+			</div>													
 			<div className="App-right-menu">
 						<Button className="App-button"
 							onClick={this.togglePlay.bind(this)}
@@ -343,7 +347,9 @@ class App extends Component {
 					{this.state.accessEnabled &&
 						<div>
     					<MediaTimeline timeline_name={this.state.timeline_name} config={this.state.config} ref={(tl) => { this.timeline = tl; }} onDisplayClick={this.handleDisplayClick.bind(this)} />
-						{this.state.config && this.state.config.url_code && <p className="App-subtitle">{window.location.href}?scrapbookName={this.state.config.url_code}</p>}
+						<div align="center">
+							<Sharing sharing_url={full_url}/>
+						</div>
 						</div>
 					}
 
@@ -388,7 +394,7 @@ class App extends Component {
 				<br/>
 
 				<div className="header">
-					<h1>Our Stories</h1>
+					<h1>Our Stories</h1>					
 				</div>
 				<div className="row">
 
@@ -398,26 +404,22 @@ class App extends Component {
 							<img src={this.state.single_timeline.banner_image} className="App-card-thumbnail"/>
 							<p><button className="App-card-button" onClick={() => this.handleChoice(this.state.single_timeline)}>{this.state.single_timeline.timeline_name}</button></p>
 						</div>	
-						<br/><br/></div> 
+						<br/><br/>
+					</div> 
   				}
 
 				{ !this.state.single_timeline && this.state.all_timelines &&
-				this.state.all_timelines.map(f => ( <div className="column">
+				this.state.all_timelines.map(f => ( 
+					<div className="column">
     					<div className="App-card">						
 							<img src={f.banner_image} className="App-card-thumbnail"/>
 							<p><button className="App-card-button" onClick={() => this.handleChoice(f)}>{f.timeline_name}</button></p>
 						</div>	
-						<br/><br/></div> 
+						<br/><br/>
+					</div> 
 				)) 
 				}
 
-				</div>								
-
-				<br/>
-				<br/>
-
-				<div className="row">
-				
 				{!this.state.timelineChosen && (!this.state.timeline_name || (this.state.timeline_name && this.state.timeline_name === "New Timeline")) && 
 				<div className="column">
     				<div className="App-newcard" onClick={() => this.createNew()}>						
@@ -433,14 +435,19 @@ class App extends Component {
 					</div>
 				</div>
   				}
-				</div>					
-
-				<br/>
-				<br/>
-
-				<br/>
-				<br/>
 				
+				</div>								
+
+				<div className="row">
+					<br/>
+					<br/>				
+					<div className="column" align="center">
+						<Sharing sharing_url={full_url}/>
+					</div>	
+
+					<br/>
+					<br/>					
+				</div>		
 									
 
 			</div>}
