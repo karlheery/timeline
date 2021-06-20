@@ -19,8 +19,7 @@ import { Button, PlayerIcon } from 'react-player-controls'
 import OtpInput from 'react-otp-input';
 import AddToPhotosIcon from '@material-ui/icons/AddToPhotos';
 import Axios from 'axios';
-
-
+  
 
 class App extends Component {
 	

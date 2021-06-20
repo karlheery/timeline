@@ -3,7 +3,7 @@ import { PropTypes } from 'react'
 import EXIF from 'exif-js'
 import Magnifier from "react-magnifier";
 
-import MediaItem  from './MediaItem';
+import MediaItem  from '../MediaItem';
 
 import HTMLFlipBook from "react-pageflip";
 

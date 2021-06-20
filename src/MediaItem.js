@@ -157,6 +157,23 @@ class MediaItem extends Component {
 	if( !contentItem.media || !Array.isArray(contentItem.media) ) {
 		contentItem.media = [];
 	}	
+
+
+	// remove movies from sliders ...for now . another @TODO
+	if( contentItem.media.length > 1 ) {
+		var newMedia = []
+		for( var i=0; i<contentItem.media.length; i++ ) {
+			if( !this.isMovie(contentItem.media[i]) ) {
+				newMedia.push( contentItem.media[i] )
+			}
+			else {
+				console.log( "had to filter our video from list of media - cant show in slider: " + contentItem.media[i] )
+			}
+		}		
+		contentItem.media = newMedia;
+	}
+
+
 					
 	// now i have react avatar for user rotating, i dont need to do any best effort using ExifOrientationImg...so removed this... contentItem.media.map(f => ( <div key={f}><ExifOrientationImg src={f} className={imgStyle} onClick={()=>this.openModal(f)}/></div> ))						
     return (
@@ -194,7 +211,7 @@ class MediaItem extends Component {
 							// autoPlay="autoplay" 
 						}}				
 					>	
-					<video preload="auto" controls="controls">
+					<video preload="auto" controls="controls" className="scrap-img-for-slider">
 						<source src={contentItem.media[0]} className='App-itemmovie' onClick={()=>this.openModal(contentItem.media[0])}/>
 						Your browser does not support the video tag.
 					</video>		  
@@ -246,4 +263,3 @@ class MediaItem extends Component {
 }
 
 export default MediaItem;
-

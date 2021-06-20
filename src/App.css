@@ -34,7 +34,7 @@ html {
 /* https://stackoverflow.com/questions/7241341/can-i-set-an-opacity-only-to-the-background-image-of-a-div */
 .main-bg { 
   background-color: whitesmoke;
-  background: url(./DefaultBackground_WhiteWood.jpg) no-repeat center center fixed; 
+  background: url(./images/DefaultBackground_WhiteWood.jpg) no-repeat center center fixed; 
   position: absolute;  
   z-index: -1;
   top: 0;
@@ -283,6 +283,11 @@ h2 {
     filter: alpha(opacity=100); /* For IE8 and earlier */
 }
 
+
+#canvas-container {
+  width: 90vw;
+  height: 85vh;
+}
 
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }

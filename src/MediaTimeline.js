@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { PropTypes } from 'react'
 
-import './scrapbook-style.css';
-import './flipbook-style.css';
+import './displayStyles/scrapbook-style.css';
+import './displayStyles/flipbook-style.css';
 
 // consider toggling with a tiled photo gallery
 // ...like: https://github.com/neptunian/react-photo-gallery
@@ -11,8 +11,9 @@ import { VerticalTimeline, VerticalTimelineElement }  from 'react-vertical-timel
 import 'react-vertical-timeline-component/style.min.css';
 
 import MediaItem  from './MediaItem';
-import PolaroidDisplay from './PolaroidDisplay';
-import FlipbookDisplay from './FlipbookDisplay';
+import PolaroidDisplay from './displayStyles/PolaroidDisplay';
+import FlipbookDisplay from './displayStyles/FlipbookDisplay';
+import ScrapbookDisplay from './displayStyles/ScrapbookDisplay';
 
 import axios from 'axios';
 
@@ -338,7 +339,7 @@ class MediaTimeline extends Component {
 			}
 			catch(err) {
 				// swallow it
-				console.log.err( "can't scroll", err );
+				console.log( "can't scroll", err );
 		   }			
 	}, this.previousItemSleepTime );
 	
@@ -510,51 +511,6 @@ class MediaTimeline extends Component {
 
 
   /**
-   * Need function to generate random-ish positioning but increment grid-row
-   */   
-  getItemRowIndex( tc, item ) {
-
-	for( var i=0; i<tc.content.length; i++ ) {
-		   		
-		 if( tc.content[i].title_on_date === item.title_on_date ) {
-			 //console.log( "item is at index " + (i+1) )
-			 return i+1;
-		 }
-	}
-	
-	return 100;	
-  }
-
-
-  /**
-   * generate the grid-area for grid-template-rows
-   */
-  getGridTemplateStyle() {
-
-	let tc = this.state.timelineData
-
-	let style = "[header-start] auto ";		
-
-	for( var i=0; i<tc.content.length; i++ ) {
-
-		if( i == 0 ) {
-			style += "[fig1-start] 3rem [header-end] minmax(var(--verticalPadding), auto) [p1-start] minmax(0, auto) [p1-end] minmax(var(--verticalPadding), auto) "
-		}
-		else {
-			//  [fig2-start] var(--overlap) [fig1-end] minmax(var(--verticalPadding), auto) [p2-start] minmax(0, auto) [p2-end] minmax(var(--verticalPadding), auto) [fig3-start] var(--overlap) [fig2-end] minmax(var(--verticalPadding), auto) [p3-start] minmax(0, auto) [p3-end] minmax(var(--verticalPadding), auto) [fig4-start] var(--overlap) [fig3-end] minmax(var(--verticalPadding), auto) [p4-start] minmax(0, auto) [p4-end] minmax(var(--verticalPadding), auto) [fig4-end];
-			style += "[fig" + (i+1) + "-start] var(--overlap) [fig" + i + "-end] minmax(var(--verticalPadding), auto) [p" + (i+1) + "-start] minmax(0, auto) [p" + (i+1) + "-end] minmax(var(--verticalPadding), auto) "
-		}
-
-	}
-
-	console.debug( "generated grid style " + style )
-	return style	   
-
-  }
-
-
-
-  /**
    * Handle click on display (e.g. Flipbook changing page)
    * ...bubbling it up to next level
    */
@@ -629,16 +585,14 @@ class MediaTimeline extends Component {
 	);
 	*/		
 
+	//width={1200} height={800} 
 	if( this.state.timelineData && this.state.timelineData.viz_style && this.state.timelineData.viz_style === "Polaroid" ) {
 		return ( 
 			<React.Fragment>
-					<div id='timeline' className='scrap-grid'>
-						<header>
-							<h1 className='scrap-h1'>{timelineContent.timeline_name}</h1>
-							<h2 className='scrap-h2'>{timelineContent.description}</h2>
-						</header>
-						
-						<canvas id="mediaview" width={900} height={600} ref={this.refCallback} />
+					<div id='timeline'>	
+						<div id="canvas-container" align="center">
+							<canvas id="mediaview" ref={this.refCallback}/>
+						</div>					
 						<PolaroidDisplay timeline_name={this.state.timeline_name} canvasArea='mediaview' timelineContent={timelineContent} />
 					</div>
 
@@ -651,7 +605,7 @@ class MediaTimeline extends Component {
 	if( this.state.timelineData && this.state.timelineData.viz_style && this.state.timelineData.viz_style === "Flipbook" ) {		
 		return ( 
 			<React.Fragment>
-					<div id='timeline' className='book-grid'>
+					<div id='timeline'>
 						<FlipbookDisplay timeline_name={this.state.timeline_name} timelineContent={timelineContent} cover={this.state.config.banner_image} onDisplayClick={this.handleDisplayClick.bind(this)} />						
 					</div>
 
@@ -662,59 +616,18 @@ class MediaTimeline extends Component {
 	
 	
 	if( this.state.timelineData && this.state.timelineData.viz_style && this.state.timelineData.viz_style === "Scrapbook" ) {
-
-		//used to say style="--aspect-ratio: 4/3;"   ...or 4/3 for middle one
-		let imgStyle = {
-			aspect_ratio: 3/5
-		};
-		let vidStyle = {
-			aspect_ratio: 4/3
-		};
-
-		let gridStyle = this.getGridTemplateStyle()
-
-		let imgPos = [ "1/span 7", "span 5/-1" ]		// bit of randomness on -1 vs. -2 or 5/6/7 ...depending on size
-		let pPos = [ "span 3/-2", "3/span 4" ]  // bit of randomness
-
-				
-		  
-		console.log( timelineContent.content.length + " items to show")
-
-		return (	<React.Fragment>
-					<div id='timeline' className='scrap-grid' style={{gridTemplateRows: gridStyle}}>
-						<header>
-							<h1 className='scrap-h1'>{timelineContent.timeline_name}</h1>
-							<h2 className='scrap-h2'>{timelineContent.description}</h2>
-						</header>
-
-						{timelineContent.content.map((contentItem) => {
-							return <React.Fragment>
-										<figure className="scrap-fig" key={contentItem.title_on_date} 
-											style={{gridColumn: imgPos[this.getItemRowIndex(timelineContent, contentItem)%2], gridRow: 'fig'+this.getItemRowIndex(timelineContent, contentItem)}} key={contentItem.title_on_date} id={contentItem.title_on_date}
-											onClick={() => window.menuComponent.closeMenu()}
-										>												
-												<MediaItem className="scrap-img" contentItem={contentItem} show_details={false}
-													ref={(item) => { this.saveRef( contentItem.title_on_date, item ); }}
-													vizStyle={this.state.vizStyle}
-												/>									
-										</figure>
-										<p className="scrap-p" style={{gridColumn: pPos[this.getItemRowIndex(timelineContent, contentItem)%2], gridRow: 'p'+this.getItemRowIndex(timelineContent, contentItem), transform:'rotate(-0.8deg)', WebkitTransform: 'rotate(-0.8deg)'}}>
-											{contentItem.comment} 
-											<br/>
-											<EditIcon className="hoverable-img" onClick={() => window.timelineComponent.editItem(contentItem)}/>
-										</p>										
-									</React.Fragment>
-						})}
-											
-					</div>
-
-					<div>
-						
-						<section className="end" ref={(section) => { this.EndOfTimeline = section; }}></section>		
-					</div>
-					</React.Fragment>		
+		return (	
+			<React.Fragment>
+				<div id='timeline'>
+					<ScrapbookDisplay timeline_name={this.state.timeline_name} timelineContent={timelineContent} vizStyle={this.state.timelineData.viz_style}
+						ref={(node) => { this.child = node; }} 
+						onDisplayClick={this.handleDisplayClick.bind(this)} />	
+				</div>
+					
+			</React.Fragment>	
 		);
-	}
+
+	}	
 
 	// ELSE the default view...
 

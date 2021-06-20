@@ -15,10 +15,8 @@
   font-size: 2.5vw;
 }
 
-.scrap-figure {
+.scrap-fig {
   margin: 0;
-  background: rgba(173, 216, 230, 0.8);
-  box-shadow: -0.035rem 0.03rem 0.3rem rgba(0, 0, 0, 0.2);
 }
 
 .scrap-p {
@@ -39,27 +37,29 @@
 }
 
 .scrap-img-for-slider {
-  max-width: 100%;
-  height: 30vw;
-  padding: 1px;
+  max-width: 100vw;
+  max-height: 70vh;
   display: block;
+  padding: 10px 10px 20px 10px;
+  border: 1px solid #BFBFBF;
+  background-color: white;
+  box-shadow: 10px 10px 5px #aaaaaa;
 }
 
 /* font-size used to be 1.5rem but it didnt respond well on phone - not sure where root element was it was relative to */
 .scrap-grid {
   font-family: "Schoolbell", cursive;
-  font-size: 2.5vw;
+  font-size: 2vw;
   margin: 0;
-  padding: 2vw;
   --verticalPadding: 2vw;
-  --overlap: 1vw;
+  --overlap: 3vw;
   display: grid;
   /* 6/5 grid from my compound grid generator: https://codepen.io/michellebarker/full/zYOMYWv */
   grid-template-columns: 5fr 1fr 4fr 2fr 3fr 3fr 2fr 4fr 1fr 5fr;
   grid-auto-rows: minmax(var(--verticalPadding), auto);
-  gap: 1rem;
-  max-width: 85vw;
-  margin: 0 auto;
+  gap: 2vw;
+  max-width: 98vw;
+  margin: 2% 2% 2% 2%;
   align-items: center;
   /*background: left top / 40rem no-repeat url(https://khpublicbucket.s3-eu-west-1.amazonaws.com/Common/overlays/scrapbook_overlay6.png), right bottom / 40rem no-repeat url(https://khpublicbucket.s3-eu-west-1.amazonaws.com/Common/overlays/scrapbook_overlay1.png);*/
   /* 

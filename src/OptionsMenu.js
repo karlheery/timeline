@@ -60,8 +60,10 @@ class OptionsMenu extends React.Component {
 
   setMenuStyle ( vstyle ) {
     this.state.vizStyle = vstyle
-    this.child.current.setMenuStyle(vstyle);        
 
+    if( this.child && this.child.current ) {
+      this.child.current.setMenuStyle(vstyle);        
+    }
   }
 
   // This can be used to close the menu, e.g. when a user clicks a menu item

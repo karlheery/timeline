@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { PropTypes } from 'react'
 import EXIF from 'exif-js'
 
-import MediaItem  from './MediaItem';
 
 
 class PolaroidDisplay extends Component {
@@ -41,6 +40,13 @@ class PolaroidDisplay extends Component {
 
     // called by ReactJS after `render()`
     componentDidMount() {   
+
+        var container = document.getElementById("canvas-container")
+        var canvas = document.getElementById( this.state.canvasArea );        
+        var context = canvas.getContext('2d');
+        context.canvas.height = container.clientHeight;
+        context.canvas.width = container.clientWidth;
+        
 
         // set interval for the timer between showing photos
         this.timer = setInterval(() => this.showMedia(this), 4000 );        	
@@ -181,8 +187,8 @@ class PolaroidDisplay extends Component {
     showMedia(self) {
         console.log( "showing next media..." );
 
-        var canvas = document.getElementById( this.state.canvasArea );
-        var context = canvas.getContext('2d');
+        var canvas = document.getElementById( this.state.canvasArea );        
+        var context = canvas.getContext('2d');        
 
 
         var indexArray = self.state.indexArray
