@@ -679,10 +679,17 @@ class TimelineItemCreator extends Component {
 
 			// no-cache and origin is essential to avoiding non-deterministic CORS issues
 			// read: https://stackoverflow.com/questions/44800431/caching-effect-on-cors-no-access-control-allow-origin-header-is-present-on-th
-			let r = await fetch(fileRef, {method: 'GET', mode: 'cors', cache: 'no-cache', referrerPolicy: 'origin'});
+			let r = await fetch(fileRef, {method: 'GET', mode: 'cors', cache: 'no-cache', referrerPolicy: 'origin', contentType: "image" });
 			let b = await r.blob();
 			var fname = self.parseFilenameFromURL( fileRef )
-			var f = new File([b], fname, {type: "image/jpeg"})
+
+			var tokens = fileRef.toLowerCase().split(".");	// look for file extension		
+			var suffix = tokens.splice(tokens.length-1,1);			
+			if( suffix == "jpg" ) {
+				suffix = "jpeg"
+			}
+
+			var f = new File([b], fname, {type: "image/"+suffix })
 			return f;
 
 			  /*

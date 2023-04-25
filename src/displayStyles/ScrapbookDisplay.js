@@ -43,11 +43,6 @@ class ScrapbookDisplay extends Component {
     }
 
 
-    shouldComponentUpdate() {
-
-    }
-
-
 
     render() {
 	  	

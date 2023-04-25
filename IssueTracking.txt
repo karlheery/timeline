@@ -1,0 +1,96 @@
+
+
+---------------------------
+RESOLVED SHIT BELOW - CRA v2.0 released 4 years ago including Babel 7 ! i needed to move to react-scripts
+----------------------------
+
+
+- requires Babel "^7.0.0-0", but was loaded with "6.26.0". 
+removed dependencies "babel": "^6.23.0", as we only need babel
+
+- changed 
+  "@babel/core": "^7.20.12",
+  to
+  "@babel/core": "^6.26.0",
+
+
+  - Deleting babel-* from node_modules and uninstalling it yielded 
+    Cannot find module 'babel-core'
+    Require stack:
+    - C:\Users\kheery\React\timeline\node_modules\babel-loader\lib\index.js
+  ...suggesting babel-core is imporant to CRA?
+
+  "@babel/core": "^7.20.12",
+
+
+- @babels are all for babeel 7 so removing for now...
+
+    "@babel/preset-env": "^7.20.2",
+    "@babel/preset-react": "^7.18.6",
+
+...and removed from babelrc
+"presets": ["@babel/preset-env", "@babel/preset-react"]
+
+- ChatGPT suggstd this on so removed transform-object-rest-spread
+"transform-object-rest-spread", "transform-es2015-spread", 
+also said go back to @babel at least for preset-env
+...so reemoved "presets": ["babel-preset-react", "babel-preset-env"],
+
+    "babel-core": "^6.26.3",
+    "babel-plugin-transform-es2015-spread": "^6.22.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+
+
+- CRA v2 uses babel 7 says to upgrad we just need to change package.kson to 2....
+https://reactjs.org/blog/2018/10/01/create-react-app-v2.html
+"react-scripts": "^1.1.5",
+
+--------------------------------------------
+
+
+
+- I might follow tutorial to use CRA wrapper to allow overrides to babel https://www.youtube.com/watch?v=3dzLIy8SPJg
+- Started creating .babelrc but now i dont know what plugin i even need to include to whats the point?     
+- "You may need an appropriate loader to handle this file type." Babel *is* the loader but is webpack using it? 
+- Instead I might need to know specifically what is it about core.esm.js that is causing a problem and find a better ESM related plugin?
+- Or else clone the actual dnd-kit, see if it works and then start porting over some config https://github.com/clauderic/dnd-kit/blob/master/package.json ....though that may introduce cypress
+
+- ACtually looking at the file the problem is the ES6 spread operator which needs this plugin https://babeljs.io/docs/en/babel-plugin-transform-spread ...which is "included in @babel/preset-env" 
+- so lets go back and do the youtube thing afterall
+
+- Followed video. Eventually complaind about clashing bable versions until i installed npm install babel-core@7.0.0-bridge.0 --save-dev
+- Now Module build failed: Error: Plugin/Preset files are not allowed to export objects, only functions. In C:\Users\kheery\React\timeline\node_modules\babel-preset-react-app\index.js
+- Read i shouldnt have babel-cre as well as @babel/core so removed this again
+        "babel-loader": "^9.1.2",
+    "babel-plugin-react-transform": "^3.0.0",
+    "babel-core": "^7.0.0-bridge.0",
+
+--------------------------------------------
+
+Removed from package.json dependencies
+"webpack": "^5.75.0"
+
+    "babel": "^6.23.0",
+    "babel-loader": "^9.1.2",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+
+
+
+"devDependencies": {
+    "@babel/cli": "^7.20.7",
+    "@babel/core": "^7.20.12",
+    "@babel/preset-env": "^7.20.2",
+    "@babel/preset-react": "^7.18.6"
+  },
+  "resolutions": {
+    "@babel/core": "7.19.6",
+    "@babel/generator": "7.19.6",
+    "@babel/compat-data": "7.19.4",
+    "@babel/helper-compilation-targets": "7.19.3",
+    "@babel/helper-create-class-features-plugin": "7.19.0",
+    "@babel/helper-module-transforms": "7.19.6",
+    "babel-loader": "8.2.5"
+  }

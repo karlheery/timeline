@@ -15,8 +15,6 @@ import PolaroidDisplay from './displayStyles/PolaroidDisplay';
 import FlipbookDisplay from './displayStyles/FlipbookDisplay';
 import ScrapbookDisplay from './displayStyles/ScrapbookDisplay';
 
-import axios from 'axios';
-
 import scrollToComponent from 'react-scroll-to-component';
 
 import WorkIcon from '@material-ui/icons/Work';
@@ -33,72 +31,7 @@ class MediaTimeline extends Component {
 	
   constructor(props) {
 	  
-	super(props);
-	
-	/** These are defaults for testing. Real list is queried from Dynamo DB through API Gateway & Lambda */
-	this.exampleTimeline = {
-        name: "Caroline's Timeline",
-            background: "",
-			description: "A beautiful life...",
-			viz_style: "Polaroid",
-            bucket_url: "",
-            basedir: "",
-            name_contains: "",
-			chapters: [
-				{
-					from_date: "1979-02-07",
-					to_date: "1997-06-30",
-					name: "The Wonder Years",
-					background: "test_media/Fashion.jpg"					
-				},
-				{
-					from_date: "1997-07-31",
-					to_date: "2018-08-07",
-					name: "The Good Years",
-					background: "test_media/Malahide_Background.jpg"					
-				}				
-			],
-            content: [ 
-				{					
-					title_on_date: "Test Timeline Title!|1000",
-					time_sortable: 1000,
-					title: "Test Timeline Title!",
-					category: "Friends",
-					date: "2012-04-20",
-					media: ["test_media/IMG_5787.PNG"],
-					comment: "This is a test comment!"
-				},
-				{					
-					title_on_date: "Test Timeline Title 2|1001",
-					time_sortable: 1001,				
-					title: "Test Timeline Title 2",
-					category: "Love",
-					date: "2015-04-20",			
-					media: ["test_media/IMG_5787.PNG", "test_media/IMG_5788.PNG", "test_media/IMG_5789.PNG"],					
-					comment: "This is another test comment!"					
-				},
-				{					
-					title_on_date: "Test Timeline Title 3!|1002",
-					time_sortable: 1002,				
-					title: "Test Timeline Title 3!",
-					category: "Friends",
-					date: "2016-12",					
-					media: [],
-					comment: "This is yet another test comment!"					
-				},				
-				{					
-					title_on_date: "Test Timeline Title 4!|1002",
-					time_sortable: 1002,				
-					title: "Test Timeline Title 4!",
-					category: "Friends",
-					date: "2016-12",					
-					media: ["test_media/IMG_5790.PNG"],
-					comment: "This is yet another test comment!"					
-				},				
-			]
-	};
-	
-
+	super(props);		
 	this.mediaItems = {};
 	this.numberScrollers = 0;
 	this.scrolling = 0;
@@ -109,6 +42,7 @@ class MediaTimeline extends Component {
 	// set initial state
 	this.state = {
 		timeline_name: this.props.timeline_name,
+		timelineData: this.props.timeline_data,
 		config: this.props.config,
 		menuController: this.props.app,
 		chapterIndex: 0		
@@ -123,10 +57,7 @@ class MediaTimeline extends Component {
 		
   // called by ReactJS after `render()`
   componentDidMount() {   
-	this.getTimeline(this.state.timeline_name);	
-
-	this.timerID = setInterval(() => this.changeBackground(), 8000 );
-	
+	this.timerID = setInterval(() => this.changeBackground(), 8000 );	
   }
 
 
@@ -349,78 +280,16 @@ class MediaTimeline extends Component {
 
   
   
-  
   /**
-   * Call API to retrieve timeline from AWS, or default to example timeline as a last resort
+   * Retrieve the cached timeline data - to be used in edit screen to move stuff around
+   * 
+   * @returns 
    */
-  getTimeline( param_timeline_name ) {
-	  				
-		var queryParams = {
-				timeline_name: param_timeline_name
-		};
-		
-		console.log( "querying timeline with params " + queryParams );
-				
-	  	axios.get( this.state.config.content_api, {
-			 params: queryParams
-		})
-		.then((result) => {			// these arrows are used so we can call other methods and setState (indirectly) from within
-			
-			console.log( "successfully retrieved timeline data " + JSON.stringify(result.data) );	  
-			console.log( "timeline content item count " + (result.data.content ? result.data.content.length : 0 ) );	  
-			
-			/**
-				{
-				  "chapters": [
-					{
-					  "name": "The Wonder Years",
-					  "from_date": "1979-02-07",
-					  "to_date": "1991-06-30",
-					  "background": "https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/Backgrounds/WonderYears.jpg"
-					},
-					{
-					  "name": "Young Fun",
-					  "from_date": "1991-07-01",
-					  "to_date": "1997-06-30",
-					  "background": "https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/Backgrounds/TakeThat.jpg"
-					},
-					{
-					  "name": "Girl About Town",
-					  "from_date": "1997-07-01",
-					  "to_date": "2018-09-01",
-					  "background": "https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/Backgrounds/Malahide_Background_v1.jpg"
-					}
-				  ],
-				  "description": "The beautiful life of Caroline McConkey",
-				  "name": "Caroline. Our Glue.",
-				  "content": [
-					{
-					  "category": "Love",
-					  "comment": "This is just a test",
-					  "timeline_name": "Caroline. Our Glue.",
-					  "date": "Jan-2015",
-					  "media": [
-						"https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/IMG_5815.JPG",
-						"https://s3-eu-west-1.amazonaws.com/khpublicbucket/Caroline/IMG_5815.JPG"
-					  ],
-					  "title": "Test Item"
-					}
-				  ]
-				}
-			*/
-			
-			this.setTimeline( result.data );			
-
-		})
-		.catch((err) => {
-			console.error( err );
-			alert("Cant show timeline right now - sorry! Check your internet connection? The following is just a sampler", err);
-			this.setTimeline( this.exampleTimeline );
-		});
-		
-		
-
+  getTimelineData() {
+	return this.state.timelineData
   }
+
+   
   
   
   /**

@@ -144,9 +144,9 @@ class MediaItem extends Component {
 		adaptiveHeight: true,
 		dots: true,		
 		infinite: true,
-		speed: 8000,
+		speed: 4000,
 		autoplay: true,
-		autoplaySpeed: 200,
+		autoplaySpeed: 100,
 		slidesToShow: 1,
 		slidesToScroll: 1
 	};

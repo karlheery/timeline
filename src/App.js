@@ -164,12 +164,16 @@ class App extends Component {
   handleChoice( timeline_config ) {
 
 	// default to access only if its public
-	var enableAccess = ( timeline_config.accessModel == "PUBLIC" ? true : false )
+	var enableAccess = ( !timeline_config.accessModel || timeline_config.accessModel == "PUBLIC" ? true : false )
 	if( !enableAccess ) console.log( "will prompt for access code for access model: "  + timeline_config.accessModel )
 	
+	// handle the API call to pull timeline data
+	var tData = this.retrieveTimeline(timeline_config)
+
 	this.setState({		
 		timelineChosen: true,
 		timeline_code: timeline_config.accessCode,
+		timeline_data: tData,
 		timeline_name: timeline_config.timeline_name,
 		vizStyle: ( this.timeline ? this.timeline.vizStyle : "" ),		
 		config: timeline_config,
@@ -180,6 +184,46 @@ class App extends Component {
 		
   }
 	
+
+
+
+   /**
+   * Call API to retrieve timeline from AWS, or default to example timeline as a last resort
+   */
+	retrieveTimeline( param_timeline_config ) {
+	  				
+		var queryParams = {
+				timeline_name: param_timeline_config.timeline_name
+		};
+		
+		console.log( "querying timeline with params " + queryParams );
+				
+	  	axios.get( param_timeline_config.content_api, {
+			 params: queryParams
+		})
+		.then((result) => {			// these arrows are used so we can call other methods and setState (indirectly) from within
+			
+			console.log( "successfully retrieved timeline data " + JSON.stringify(result.data) );	  
+			console.log( "timeline content item count " + (result.data.content ? result.data.content.length : 0 ) );	  												
+
+
+			// asynch block this setting happens later than expected!
+			this.setState({			  
+				timeline_data: result	.data
+			});
+
+			if( this.timeline ) {
+				this.timeline.setTimeline( result.data );			
+			}
+
+			return result.data
+		})
+		.catch((err) => {
+			console.error( err );
+			alert("Cant show timeline right now - sorry! Check your internet connection?", err);
+		});
+	}
+
 
   /**
    * Show a modal to capture data and create a new timeline
@@ -322,7 +366,7 @@ class App extends Component {
 			{this.state.timelineChosen && 
 			<div>
 			<div className="App-right-menu" id="menu" name="menu">
-				<OptionsMenu timeline_name={this.state.timeline_name} vizStyle={this.state.vizStyle} config={this.state.config} ref={(tl) => { this.optionsMenu = tl; }}/>
+				<OptionsMenu timeline_name={this.state.timeline_name} timeline_data={this.state.timeline_data} vizStyle={this.state.vizStyle} config={this.state.config} backend_uri={this.state.all_timelines_uri} ref={(tl) => { this.optionsMenu = tl; }}/>
 			</div>													
 			<div className="App-right-menu">
 						<Button className="App-button"
@@ -345,7 +389,7 @@ class App extends Component {
 				<div>
 					{this.state.accessEnabled &&
 						<div>
-    					<MediaTimeline timeline_name={this.state.timeline_name} config={this.state.config} ref={(tl) => { this.timeline = tl; }} onDisplayClick={this.handleDisplayClick.bind(this)} />
+    					<MediaTimeline timeline_name={this.state.timeline_name} timeline_data={this.state.timeline_data} config={this.state.config} ref={(tl) => { this.timeline = tl; }} onDisplayClick={this.handleDisplayClick.bind(this)} />
 						<div align="center">
 							<Sharing sharing_url={full_url}/>
 						</div>
@@ -386,7 +430,7 @@ class App extends Component {
 			{!this.state.timelineChosen && 
 				<div>
 				<div className="App-right-menu" id="menu" name="menu">
-					<DetailsFormCreator isOpen={this.state.formOpen} handleDetailsFormClose={this.closeNew} backend_uri={this.state.all_timelines_uri}/>
+					<DetailsFormCreator isOpen={this.state.formOpen} handleDetailsFormClose={this.closeNew} backend_uri={this.state.all_timelines_uri} is_new={true}/>
 				</div>
 
 				<br/>				
@@ -395,27 +439,28 @@ class App extends Component {
 				<div className="header">
 					<h1>Our Stories</h1>					
 				</div>
-				<div className="row">
+				<ul>
+				
 
 				{ this.state.single_timeline &&
-					<div className="column">
-    					<div className="App-card">						
+					<li>
+    					<div className="App-card">
 							<img src={this.state.single_timeline.banner_image} className="App-card-thumbnail"/>
 							<p><button className="App-card-button" onClick={() => this.handleChoice(this.state.single_timeline)}>{this.state.single_timeline.timeline_name}</button></p>
 						</div>	
 						<br/><br/>
-					</div> 
+					</li>
   				}
 
 				{ !this.state.single_timeline && this.state.all_timelines &&
 				this.state.all_timelines.map(f => ( 
-					<div className="column">
-    					<div className="App-card">						
+					<li>
+    					<div className="App-card">													
 							<img src={f.banner_image} className="App-card-thumbnail"/>
 							<p><button className="App-card-button" onClick={() => this.handleChoice(f)}>{f.timeline_name}</button></p>
 						</div>	
 						<br/><br/>
-					</div> 
+					</li> 
 				)) 
 				}
 
@@ -434,8 +479,8 @@ class App extends Component {
 					</div>
 				</div>
   				}
-				
-				</div>								
+											
+				</ul>
 
 				<div className="row">
 					<br/>

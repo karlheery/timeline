@@ -38,7 +38,7 @@
 
 .scrap-img-for-slider {
   max-width: 100vw;
-  max-height: 70vh;
+  height: 70vh;
   display: block;
   padding: 10px 10px 20px 10px;
   border: 1px solid #BFBFBF;
@@ -48,7 +48,7 @@
 
 /* font-size used to be 1.5rem but it didnt respond well on phone - not sure where root element was it was relative to */
 .scrap-grid {
-  font-family: "Schoolbell", cursive;
+  font-family: "Kalam", cursive;
   font-size: 2vw;
   margin: 0;
   --verticalPadding: 2vw;

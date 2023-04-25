@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { slide as Menu } from 'react-burger-menu'
 import './OptionsMenu.css';
 import TimelineItemCreator  from './TimelineItemCreator';
+import EditMenu from './EditMenu';
 
 
 class OptionsMenu extends React.Component {
@@ -10,9 +11,11 @@ class OptionsMenu extends React.Component {
     super(props)
     this.state = {
       timeline_name: props.timeline_name,
+      timeline_data: props.timeline_data,
       vizStyle: props.vizStyle,
       config: props.config,
-      menuOpen: false
+      menuOpen: false,
+      all_timelines_uri: props.backend_uri
     }
 	
 	console.log( "creating options menu" );
@@ -100,7 +103,8 @@ class OptionsMenu extends React.Component {
           isOpen={this.state.menuOpen}
           onStateChange={(state) => this.handleStateChange(state)}
         >
-		  <TimelineItemCreator timeline_name={this.state.timeline_name} config={this.state.config} vizStyle={this.state.vizStyle} ref={this.child} menu={this}/>		          
+		  <EditMenu timeline_name={this.state.timeline_name} timeline_data={this.state.timeline_data} config={this.state.config} vizStyle={this.state.vizStyle} ref={this.child} backend_uri={this.state.all_timelines_uri} menu={this}/>		      
+      <TimelineItemCreator timeline_name={this.state.timeline_name} config={this.state.config} vizStyle={this.state.vizStyle} ref={this.child} menu={this}/>		          
     </Menu>
 		      
     );

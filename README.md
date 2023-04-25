@@ -16,4 +16,7 @@ Useful links:
 - https://web.dev/responsive-web-design-basics/#media-queries
 - https://www.w3schools.com/cssref/css_units.asp
 - https://reactjsexample.com/otp-input-component-for-react/
+- https://github.com/react-grid-layout/react-grid-layout/blob/master/test/examples/9-min-max-wh.jsx
+
+
 
